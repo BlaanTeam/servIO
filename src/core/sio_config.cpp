@@ -20,8 +20,9 @@ void Config::displayContent(void) const {
 // Setters
 
 void Config::setPath(const string &path) {
+	_file_stream.close();
 	_file_stream.open(path, ios::in);
-	if (!_file_stream.good())
+	if (!good())
 		cerr << NAME << ": " << strerror(errno) << endl;
 	_path = path;
 }

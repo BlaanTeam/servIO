@@ -1,0 +1,4 @@
+{
+  "C_Cpp.clang_format_style": "{BasedOnStyle: Google, IndentWidth: 4, IndentCaseLabels: false, TabWidth: 4, UseTab: ForIndentation, AlignConsecutiveDeclarations: true, , ColumnLimit: 0}",
+  "C_Cpp.clang_format_fallbackStyle": "Google"
+}

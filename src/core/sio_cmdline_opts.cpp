@@ -23,7 +23,7 @@ static void _display_help(void) {
 }
 
 static bool _test_configuration(const Config &config) {
-	bool success = config.syntaxOnly();
+	bool success = config.good() && config.syntaxOnly();
 	cerr << NAME ": configuration file \"" << config.getPath() << "\" test is " << (success ? "successful" : "failed") << endl;
 	return success;
 }

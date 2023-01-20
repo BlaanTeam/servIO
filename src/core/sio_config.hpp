@@ -5,12 +5,14 @@
 #include <string>
 using namespace std;
 
+#define CONF_DFL_PATH "conf/servio.conf"
+
 class Config {
 	string   _path;
 	ifstream _file_stream;
 
    public:
-	Config(const string &path = "");
+	Config(const string &path = CONF_DFL_PATH);
 	bool syntaxOnly() const;
 
 	void displayContent(void) const;

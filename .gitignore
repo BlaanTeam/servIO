@@ -34,5 +34,6 @@
 *.exe
 *.out
 *.app
+servio
 
 # End of https://www.toptal.com/developers/gitignore/api/c++

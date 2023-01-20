@@ -5,6 +5,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <iomanip>
+
 #include "servio.hpp"
 #include "sio_config.hpp"
 

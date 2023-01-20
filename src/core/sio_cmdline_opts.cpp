@@ -7,6 +7,19 @@ static void _display_version(void) {
 static void _display_help(void) {
 	cerr << NAME << " version: " << (NAME "/" VERSION) << endl;
 	cerr << "Usage: " NAME " [-hvtT] [-c filename]" << endl;
+
+	cerr.setf(ios::left);
+	cerr << "\nOptions:" << endl;
+	cerr << setw(14) << "  -h"
+	     << ": this help " << endl;
+	cerr << setw(14) << "  -v"
+	     << ": show version and exit" << endl;
+	cerr << setw(14) << "  -t"
+	     << ": test configuration and exit" << endl;
+	cerr << setw(14) << "  -T"
+	     << ": test configuration, dump it and exit" << endl;
+	cerr << setw(14) << "  -c filename"
+	     << ": set configuration file(default: conf/nginx.conf)" << endl;
 }
 
 static bool _test_configuration(const Config &config) {

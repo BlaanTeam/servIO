@@ -1,6 +1,8 @@
 #include "sio_config.hpp"
 
-Config::Config(const string &path) : _path(path){};
+Config::Config(const string &path) {
+	setPath(path);
+}
 
 bool Config::syntaxOnly() const {
 	// TODO: implement syntax checking !
@@ -8,13 +10,19 @@ bool Config::syntaxOnly() const {
 }
 
 void Config::displayContent(void) const {
-	// TODO: implement display content !
-	return;
+	char buff[1 << 10];
+	while (good() && !_file_stream.eof()) {
+		_file_stream.read(buff, (1 << 10) - 1);
+		cout << buff;
+	}
 }
 
 // Setters
 
 void Config::setPath(const string &path) {
+	_file_stream.open(path, ios::in);
+	if (!_file_stream.good())
+		cerr << NAME << ": " << strerror(errno) << endl;
 	_path = path;
 }
 
@@ -22,4 +30,8 @@ void Config::setPath(const string &path) {
 
 string Config::getPath(void) const {
 	return _path;
+}
+
+bool Config::good(void) const {
+	return _file_stream.good();
 }

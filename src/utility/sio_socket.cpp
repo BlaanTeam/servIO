@@ -65,7 +65,10 @@ Socket::Socket(int domain, int type, int protocol) {
 	setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 }
 
-bool Socket::isGood() const { return good; }
+bool   Socket::isGood() const { return good; }
+sockfd Socket::getSockFd(void) const {
+	return sock_fd;
+}
 
 Socket::~Socket() {}
 

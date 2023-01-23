@@ -56,7 +56,8 @@ class Socket {
 	pair<int, Address> accept();
 
 	// getters
-	bool isGood() const;
+	bool   isGood() const;
+	sockfd getSockFd(void) const;
 
 	~Socket();
 };

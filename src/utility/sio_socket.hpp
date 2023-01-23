@@ -4,12 +4,15 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <poll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 typedef int sockfd;
 
@@ -56,6 +59,25 @@ class Socket {
 	bool isGood() const;
 
 	~Socket();
+};
+
+class PollFd {
+	vector<pollfd>                   pfds;
+	typedef vector<pollfd>::iterator iterator;
+
+	class IsExists;
+
+   public:
+	PollFd();
+	void add(const sockfd &fd, const short &events);
+	void remove(const sockfd &fd);
+
+	iterator begin(void) { return pfds.begin(); }
+	iterator end(void) { return pfds.end(); }
+
+	int             size(void) const;
+	int             poll(const int &timeout);
+	vector<pollfd> &getPfds(void);
 };
 
 #endif

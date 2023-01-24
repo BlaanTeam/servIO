@@ -18,7 +18,7 @@ Address::Address(sockaddr sa, const socklen_t &len) {
 
 	_ss_family = sa.sa_family;
 
-	inet_ntop(sa.sa_family, (const sockaddr *)get_in_addr(&sa), buff, len);
+	inet_ntop(sa.sa_family, (const sockaddr *)get_in_addr(&sa), buff, len);  // Todo: change it.
 
 	_host = string(buff);
 	_port = ntohs(((sockaddr_in *)&sa)->sin_port);
@@ -47,7 +47,7 @@ sockaddr  Address::getSockAddr(void) const {
     else if (_ss_family == AF_INET6)
         ((sockaddr_in6 *)&sa)->sin6_port = htons(_port);
 
-    inet_pton(_ss_family, _host.c_str(), get_in_addr(&sa));
+    inet_pton(_ss_family, _host.c_str(), get_in_addr(&sa)); // Todo: change it.
 
     return sa;
 }

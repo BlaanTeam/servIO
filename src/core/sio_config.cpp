@@ -6,6 +6,18 @@ Config::Config(const string &path) {
 
 bool Config::syntaxOnly() const {
 	// TODO: implement syntax checking !
+
+	Lexer lexer;
+
+	lexer.tokenizer(_file_stream);
+
+	Lexer::iterator it = lexer.begin();
+
+	while (it != lexer.end()) {
+		cout << setw(10) << left << TokenNames[(int)log2((double)it->getType()) - 1] << " = " << it->getValue() << endl;
+		it++;
+	}
+
 	return true;
 }
 

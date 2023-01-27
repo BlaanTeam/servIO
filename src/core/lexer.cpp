@@ -1,5 +1,19 @@
 #include "lexer.hpp"
 
+/*
+
+<main> = "http" "{" {<key-val> <server-context> <key-val>}+ "}"
+
+<server-context> = "server" "{" {<key-val> <location-context> <key-val>}+ "}"
+
+<location-context> = "location" <WORD> "{" {<key-val> <location-context> <key-val>} "}"
+
+<key-val> = {(<WORD> | "error_page" INT) <WORD> ";"}
+
+<WORD> = config file literals
+
+*/
+
 const char *TokenNames[7] = {
     "WORD",
     "OCURLY",

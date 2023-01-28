@@ -2,13 +2,13 @@
 
 /*
 
-<main> = "http" "{" {<key-val> <server-context> <key-val>}+ "}"
+<main> = "http" "{" {<key-val> <server> <key-val>}+ "}"
 
-<server-context> = "server" "{" {<key-val> <location-context> <key-val>}+ "}"
+<server> = "server" "{" {<location>} "}"
 
-<location-context> = "location" <WORD> "{" {<key-val> <location-context> <key-val>} "}"
+<location> = <key-val> | "location" <WORD> "{" {<location>} "}"
 
-<key-val> = {(<WORD> | "error_page" INT) <WORD> ";"}
+<key-val> = {<WORD>}+ ";"
 
 <WORD> = config file literals
 

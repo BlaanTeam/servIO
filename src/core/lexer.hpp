@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
+#include <deque>
 
 using namespace std;
 
@@ -35,25 +35,11 @@ class Token {
 	string    getValue(void) const;
 };
 
-class Lexer {
-	mutable vector<Token> _tokens;
-
-   public:
-	// Member Types
-	typedef vector<Token>::iterator iterator;
-
+class Lexer: public deque<Token> {
    public:
 	Lexer();
 
 	void tokenizer(ifstream &file);
-
-	// Iterator
-
-	iterator begin() const;
-	iterator end() const;
-
-	// Getters
-	vector<Token> &getTokens(void) const;
 };
 
 #endif

@@ -13,7 +13,7 @@ using namespace std;
 extern const char *TokenNames[7];
 
 enum TokenType {
-	STRING = 1 << 1,
+	WORD = 1 << 1,
 	OCURLY = 1 << 2,
 	CCURLY = 1 << 3,
 	SEMICOLON = 1 << 4,

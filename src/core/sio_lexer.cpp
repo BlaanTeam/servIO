@@ -1,4 +1,4 @@
-#include "lexer.hpp"
+#include "sio_lexer.hpp"
 
 /*
 
@@ -86,7 +86,7 @@ void Lexer::tokenizer(ifstream &file) {
 				word += string(1, chr);
 				file.get(chr);
 			}
-			push_back(Token(STRING, word));
+			push_back(Token(WORD, word));
 			continue;
 		};
 		file.get(chr);

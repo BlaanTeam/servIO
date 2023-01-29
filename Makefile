@@ -10,13 +10,13 @@ CFLAGS = -Wall -Wextra -Werror -ggdb -std=c++98
 CORE_SRC = servio.cpp\
 	sio_config.cpp\
 	sio_cmdline_opts.cpp\
-	lexer.cpp
+	sio_lexer.cpp
 
 # core headers
 CORE_HEADER = servio.hpp\
 	sio_config.hpp\
 	sio_cmdline_opts.hpp\
-	lexer.hpp
+	sio_lexer.hpp
 
 # http files
 # HTTP_SRC = 

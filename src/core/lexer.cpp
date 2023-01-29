@@ -4,16 +4,28 @@
 
 <main> = "http" "{" {<key-val> <server> <key-val>}+ "}"
 
-<server> = "server" "{" {<location>} "}"
+<server> = "server" "{" {<key-val> | <location>} "}"
 
-<location> = <key-val> | "location" <WORD> "{" {<location>} "}"
+<location> = "location" <WORD> "{" {<location>} "}"
 
-<key-val> = {<WORD>}+ ";"
+<key-val> = { {<WORD>}+ ";" }
 
 <WORD> = config file literals
 
 */
 
+// class MainContext {
+// 	map<string, string> directives;
+// 	vector<MainContext> contexts;
+// };
+
+// class HttpContext : public MainContext {};
+
+// class ServerContext : public HttpContext {};
+
+// class LocationContext: public ServerContext {
+// 	LocationContext()
+// };
 const char *TokenNames[7] = {
     "WORD",
     "OCURLY",

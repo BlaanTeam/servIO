@@ -3,10 +3,10 @@
 
 #include <math.h>
 
+#include <deque>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <deque>
 
 using namespace std;
 
@@ -35,11 +35,15 @@ class Token {
 	string    getValue(void) const;
 };
 
-class Lexer: public deque<Token> {
+class Lexer : public deque<Token> {
    public:
 	Lexer();
 
 	void tokenizer(ifstream &file);
+
+	int  current(void) const;
+	bool match(int tokenType) const;
+	bool accept(int tokenType);
 };
 
 #endif

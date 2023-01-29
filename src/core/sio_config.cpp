@@ -24,7 +24,7 @@ bool Config::syntaxOnly() const {
 void Config::displayContent(void) const {
 	char buff[1 << 10];
 	while (good() && !_file_stream.eof()) {
-		_file_stream.read(buff, (1 << 10) - 1);
+		buff[_file_stream.read(buff, (1 << 10) - 1).gcount()] = 0x0;
 		cout << buff;
 	}
 }

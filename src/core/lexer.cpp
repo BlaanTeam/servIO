@@ -83,7 +83,7 @@ void Lexer::tokenizer(ifstream &file) {
 			break;
 		case '{':
 		case '}':
-			_tokens.push_back(Token(chr == '}' ? OCURLY : CCURLY, string(1, chr)));
+			_tokens.push_back(Token(chr == '}' ? CCURLY : OCURLY, string(1, chr)));
 			break;
 		case ';':
 			_tokens.push_back(Token(SEMICOLON, string(1, chr)));

@@ -9,7 +9,7 @@
 #define CRLF CRLF
 
 #include "http/sio_barrel.hpp"
-#include "lexer.hpp"
+#include "sio_lexer.hpp"
 #include "utility/sio_barrel.hpp"
 
 void servio_init(const int &ac, char *const *av);

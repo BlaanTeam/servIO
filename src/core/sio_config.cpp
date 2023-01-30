@@ -14,7 +14,7 @@ bool Config::syntaxOnly() const {
 	Lexer::iterator it = lexer.begin();
 
 	while (it != lexer.end()) {
-		cout << setw(10) << left << TokenNames[(int)log2((double)it->getType()) - 1] << " = " << it->getValue() << endl;
+		cout << left << setw(4) << it->getLine() << " : " << setw(10) << TokenNames[(int)log2((double)it->getType()) - 1] << " = " << it->getValue() << endl;
 		it++;
 	}
 

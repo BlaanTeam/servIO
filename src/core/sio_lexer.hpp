@@ -25,14 +25,16 @@ enum TokenType {
 class Token {
 	TokenType _type;
 	string    _value;
+	size_t    _line;
 
    public:
 	Token();
-	Token(const TokenType &type, const string &value);
+	Token(const TokenType &type, const string &value, const size_t &line);
 
 	// Getters
 	TokenType getType(void) const;
 	string    getValue(void) const;
+	size_t    getLine(void) const;
 };
 
 class Lexer : public deque<Token> {

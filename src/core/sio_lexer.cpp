@@ -39,7 +39,7 @@ const char *TokenNames[7] = {
 
 Token::Token() {}
 
-Token::Token(const TokenType &type, const string &value) : _type(type), _value(value) {}
+Token::Token(const TokenType &type, const string &value, const size_t &line) : _type(type), _value(value), _line(line) {}
 
 // Token Getters
 
@@ -51,12 +51,17 @@ string Token::getValue(void) const {
 	return _value;
 }
 
+size_t Token::getLine(void) const {
+	return _line;
+}
+
 // Lexer Class
 
 Lexer::Lexer() {}
 
 void Lexer::tokenizer(ifstream &file) {
-	char chr;
+	char   chr;
+	size_t line = 1;
 
 	file.get(chr);
 	while (!file.eof()) {
@@ -66,6 +71,7 @@ void Lexer::tokenizer(ifstream &file) {
 				file.get(chr);
 		case ' ':
 		case '\n':
+			chr == '\n' ? line++ : line += 0;
 		case '\r':
 		case '\f':
 		case '\v':
@@ -73,10 +79,10 @@ void Lexer::tokenizer(ifstream &file) {
 			break;
 		case '{':
 		case '}':
-			push_back(Token(chr == '}' ? CCURLY : OCURLY, string(1, chr)));
+			push_back(Token(chr == '}' ? CCURLY : OCURLY, string(1, chr), line));
 			break;
 		case ';':
-			push_back(Token(SEMICOLON, string(1, chr)));
+			push_back(Token(SEMICOLON, string(1, chr), line));
 			break;
 		default:
 			string word;
@@ -86,12 +92,12 @@ void Lexer::tokenizer(ifstream &file) {
 				word += string(1, chr);
 				file.get(chr);
 			}
-			push_back(Token(WORD, word));
+			push_back(Token(WORD, word, line));
 			continue;
 		};
 		file.get(chr);
 	}
-	push_back(Token(_EOF, "End Of File"));
+	push_back(Token(_EOF, "End Of File", line));
 
 	// reset seek of the file to the beginning !
 	file.clear();

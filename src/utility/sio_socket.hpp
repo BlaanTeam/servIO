@@ -36,6 +36,9 @@ class Address {
 	void setHost(const string &host);
 	void setPort(const short &port);
 
+	// operator overloading
+	bool operator<(const Address &rhs) const;
+
 	// getters
 	string    getHost(void) const;
 	in_port_t getPort(void) const;

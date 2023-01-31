@@ -103,19 +103,3 @@ void Lexer::tokenizer(ifstream &file) {
 	file.clear();
 	file.seekg(0);
 }
-
-int Lexer::current(void) const {
-	return front().getType();
-}
-
-bool Lexer::match(int tokenType) const {
-	return current() & tokenType;
-}
-
-bool Lexer::accept(int tokenType) {
-	if (match(tokenType)) {
-		pop_front();
-		return true;
-	}
-	return false;
-}

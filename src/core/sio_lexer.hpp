@@ -42,10 +42,6 @@ class Lexer : public deque<Token> {
 	Lexer();
 
 	void tokenizer(ifstream &file);
-
-	int  current(void) const;
-	bool match(int tokenType) const;
-	bool accept(int tokenType);
 };
 
 #endif

@@ -22,13 +22,13 @@ static void _display_help(void) {
 	     << ": set configuration file(default: conf/nginx.conf)" << endl;
 }
 
-static bool _test_configuration(const Config &config) {
+static bool _test_configuration(Config &config) {
 	bool success = config.good() && config.syntaxOnly();
 	cerr << NAME ": configuration file \"" << config.getPath() << "\" test is " << (success ? "successful" : "failed") << endl;
 	return success;
 }
 
-static void _dump_configuration(const Config &config) {
+static void _dump_configuration(Config &config) {
 	if (_test_configuration(config)) {
 		config.displayContent();
 	}

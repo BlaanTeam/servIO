@@ -115,24 +115,17 @@ class PollFd::IsExists {
 
 void PollFd::add(const sockfd &fd, const short &events) {
 	pollfd new_pfd = {fd, events, 0};
-	pfds.push_back(new_pfd);
+	push_back(new_pfd);
 }
 
 void PollFd::remove(const sockfd &fd) {
-	vector<pollfd>::iterator it = find_if(pfds.begin(), pfds.end(), IsExists(fd));
+	vector<pollfd>::iterator it = find_if(begin(), end(), IsExists(fd));
 
-	if (it != pfds.end())
-		pfds.erase(it);
-}
-
-int PollFd::size() const {
-	return pfds.size();
+	if (it != end()) {
+		erase(it);
+	}
 }
 
 int PollFd::poll(const int &timeout) {
-	return ::poll(pfds.data(), pfds.size(), timeout);
-}
-
-vector<pollfd> &PollFd::getPfds(void) {
-	return pfds;
+	return ::poll(data(), size(), timeout);
 }

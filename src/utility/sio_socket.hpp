@@ -62,10 +62,7 @@ class Socket {
 	~Socket();
 };
 
-class PollFd {
-	vector<pollfd>                   pfds;
-	typedef vector<pollfd>::iterator iterator;
-
+class PollFd : public vector<pollfd> {
 	class IsExists;
 
    public:
@@ -73,12 +70,7 @@ class PollFd {
 	void add(const sockfd &fd, const short &events);
 	void remove(const sockfd &fd);
 
-	iterator begin(void) { return pfds.begin(); }
-	iterator end(void) { return pfds.end(); }
-
-	int             size(void) const;
-	int             poll(const int &timeout);
-	vector<pollfd> &getPfds(void);
+	int poll(const int &timeout);
 };
 
 #endif

@@ -51,3 +51,5 @@ class LocationContext : public MainContext {
 	LocationContext();
 	LocationContext(const MainContext *copy);
 };
+
+#endif

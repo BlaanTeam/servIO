@@ -4,21 +4,17 @@ Config::Config(const string &path) {
 	setPath(path);
 }
 
-bool Config::syntaxOnly() const {
-	// TODO: implement syntax checking !
-
-	Lexer lexer;
-
-	lexer.tokenizer(_file_stream);
-
-	Lexer::iterator it = lexer.begin();
-
-	while (it != lexer.end()) {
-		cout << left << setw(4) << it->getLine() << " : " << setw(10) << TokenNames[(int)log2((double)it->getType()) - 1] << " = " << it->getValue() << endl;
-		it++;
+bool Config::parse() {
+	Parser parser(_file_stream);
+	if (!(_asTree = parser.parse())) {
+		cerr << parser.err() << endl;
+		return false;
 	}
-
 	return true;
+}
+
+bool Config::syntaxOnly() {
+	return parse();
 }
 
 void Config::displayContent(void) const {

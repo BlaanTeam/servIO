@@ -5,6 +5,7 @@
 #include <string>
 
 #include "servio.hpp"
+#include "sio_parser.hpp"
 
 using namespace std;
 
@@ -14,9 +15,14 @@ class Config {
 	string           _path;
 	mutable ifstream _file_stream;
 
+	MainContext *_asTree;
+
+   private:
+	bool parse();
+
    public:
 	Config(const string &path = CONF_DFL_PATH);
-	bool syntaxOnly() const;
+	bool syntaxOnly();
 
 	void displayContent(void) const;
 

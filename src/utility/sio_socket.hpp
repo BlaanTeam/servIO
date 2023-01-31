@@ -29,6 +29,7 @@ class Address {
 	short     _ss_family;
 
    public:
+	Address();
 	Address(const string &host, const in_port_t &port);
 	Address(sockaddr addr, const socklen_t &len);
 

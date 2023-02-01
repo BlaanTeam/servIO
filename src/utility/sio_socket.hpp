@@ -50,6 +50,8 @@ class Address {
 	~Address();
 };
 
+ostream &operator<<(ostream &stream, const Address &addr);
+
 class Socket {
 	sockfd sock_fd;
 	bool   good;

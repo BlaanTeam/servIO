@@ -36,6 +36,11 @@ Address::Address(sockaddr sa, const socklen_t &len) {
 
 Address::~Address() {}
 
+ostream &operator<<(ostream &stream, const Address &addr) {
+	stream << addr.getHost() << ":" << addr.getPort();
+	return stream;
+}
+
 // Address Setters
 
 void Address::setHost(const string &host) { _host = host; }

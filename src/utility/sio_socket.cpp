@@ -13,6 +13,14 @@ static void *get_in_addr(struct sockaddr *sa) {
 
 Address::Address() {}
 
+Address::Address(const sockfd &fd) {
+	sockaddr  sa;
+	socklen_t len = sizeof(sockaddr_storage);
+
+	getsockname(fd, &sa, &len);
+	*this = Address(sa, len);
+}
+
 Address::Address(const string &host, const in_port_t &port) : _host(host), _port(port), _ss_family(AF_INET) {}
 
 Address::Address(sockaddr sa, const socklen_t &len) {

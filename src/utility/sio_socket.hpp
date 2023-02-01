@@ -30,6 +30,7 @@ class Address {
 
    public:
 	Address();
+	Address(const sockfd &fd);
 	Address(const string &host, const in_port_t &port);
 	Address(sockaddr addr, const socklen_t &len);
 

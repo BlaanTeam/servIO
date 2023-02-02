@@ -43,15 +43,15 @@ Token::Token(const TokenType &type, const string &value, const size_t &line) : _
 
 // Token Getters
 
-TokenType Token::getType(void) const {
+TokenType Token::type(void) const {
 	return _type;
 }
 
-string Token::getValue(void) const {
+const string &Token::value(void) const {
 	return _value;
 }
 
-size_t Token::getLine(void) const {
+size_t Token::line(void) const {
 	return _line;
 }
 

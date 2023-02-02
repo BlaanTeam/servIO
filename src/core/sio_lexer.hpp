@@ -32,9 +32,9 @@ class Token {
 	Token(const TokenType &type, const string &value, const size_t &line);
 
 	// Getters
-	TokenType getType(void) const;
-	string    getValue(void) const;
-	size_t    getLine(void) const;
+	TokenType     type(void) const;
+	const string &value(void) const;
+	size_t        line(void) const;
 };
 
 class Lexer : public deque<Token> {

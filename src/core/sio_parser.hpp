@@ -15,7 +15,11 @@ class Parser {
 		_lex.tokenizer(cfile);
 	};
 	MainContext *parse() {
-		return nullptr;
+		if (_lex.front().type() == _EOF) {
+			_serr = "empty config";
+			return nullptr;
+		}
+		return parse_main();
 	};
 	const string &err() const {
 		return _serr;

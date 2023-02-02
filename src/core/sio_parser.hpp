@@ -6,9 +6,17 @@
 
 class Parser {
 	string _serr;
-	Lexer _lex;
+	Lexer  _lex;
 
    private:
+	bool expect(TokenType type) {
+		if (_lex.front().type() != type) {
+			_serr = "LINE " + to_string(_lex.front().line()) + ": temp expect token";
+			return false;
+		}
+		return _lex.pop_front(), true;
+	}
+
 	
    public:
 	Parser(ifstream &cfile) {

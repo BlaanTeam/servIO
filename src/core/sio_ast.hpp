@@ -8,9 +8,9 @@
 using namespace std;
 
 enum CtxType {
-	httpCtx,
-	serverCtx,
-	locationCtx,
+	httpCtx = 1 << 1,
+	serverCtx = 1 << 2,
+	locationCtx = 1 << 3,
 };
 
 class MainContext {

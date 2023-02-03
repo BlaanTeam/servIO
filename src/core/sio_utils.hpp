@@ -7,6 +7,6 @@
 
 using namespace std;
 
-void dumpConfigDot(MainContext *main, ostream &stream);
+void dumpConfigDot(MainContext *main, ostream &stream = cout);
 
 #endif

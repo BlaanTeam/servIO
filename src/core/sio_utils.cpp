@@ -58,7 +58,7 @@ static int dotDfs(MainContext *main, int &id, ostream &stream) {
 	return my_id;
 }
 
-void dumpConfigDot(MainContext *main, ostream &stream = cout) {
+void dumpConfigDot(MainContext *main, ostream &stream) {
 	if (!main) return;
 	int id = 0;
 	stream << "digraph {\n";

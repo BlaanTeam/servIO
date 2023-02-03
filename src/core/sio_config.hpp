@@ -31,8 +31,9 @@ class Config {
 	void setPath(const string &path);
 
 	// getters
-	string getPath(void) const;
-	bool   good(void) const;
+	MainContext *ast();
+	string       getPath(void) const;
+	bool         good(void) const;
 };
 
 #endif

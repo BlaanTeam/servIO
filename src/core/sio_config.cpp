@@ -37,6 +37,10 @@ void Config::setPath(const string &path) {
 
 // Getters
 
+MainContext *Config::ast() {
+	return _asTree;
+}
+
 string Config::getPath(void) const {
 	return _path;
 }

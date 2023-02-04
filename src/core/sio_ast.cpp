@@ -58,7 +58,16 @@ ServerContext::ServerContext(const MainContext *copy)
 
 // LocationContext functions
 
-LocationContext::LocationContext() { _type = locationCtx; };
+LocationContext::LocationContext(const string &loc)
+    : _loc(loc) { _type = locationCtx; };
 
 LocationContext::LocationContext(const MainContext *copy)
     : MainContext(copy) { _type = locationCtx; }
+
+const string &LocationContext::location() const {
+	return _loc;
+}
+
+void LocationContext::setLocation(const string &loc) {
+	_loc = loc;
+}

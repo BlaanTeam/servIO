@@ -50,8 +50,12 @@ class ServerContext : public MainContext {
 };
 
 class LocationContext : public MainContext {
+	string _loc;
+
    public:
-	LocationContext();
+	LocationContext(const string &loc = "");
+	const string &location() const;
+	void          setLocation(const string &loc);
 	LocationContext(const MainContext *copy);
 };
 

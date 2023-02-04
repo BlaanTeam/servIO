@@ -49,12 +49,16 @@ HttpContext::HttpContext() { _type = httpCtx; };
 HttpContext::HttpContext(const MainContext *copy)
     : MainContext(copy) { _type = httpCtx; }
 
+HttpContext::~HttpContext(){};
+
 // ServerContext functions
 
 ServerContext::ServerContext() { _type = serverCtx; };
 
 ServerContext::ServerContext(const MainContext *copy)
     : MainContext(copy) { _type = serverCtx; }
+
+ServerContext::~ServerContext(){};
 
 // LocationContext functions
 
@@ -71,3 +75,5 @@ const string &LocationContext::location() const {
 void LocationContext::setLocation(const string &loc) {
 	_loc = loc;
 }
+
+LocationContext::~LocationContext(){};

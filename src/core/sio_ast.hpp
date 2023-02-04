@@ -41,12 +41,14 @@ class HttpContext : public MainContext {
    public:
 	HttpContext();
 	HttpContext(const MainContext *copy);
+	~HttpContext();
 };
 
 class ServerContext : public MainContext {
    public:
 	ServerContext();
 	ServerContext(const MainContext *copy);
+	~ServerContext();
 };
 
 class LocationContext : public MainContext {
@@ -57,6 +59,7 @@ class LocationContext : public MainContext {
 	const string &location() const;
 	void          setLocation(const string &loc);
 	LocationContext(const MainContext *copy);
+	~LocationContext();
 };
 
 #endif

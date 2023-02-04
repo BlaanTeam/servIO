@@ -19,6 +19,7 @@ class MainContext {
 	vector<MainContext *>                          _contexts;
 	map<string, vector<string> >                   _directives;
 	typedef map<string, vector<string> >::iterator dirIter;
+	typedef pair<string, vector<string> >          Directive;
 
    public:
 	MainContext();
@@ -29,6 +30,7 @@ class MainContext {
 	vector<MainContext *>        &contexts();
 
 	void            addContext(MainContext *ctx);
+	void            addDirective(const Directive &dir);
 	void            rmDirective(const string &dir);
 	vector<string> &operator[](const string &dir);
 

@@ -24,6 +24,10 @@ void MainContext::addContext(MainContext *ctx) {
 	_contexts.push_back(ctx);
 }
 
+void MainContext::addDirective(const Directive &dir) {
+	_directives[dir.first] = dir.second;
+}
+
 void MainContext::rmDirective(const string &dir) {
 	dirIter it = _directives.find(dir);
 	if (it != _directives.end()) _directives.erase(it);

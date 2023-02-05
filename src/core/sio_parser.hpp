@@ -15,6 +15,11 @@ class Parser {
 	bool         accept(int type, const string &value = "");
 	bool         expect(int type, const string &value = "");
 
+	Directive *parse_directive(Directive *_dir = nullptr);
+	Directive *parse_http_dir(Directive *_dir = nullptr);
+	Directive *parse_server_dir();
+	Directive *parse_location_dir();
+
 
    public:
 	Parser(ifstream &cfile);

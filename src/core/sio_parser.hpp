@@ -1,8 +1,8 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
-#include "sio_lexer.hpp"
 #include "sio_ast.hpp"
+#include "sio_lexer.hpp"
 
 class Parser {
 	string _serr;
@@ -20,6 +20,10 @@ class Parser {
 	Directive *parse_server_dir();
 	Directive *parse_location_dir();
 
+	MainContext *parse_location(MainContext *parent);
+	MainContext *parse_server(MainContext *parent);
+	MainContext *parse_main();
+	MainContext *updateDirectives(MainContext *tree);
 
    public:
 	Parser(ifstream &cfile);

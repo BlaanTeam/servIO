@@ -201,3 +201,102 @@ Parser::Directive *Parser::parse_location_dir() {
 failed:
 	return delete dir, nullptr;
 }
+
+MainContext *Parser::parse_location(MainContext *parent) {
+	MainContext *ret = new LocationContext(parent);
+
+	if (!expect(WORD, "location"))
+		goto failed;
+
+	((LocationContext *)ret)->setLocation(current().value());
+
+	if (!expect(WORD) || !expect(OCURLY))
+		goto failed;
+
+	while (current().type() & ~CCURLY) {
+		if (current().value() == "location") {
+			MainContext *p = parse_location(ret);
+			if (!p)
+				goto failed;
+			ret->addContext(p);
+		} else {
+			Parser::Directive *dir = parse_location_dir();
+			if (!dir)
+				goto failed;
+			ret->addDirective(*dir);
+			delete dir;
+		}
+	}
+
+	if (!expect(CCURLY))
+		goto failed;
+
+	return ret;
+
+failed:
+	return delete ret, nullptr;
+}
+
+MainContext *Parser::parse_server(MainContext *parent) {
+	MainContext *ret = new ServerContext(parent);
+
+	if (!expect(WORD, "server") || !expect(OCURLY))
+		goto failed;
+
+	while (current().type() & ~CCURLY) {
+		if (current().value() == "location") {
+			MainContext *p = parse_location(ret);
+			if (!p)
+				goto failed;
+			ret->addContext(p);
+		} else {
+			Parser::Directive *dir = parse_server_dir();
+			if (!dir)
+				goto failed;
+			ret->addDirective(*dir);
+			delete dir;
+		}
+	}
+
+	if (!expect(CCURLY))
+		goto failed;
+
+	return ret;
+
+failed:
+	return delete ret, nullptr;
+}
+
+MainContext *Parser::parse_main() {
+	MainContext *ret = new HttpContext();
+
+	if (!expect(WORD, "http") || !expect(OCURLY))
+		goto failed;
+
+	while (current().type() & ~CCURLY) {
+		if (current().value() == "server") {
+			MainContext *p = parse_server(ret);
+			if (!p)
+				goto failed;
+			ret->addContext(p);
+		} else {
+			Parser::Directive *dir = parse_http_dir();
+			if (!dir)
+				goto failed;
+			ret->addDirective(*dir);
+			delete dir;
+		}
+	}
+
+	if (!expect(CCURLY) || !expect(_EOF))
+		goto failed;
+
+	return ret;
+
+failed:
+	return delete ret, nullptr;
+}
+
+MainContext *Parser::updateDirectives(MainContext *tree) {
+	return tree;
+}

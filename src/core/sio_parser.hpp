@@ -20,10 +20,10 @@ class Parser {
 	Directive *parse_server_dir();
 	Directive *parse_location_dir();
 
-	MainContext *parse_location(MainContext *parent);
-	MainContext *parse_server(MainContext *parent);
+	MainContext *parse_location();
+	MainContext *parse_server();
 	MainContext *parse_main();
-	MainContext *updateDirectives(MainContext *tree);
+	MainContext *updateDirectives(MainContext *tree, MainContext *parent = nullptr);
 
    public:
 	Parser(ifstream &cfile);

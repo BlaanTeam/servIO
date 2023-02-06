@@ -203,8 +203,8 @@ failed:
 	return delete dir, nullptr;
 }
 
-MainContext *Parser::parse_location(MainContext *parent) {
-	MainContext *ret = new LocationContext(parent);
+MainContext *Parser::parse_location() {
+	MainContext *ret = new LocationContext();
 
 	if (!expect(WORD, "location"))
 		goto failed;
@@ -216,7 +216,7 @@ MainContext *Parser::parse_location(MainContext *parent) {
 
 	while (current().type() & ~CCURLY) {
 		if (current().value() == "location") {
-			MainContext *p = parse_location(ret);
+			MainContext *p = parse_location();
 			if (!p)
 				goto failed;
 			ret->addContext(p);
@@ -238,15 +238,15 @@ failed:
 	return delete ret, nullptr;
 }
 
-MainContext *Parser::parse_server(MainContext *parent) {
-	MainContext *ret = new ServerContext(parent);
+MainContext *Parser::parse_server() {
+	MainContext *ret = new ServerContext();
 
 	if (!expect(WORD, "server") || !expect(OCURLY))
 		goto failed;
 
 	while (current().type() & ~CCURLY) {
 		if (current().value() == "location") {
-			MainContext *p = parse_location(ret);
+			MainContext *p = parse_location();
 			if (!p)
 				goto failed;
 			ret->addContext(p);
@@ -276,7 +276,7 @@ MainContext *Parser::parse_main() {
 
 	while (current().type() & ~CCURLY) {
 		if (current().value() == "server") {
-			MainContext *p = parse_server(ret);
+			MainContext *p = parse_server();
 			if (!p)
 				goto failed;
 			ret->addContext(p);
@@ -298,6 +298,18 @@ failed:
 	return delete ret, nullptr;
 }
 
-MainContext *Parser::updateDirectives(MainContext *tree) {
+MainContext *Parser::updateDirectives(MainContext *tree, MainContext *parent) {
+	if (!tree)
+		return nullptr;
+	if (parent) {
+		map<string, vector<string> > &directives = parent->directives();
+		for (map<string, vector<string> >::iterator dir = directives.begin(); dir != directives.end(); dir++) {
+			if (tree->directives().find(dir->first) == tree->directives().end()) {
+				tree->directives().insert(*dir);
+			}
+		}
+	}
+	for (size_t i = 0; i < tree->contexts().size(); i++)
+		updateDirectives(tree->contexts()[i], tree);
 	return tree;
 }

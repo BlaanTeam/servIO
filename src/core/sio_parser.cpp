@@ -121,6 +121,7 @@ Parser::Directive *Parser::parse_http_dir(Parser::Directive *_dir) {
 			}
 			digit++;
 		}
+		dir->first += "_" + dir->second[0];  // to differentiate between multiple error_page keys
 		return dir;
 	}
 

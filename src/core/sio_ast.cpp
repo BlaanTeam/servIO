@@ -44,7 +44,16 @@ MainContext::~MainContext() {
 
 // HttpContext functions
 
-HttpContext::HttpContext() { _type = httpCtx; };
+HttpContext::HttpContext() {
+	_type = httpCtx;
+	_directives["root"].push_back("html");
+	_directives["autoindex"].push_back("off");
+	_directives["index"].push_back("index.html");
+	_directives["allowed_methods"].push_back("GET");
+	_directives["allowed_methods"].push_back("POST");
+	_directives["allowed_methods"].push_back("DELETE");
+	_directives["client_max_body_size"].push_back("1048576");
+};
 
 HttpContext::HttpContext(const MainContext *copy)
     : MainContext(copy) { _type = httpCtx; }

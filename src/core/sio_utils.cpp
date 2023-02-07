@@ -65,3 +65,19 @@ void dumpConfigDot(MainContext *main, ostream &stream) {
 	dotDfs(main, id, stream);
 	stream << "}\n";
 }
+
+string getUTCDate(void) {
+	time_t clock;
+	time(&clock);
+	tm *date = gmtime(&clock);
+
+	char dateBuffer[0xFF] = {0};
+	strftime(dateBuffer, 0xFF, "%A, %d %b %Y %H:%M:%S GMT", date);
+	return string(dateBuffer);
+}
+
+long long getmstime(void) {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec * 1e3) + (tv.tv_usec / 1e3);
+}

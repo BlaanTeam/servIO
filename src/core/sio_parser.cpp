@@ -167,6 +167,8 @@ Parser::Directive *Parser::parse_server_dir() {
 		_serr = "server context: " + dir->first + ": invalid directive!";
 	}
 
+	return nullptr;
+
 failed:
 	return delete dir, nullptr;
 }
@@ -198,6 +200,8 @@ Parser::Directive *Parser::parse_location_dir() {
 	if (_serr.substr(0, 4) == "http") {
 		_serr = "location context: " + dir->first + ": invalid directive!";
 	}
+
+	return nullptr;
 
 failed:
 	return delete dir, nullptr;

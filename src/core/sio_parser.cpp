@@ -93,15 +93,16 @@ Parser::Directive *Parser::parse_http_dir(Parser::Directive *_dir) {
 			_serr = "client_max_body_size directive: invalid arguments!";
 			goto failed;
 		}
-		int digit = 0;
-		while (dir->second[0][digit]) {
-			if (!isdigit(dir->second[0][digit])) {
-				if (!digit || !strchr("bmg", dir->second[0][digit]) || dir->second[0][digit + 1]) {
-					_serr = "client_max_body_size directive: invalid arguments!";
-					goto failed;
-				}
-			}
-			digit++;
+		int value = 0;
+		size_t last;
+		stoi(dir->second[0], &last);
+		if (!isdigit(dir->second[0][0]) || value < 0 || last < (dir->second[0].size() - 1)) {
+			_serr = "client_max_body_size directive: invalid arguments!";
+			goto failed;
+		}
+		else if (last == (dir->second[0].size() - 1) && !strchr("gmkb", dir->second[0][last])) {
+			_serr = "client_max_body_size directive: invalid arguments!";
+			goto failed;
 		}
 		return dir;
 	}
@@ -111,15 +112,11 @@ Parser::Directive *Parser::parse_http_dir(Parser::Directive *_dir) {
 			_serr = "error_page directive: invalid arguments!";
 			goto failed;
 		}
-		int digit = 0;
-		while (dir->second[0][digit]) {
-			if (!isdigit(dir->second[0][digit])) {
-				if (dir->second[0][digit] != 'x' || dir->second[0][digit + 1]) {
-					_serr = "error_page directive: invalid arguments!";
-					goto failed;
-				}
+		for (size_t i = 0; i < dir->second[0].size(); i++) {
+			if (!isdigit(dir->second[0][i]) && (dir->second[0][i] != 'x')) {
+				_serr = "error_page directive: invalid arguments!";
+				goto failed;
 			}
-			digit++;
 		}
 		dir->first += "_" + dir->second[0];  // to differentiate between multiple error_page keys
 		return dir;

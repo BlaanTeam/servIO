@@ -9,4 +9,7 @@ using namespace std;
 
 void dumpConfigDot(MainContext *main, ostream &stream = cout);
 
+
+string getUTCDate(void);
+
 #endif

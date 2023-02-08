@@ -5,21 +5,8 @@ Request::Request() {
 	_method = UNKNOWN;
 }
 
-void Request::consumeStream(const string &stream) {
+void Request::consumeStream(istream &stream) {
 	(void)stream;
-
-headers:
-
-	goto body;
-body:
-
-	goto done;
-done:
-	_state = REQ_DONE;
-	return;
-
-invalid:
-	_state = REQ_INVALID;
 }
 
 // Getters

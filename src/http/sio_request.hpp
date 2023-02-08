@@ -25,7 +25,7 @@ class Request {
    public:
 	Request();
 
-	void consumeStream(const string &stream);
+	void consumeStream(istream &stream);
 
 	bool valid() const;
 };

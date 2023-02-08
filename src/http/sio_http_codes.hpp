@@ -69,7 +69,8 @@ enum HttpMethod {
 	DELETE,
 	CONNECT,
 	OPTIONS,
-	TRACE
+	TRACE,
+	UNKNOWN
 };
 
 extern string httpMethods[8];

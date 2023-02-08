@@ -5,6 +5,9 @@
 #include "sio_client.hpp"
 #include "sio_http_codes.hpp"
 #include "sio_request.hpp"
-#include "sio_response.hpp"
+
+#define CR "\r"
+#define LF "\n"
+#define CRLF "\r\n"
 
 #endif

@@ -4,9 +4,7 @@
 #define NAME "ServIo"
 #define VERSION "1.0.0"
 
-#define CR "\r"
-#define LF "\n"
-#define CRLF "\r\n"
+
 
 #include <map>
 #include <set>

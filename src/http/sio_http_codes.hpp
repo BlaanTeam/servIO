@@ -51,8 +51,8 @@ using namespace std;
 #define HTTP_VERSION_NOT_SUPPORTED 505
 
 struct HttpStatusCode {
-	const short code;
-	const char *description;
+  const short code;
+  const char *description;
 };
 
 extern HttpStatusCode httpStatusCodes[];
@@ -61,18 +61,24 @@ const char *getCodeDescription(const short &code);
 
 // TODO : change name of the current file
 
+extern int httpMethodCount;
+
 enum HttpMethod {
-	GET,
-	HEAD,
-	POST,
-	PUT,
-	DELETE,
-	CONNECT,
-	OPTIONS,
-	TRACE,
-	UNKNOWN
+  GET,
+  HEAD,
+  POST,
+  PUT,
+  DELETE,
+  CONNECT,
+  OPTIONS,
+  TRACE,
+  UNKNOWN
 };
 
 extern string httpMethods[8];
+
+#define CR "\r"
+#define LF "\n"
+#define CRLF "\r\n"
 
 #endif

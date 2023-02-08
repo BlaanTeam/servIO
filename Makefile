@@ -25,9 +25,12 @@ CORE_HEADER = servio.hpp\
 	sio_utils.hpp
 
 # http files
+HTTP_SRC = sio_request.cpp\
 	sio_http_codes.cpp\
 
 # http headers
+HTTP_HEADER = barrel.hpp\
+	sio_request.hpp\
 	sio_http_codes.hpp\
 
 # utility files

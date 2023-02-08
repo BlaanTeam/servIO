@@ -6,12 +6,17 @@
 
 #define CR "\r"
 #define LF "\n"
-#define CRLF CRLF
+#define CRLF "\r\n"
+
+#include <map>
+#include <set>
 
 #include "http/sio_barrel.hpp"
 #include "sio_lexer.hpp"
 #include "sio_utils.hpp"
 #include "utility/sio_barrel.hpp"
+
+using namespace std;
 
 void servio_init(const int &ac, char *const *av);
 

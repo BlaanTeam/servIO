@@ -64,3 +64,5 @@ const char *getCodeDescription(const short &code) {
 
 	return httpStatusCodes[idx].description;
 }
+
+string httpMethods[8] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};

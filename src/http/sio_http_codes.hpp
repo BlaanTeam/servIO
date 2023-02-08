@@ -1,6 +1,10 @@
 #ifndef __HTTP_CODES_H__
 #define __HTTP_CODES_H__
 
+#include <string>
+
+using namespace std;
+
 #define CONTINUE 100
 #define SWITCHING_PROTOCOLS 101
 
@@ -54,5 +58,20 @@ struct HttpStatusCode {
 extern HttpStatusCode httpStatusCodes[];
 
 const char *getCodeDescription(const short &code);
+
+// TODO : change name of the current file
+
+enum HttpMethod {
+	GET,
+	HEAD,
+	POST,
+	PUT,
+	DELETE,
+	CONNECT,
+	OPTIONS,
+	TRACE
+};
+
+extern string httpMethods[8];
 
 #endif

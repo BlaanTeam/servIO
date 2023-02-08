@@ -25,10 +25,10 @@ CORE_HEADER = servio.hpp\
 	sio_utils.hpp
 
 # http files
-# HTTP_SRC = 
+	sio_http_codes.cpp\
 
 # http headers
-HTTP_HEADER = barrel.hpp
+	sio_http_codes.hpp\
 
 # utility files
 UTILITY_SRC = sio_socket.cpp
@@ -37,9 +37,8 @@ UTILITY_SRC = sio_socket.cpp
 UTILITY_HEADER = barrel.hpp\
 	sio_socket.hpp
 
-
-
 SRCS = sio_main.cpp\
+	$(addprefix http/,$(HTTP_SRC))\
 	$(addprefix core/, $(CORE_SRC))\
 	$(addprefix utility/, $(UTILITY_SRC))
 

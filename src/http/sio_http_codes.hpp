@@ -81,4 +81,6 @@ extern string httpMethods[8];
 #define LF "\n"
 #define CRLF "\r\n"
 
+#define HTTP_VERSION "HTTP/1.1"
+
 #endif

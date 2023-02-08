@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <sstream>
 
 #include "sio_http_codes.hpp"
 

@@ -101,9 +101,6 @@ void servio_init(const int &ac, char *const *av) {
 				cerr << "New Connection From " << newConnection.second << endl;
 				tmp.add(newConnection.first, POLLIN);
 				clients[newConnection.first] = Client(newConnection);
-			} else if (it->revents & POLLHUP) {
-				cerr << "Client Disconnected !" << endl;
-				purgeConnection(it->fd, tmp, clients);
 			} else if (it->revents & POLLIN) {
 				char stream[(1 << 0xA) + 1];
 				int  nbyte = recv(it->fd, stream, (1 << 0xA), 0);
@@ -113,6 +110,10 @@ void servio_init(const int &ac, char *const *av) {
 					clients[it->fd].handleRequest(iss);
 					clients[it->fd].setTime(getmstime());
 				}
+			}
+			if (it->revents & POLLHUP) {
+				cerr << "Client Disconnected !" << endl;
+				purgeConnection(it->fd, tmp, clients);
 			}
 			it++;
 		}

@@ -6,8 +6,4 @@
 #include "sio_http_codes.hpp"
 #include "sio_request.hpp"
 
-#define CR "\r"
-#define LF "\n"
-#define CRLF "\r\n"
-
 #endif

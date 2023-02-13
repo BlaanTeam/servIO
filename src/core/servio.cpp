@@ -80,8 +80,8 @@ void servio_init(const int &ac, char *const *av) {
 				if (nbyte != -1) {
 					stream[nbyte] = 0x0;
 					istringstream iss(stream);
-					clients[it->fd].handleRequest(iss);
 					clients[it->fd].setTime(getmstime());
+					clients[it->fd].handleRequest(iss);
 				}
 			}
 			if (it->revents & POLLHUP) {

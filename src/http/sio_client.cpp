@@ -21,8 +21,23 @@ bool Client::timedOut(void) const {
 	return getmstime() - _time > TIMEOUT;
 }
 
+#include <fstream>
+
 void Client::handleRequest(istream &stream) {
 	_req.consumeStream(stream);
+
+
+	// Example Start !
+	fstream file("html/index.html");
+
+	_res.setStatusCode(200);
+	_res.setConnectionStatus(false);
+	_res.addHeader("Content-Type", mimeTypes["html"]);
+	_res.prepare();
+
+	_res.send(_connection.first, file);
+	clients.purgeConnection(_connection.first);
+	// Example End !
 }
 
 ClientMap::ClientMap() {

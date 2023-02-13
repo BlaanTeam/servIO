@@ -1,7 +1,5 @@
 #include "sio_request.hpp"
 
-#include "sio_http_codes.hpp"
-
 Request::Request() {
 	_state = REQ_INIT;
 	_method = UNKNOWN;
@@ -10,17 +8,29 @@ Request::Request() {
 void Request::parseFirstLine(string &line) {
 	stringstream ss(line);
 	string       buff;
+	string       uri;
 	string       httpVer;
 
-	ss >> buff >> _uri >> httpVer;
-	int idx = 0;
-	while (idx < httpMethodCount && httpMethods[idx] != buff)
-		idx++;
+	ss >> buff >> uri >> httpVer;
+
+	if (!every(buff, ::isupper))
+		goto invalid;
+
+	{
+		int idx = 0;
+		while (idx < httpMethodCount && httpMethods[idx] != buff)
+			idx++;
+		_method = (HttpMethod)idx;
+	}
 	getline(ss, buff, '\0');
-	_method = (HttpMethod)idx;
-	if (_method == UNKNOWN || _uri[0] != '/' || httpVer != HTTP_VERSION ||
+	if (uri[0] != '/' || httpVer != HTTP_VERSION ||
 	    buff != CRLF)
 		goto invalid;
+	string::size_type idx;
+	idx = uri.find('?');
+	_path = uri.substr(0, idx);
+	if (idx != string::npos)
+		_query = uri.substr(idx + 1);
 	changeState(REQ_HEADER);
 	return;
 

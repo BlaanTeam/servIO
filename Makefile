@@ -36,11 +36,13 @@ HTTP_HEADER = barrel.hpp\
 	sio_client.hpp\
 
 # utility files
-UTILITY_SRC = sio_socket.cpp
+UTILITY_SRC = sio_socket.cpp\
+	sio_helpers.cpp\
 
 # utility headers
 UTILITY_HEADER = barrel.hpp\
-	sio_socket.hpp
+	sio_socket.hpp\
+	sio_helpers.hpp\
 
 SRCS = sio_main.cpp\
 	$(addprefix http/,$(HTTP_SRC))\

@@ -7,6 +7,8 @@
 #include <string>
 
 #include "sio_http_codes.hpp"
+#include "utility/sio_barrel.hpp"
+
 
 using namespace std;
 
@@ -20,7 +22,8 @@ class Request {
 	short _state;
 
 	HttpMethod _method;
-	string     _uri;
+	string     _path;
+	string    _query;
 	string     _line;
 
 	map<string, string> _headers;

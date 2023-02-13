@@ -1,69 +1,58 @@
 #include "sio_http_codes.hpp"
 
-HttpStatusCode httpStatusCodes[] = {
-    // # 1xx Informational
+HttpStatusCode::HttpStatusCode() {
+	// # 1xx Informational
+	(*this)[100] = "Continue";
+	(*this)[101] = "Switching Protocols";
 
-    {100, "Continue"},
-    {101, "Switching Protocols"},
+	// # 2xx Success
+	(*this)[200] = "OK";
+	(*this)[201] = "Created";
+	(*this)[202] = "Accepted";
+	(*this)[203] = "Non - Authoritative Information";
+	(*this)[204] = "No Content";
+	(*this)[205] = "Reset Content";
+	(*this)[206] = "Partial Content";
 
-    // # 2xx Success
-    {200, "OK"},
-    {201, "Created"},
-    {202, "Accepted"},
-    {203, "Non - Authoritative Information"},
-    {204, "No Content"},
-    {205, "Reset Content"},
-    {206, "Partial Content"},
+	// # 3xx Redirection
+	(*this)[300] = "Multiple Choices";
+	(*this)[301] = "Moved Permanently";
+	(*this)[302] = "Found";
+	(*this)[303] = "See Other";
+	(*this)[304] = "Not Modified";
+	(*this)[305] = "Use Proxy";
+	(*this)[307] = "Temporary Redirect";
 
-    // # 3xx Redirection
-    {300, "Multiple Choices"},
-    {301, "Moved Permanently"},
-    {302, "Found"},
-    {303, "See Other"},
-    {304, "Not Modified"},
-    {305, "Use Proxy"},
-    {307, "Temporary Redirect"},
+	// # 4xx Client Error
+	(*this)[400] = "Bad Request";
+	(*this)[401] = "Unauthorized";
+	(*this)[402] = "Payment Required";
+	(*this)[403] = "Forbidden";
+	(*this)[404] = "Not Found";
+	(*this)[405] = "Method Not Allowed";
+	(*this)[406] = "Not Acceptable";
+	(*this)[407] = "Proxy Authentication Required";
+	(*this)[408] = "Request Timeout";
+	(*this)[409] = "Conflict";
+	(*this)[410] = "Gone";
+	(*this)[411] = "Length Required";
+	(*this)[412] = "Precondition Failed";
+	(*this)[413] = "Request Entity Too Large";
+	(*this)[414] = "Request - URI Too Long";
+	(*this)[415] = "Unsupported Media Type";
+	(*this)[416] = "Requested Range Not Satisfiable";
+	(*this)[417] = "Expectation Failed";
 
-    // # 4xx Client Error
-    {400, "Bad Request"},
-    {401, "Unauthorized"},
-    {402, "Payment Required"},
-    {403, "Forbidden"},
-    {404, "Not Found"},
-    {405, "Method Not Allowed"},
-    {406, "Not Acceptable"},
-    {407, "Proxy Authentication Required"},
-    {408, "Request Timeout"},
-    {409, "Conflict"},
-    {410, "Gone"},
-    {411, "Length Required"},
-    {412, "Precondition Failed"},
-    {413, "Request Entity Too Large"},
-    {414, "Request - URI Too Long"},
-    {415, "Unsupported Media Type"},
-    {416, "Requested Range Not Satisfiable"},
-    {417, "Expectation Failed"},
-
-    // # 5xx Server Error
-    {500, "Internal Server Error"},
-    {501, "Not Implemented"},
-    {502, "Bad Gateway"},
-    {503, "Service Unavailable"},
-    {504, "Gateway Timeout"},
-    {505, "HTTP Version Not Supported"},
-
-    // end
-    {-1, (char *)0}
-
+	// # 5xx Server Error
+	(*this)[500] = "Internal Server Error";
+	(*this)[501] = "Not Implemented";
+	(*this)[502] = "Bad Gateway";
+	(*this)[503] = "Service Unavailable";
+	(*this)[504] = "Gateway Timeout";
+	(*this)[505] = "HTTP Version Not Supported";
 };
 
-const char *getCodeDescription(const short &code) {
-	unsigned int idx = 0;
-	while (idx < sizeof(httpStatusCodes) / sizeof(HttpStatusCode) && httpStatusCodes[idx].code != code && httpStatusCodes[idx].code > 0)
-		idx++;
-
-	return httpStatusCodes[idx].description;
-}
+HttpStatusCode httpStatusCodes;
 
 int httpMethodCount = 8;
 
@@ -71,9 +60,9 @@ string httpMethods[8] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPT
 
 void buildResponseBody(const short &statusCode, stringstream &stream) {
 	stream << "<html>" << endl
-	       << "<head><title>" << statusCode << " " << getCodeDescription(statusCode) << "</title></head>" << endl
+	       << "<head><title>" << statusCode << " " << httpStatusCodes[statusCode] << "</title></head>" << endl
 	       << "<body>" << endl
-	       << "<center><h1>" << statusCode << " " << getCodeDescription(statusCode) << "</h1></center>" << endl
+	       << "<center><h1>" << statusCode << " " << httpStatusCodes[statusCode] << "</h1></center>" << endl
 	       << "<hr><center>" NAME "/" VERSION "</center>" << endl
 	       << "</body>" << endl
 	       << "</html>" << endl;

@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <string>
+#include <map>
 
 using namespace std;
 
@@ -51,14 +52,18 @@ using namespace std;
 #define GATEWAY_TIMEOUT 504
 #define HTTP_VERSION_NOT_SUPPORTED 505
 
-struct HttpStatusCode {
-	const short code;
-	const char *description;
+class HttpStatusCode : public map<short, string> {
+   public:
+
+	HttpStatusCode();
+
+	const string &getCodeDescription(const short &code);
 };
 
-extern HttpStatusCode httpStatusCodes[];
 
-const char *getCodeDescription(const short &code);
+extern HttpStatusCode httpStatusCodes;
+
+
 
 // TODO : change name of the current file
 

@@ -1,7 +1,5 @@
 #include "servio.hpp"
 
-#include "sio_cmdline_opts.hpp"
-
 static int isInSockets(const sockfd &fd, const vector<Socket> &vec) {
 	vector<Socket>::const_iterator it = vec.begin();
 

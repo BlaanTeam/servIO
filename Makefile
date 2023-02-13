@@ -28,12 +28,14 @@ CORE_HEADER = servio.hpp\
 HTTP_SRC = sio_request.cpp\
 	sio_http_codes.cpp\
 	sio_client.cpp\
+	sio_mime_types.cpp\
 
 # http headers
 HTTP_HEADER = barrel.hpp\
 	sio_request.hpp\
 	sio_http_codes.hpp\
 	sio_client.hpp\
+	sio_mime_types.hpp\
 
 # utility files
 UTILITY_SRC = sio_socket.cpp\

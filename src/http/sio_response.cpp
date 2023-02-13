@@ -46,6 +46,10 @@ void Response::setStatusCode(const short &statusCode) {
 	_statusCode = statusCode;
 }
 
+void Response::setConnectionStatus(bool keepAlive) {
+	_keepAlive = keepAlive;
+}
+
 void Response::addHeader(const string &name, const string &value) {
 	_headers[name] = value;
 }

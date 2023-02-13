@@ -2,32 +2,6 @@
 
 #include "sio_cmdline_opts.hpp"
 
-static const vector<sockfd> getInactiveClients(const map<sockfd, Client> &clients) {
-	map<sockfd, Client>::const_iterator it = clients.begin();
-
-	vector<sockfd> vec;
-	while (it != clients.end()) {
-		if (it->second.timedOut()) {
-			vec.push_back(it->first);
-		}
-		it++;
-	}
-	return vec;
-}
-
-static void purgeConnection(const sockfd &fd, PollFd &pfds, map<sockfd, Client> &clients) {
-	close(fd);
-	pfds.remove(fd);
-	clients.erase(fd);
-}
-
-static void purgeInactiveClients(const vector<sockfd> &vec, PollFd &pfds, map<sockfd, Client> &clients) {
-	vector<sockfd>::const_iterator it = vec.begin();
-
-	while (it != vec.end())
-		purgeConnection(*it++, pfds, clients);
-}
-
 static int isInSockets(const sockfd &fd, const vector<Socket> &vec) {
 	vector<Socket>::const_iterator it = vec.begin();
 
@@ -78,9 +52,8 @@ void servio_init(const int &ac, char *const *av) {
 	addrs.insert(Address("0.0.0.0", 443));
 	addrs.insert(Address("127.0.0.1", 4040));
 
-	map<sockfd, Client> clients;
-	vector<Socket>      sockets(addrs.size());
-	PollFd              pfds;
+	vector<Socket> sockets(addrs.size());
+	PollFd         pfds;
 
 	initListeningSockets(addrs, sockets, pfds);
 
@@ -89,12 +62,14 @@ void servio_init(const int &ac, char *const *av) {
 		if (ret == -1)
 			perror("poll");
 
-		purgeInactiveClients(getInactiveClients(clients), pfds, clients);
+		clients.changePollFds(&pfds);
+		clients.purgeInactiveClients();
 
 		PollFd::iterator it = pfds.begin();
 		PollFd           tmp = pfds;
 
 		while (it != pfds.end()) {
+			clients.changePollFds(&tmp);
 			const int idx = isInSockets(it->fd, sockets);
 			if (idx != -1 && it->revents & POLLIN) {
 				pair<int, Address> newConnection = sockets[idx].accept();
@@ -113,7 +88,7 @@ void servio_init(const int &ac, char *const *av) {
 			}
 			if (it->revents & POLLHUP) {
 				cerr << "Client Disconnected !" << endl;
-				purgeConnection(it->fd, tmp, clients);
+				clients.purgeConnection(it->fd);
 			}
 			it++;
 		}

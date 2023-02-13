@@ -22,5 +22,46 @@ bool Client::timedOut(void) const {
 }
 
 void Client::handleRequest(istream &stream) {
-	req.consumeStream(stream);
+	_req.consumeStream(stream);
 }
+
+ClientMap::ClientMap() {
+	_pfds = nullptr;
+}
+
+void ClientMap::changePollFds(PollFd *pfds) {
+	_pfds = pfds;
+}
+
+int ClientMap::purgeConnection(const sockfd &fd) {
+	iterator it = find(fd);
+	if (it != end()) {
+		_pfds->remove(fd);
+		erase(it);
+		close(fd);
+		return 1;
+	}
+	return 0;
+}
+
+const vector<sockfd> ClientMap::getInactiveClients(void) {
+	vector<sockfd> inactiveClients;
+	for (iterator it = begin(); it != end(); it++)
+		if (it->second.timedOut())
+			inactiveClients.push_back(it->first);
+	return inactiveClients;
+}
+
+int ClientMap::purgeInactiveClients() {
+	int            count = 0;
+	vector<sockfd> inactiveClients = getInactiveClients();
+
+	vector<sockfd>::iterator it = inactiveClients.begin();
+
+	while (it != inactiveClients.end())
+		if (clients[*it].timedOut())
+			count += clients.purgeConnection(*it++);
+	return count;
+}
+
+ClientMap clients;

@@ -1,8 +1,8 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
-#include "sio_ast.hpp"
-#include "sio_lexer.hpp"
+#include "./sio_ast.hpp"
+#include "./sio_lexer.hpp"
 
 class Parser {
 	string _serr;

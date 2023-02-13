@@ -7,8 +7,10 @@
 
 #include <iomanip>
 
-#include "servio.hpp"
-#include "sio_config.hpp"
+#include "./sio_config.hpp"
+
+
+class Config;
 
 enum OptionTypes {
 	HELP_OPT = (1 << 1),

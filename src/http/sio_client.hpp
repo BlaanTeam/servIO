@@ -6,11 +6,10 @@
 #include <unistd.h>
 
 #include <map>
-#include <sstream>
+#include <iostream>
 
-#include "sio_request.hpp"
-#include "sio_response.hpp"
-#include "utility/sio_barrel.hpp"
+#include "./sio_request.hpp"
+#include "./sio_response.hpp"
 
 using namespace std;
 
@@ -18,6 +17,7 @@ class Client {
 	pair<sockfd, Address> _connection;
 	long long             _time;
 	Request               _req;
+	Response              _res;
 
    public:
 	Client();

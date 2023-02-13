@@ -4,8 +4,9 @@
 #include <fstream>
 #include <string>
 
-#include "servio.hpp"
-#include "sio_parser.hpp"
+#include "./sio_parser.hpp"
+#include "http/sio_http_codes.hpp"
+#include "utility/sio_utils.hpp"
 
 using namespace std;
 

@@ -6,9 +6,8 @@
 #include <sstream>
 #include <string>
 
-#include "sio_http_codes.hpp"
-#include "utility/sio_barrel.hpp"
-
+#include "./sio_http_codes.hpp"
+#include "utility/sio_helpers.hpp"
 
 using namespace std;
 
@@ -23,7 +22,7 @@ class Request {
 
 	HttpMethod _method;
 	string     _path;
-	string    _query;
+	string     _query;
 	string     _line;
 
 	map<string, string> _headers;
@@ -34,6 +33,7 @@ class Request {
 	// void parseBody(string &line);
 
 	void changeState(const int &state);
+
    public:
 	Request();
 

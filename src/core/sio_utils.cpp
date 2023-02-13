@@ -72,7 +72,7 @@ string getUTCDate(void) {
 	tm *date = gmtime(&clock);
 
 	char dateBuffer[0xFF] = {0};
-	strftime(dateBuffer, 0xFF, "%A, %d %b %Y %H:%M:%S GMT", date);
+	strftime(dateBuffer, 0xFF, "%a, %d %b %Y %H:%M:%S GMT", date);
 	return string(dateBuffer);
 }
 

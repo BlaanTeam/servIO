@@ -68,3 +68,13 @@ const char *getCodeDescription(const short &code) {
 int httpMethodCount = 8;
 
 string httpMethods[8] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
+
+void buildResponseBody(const short &statusCode, stringstream &stream) {
+	stream << "<html>" << endl
+	       << "<head><title>" << statusCode << " " << getCodeDescription(statusCode) << "</title></head>" << endl
+	       << "<body>" << endl
+	       << "<center><h1>" << statusCode << " " << getCodeDescription(statusCode) << "</h1></center>" << endl
+	       << "<hr><center>" NAME "/" VERSION "</center>" << endl
+	       << "</body>" << endl
+	       << "</html>" << endl;
+}

@@ -1,6 +1,7 @@
 #ifndef __HTTP_CODES_H__
 #define __HTTP_CODES_H__
 
+#include <sstream>
 #include <string>
 
 using namespace std;
@@ -51,8 +52,8 @@ using namespace std;
 #define HTTP_VERSION_NOT_SUPPORTED 505
 
 struct HttpStatusCode {
-  const short code;
-  const char *description;
+	const short code;
+	const char *description;
 };
 
 extern HttpStatusCode httpStatusCodes[];
@@ -64,15 +65,15 @@ const char *getCodeDescription(const short &code);
 extern int httpMethodCount;
 
 enum HttpMethod {
-  GET,
-  HEAD,
-  POST,
-  PUT,
-  DELETE,
-  CONNECT,
-  OPTIONS,
-  TRACE,
-  UNKNOWN
+	GET,
+	HEAD,
+	POST,
+	PUT,
+	DELETE,
+	CONNECT,
+	OPTIONS,
+	TRACE,
+	UNKNOWN
 };
 
 extern string httpMethods[8];
@@ -82,5 +83,10 @@ extern string httpMethods[8];
 #define CRLF "\r\n"
 
 #define HTTP_VERSION "HTTP/1.1"
+
+#define NAME "ServIo"
+#define VERSION "1.0.0"
+
+void buildResponseBody(const short &statusCode, stringstream &stream);
 
 #endif

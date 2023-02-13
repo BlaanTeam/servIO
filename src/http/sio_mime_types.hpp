@@ -8,18 +8,15 @@
 
 using namespace std;
 
-class MimeType : public map<const string, const char *> {
-    public:
-    // member types;
-    typedef map<const string, const char *>::iterator iterator;
+class MimeType : public map<string, const char *> {
+	typedef map<string, const char *> Base;
+
    public:
 	MimeType();
-	const char *getMimeType(const string &ext);
+
+	mapped_type &operator[](const key_type &key);
 };
 
 extern MimeType mimeTypes;
-
-
-const string *getFileExtension(const char *file);
 
 #endif

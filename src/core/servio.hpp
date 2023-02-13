@@ -1,8 +1,6 @@
 #ifndef __SERVIO_H__
 #define __SERVIO_H__
 
-#define NAME "ServIo"
-#define VERSION "1.0.0"
 
 
 

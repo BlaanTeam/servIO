@@ -13,7 +13,6 @@ CORE_SRC = servio.cpp\
 	sio_lexer.cpp\
 	sio_ast.cpp\
 	sio_parser.cpp\
-	sio_utils.cpp\
 
 # core headers
 CORE_HEADER = servio.hpp\
@@ -31,8 +30,7 @@ HTTP_SRC = sio_request.cpp\
 	sio_mime_types.cpp\
 
 # http headers
-HTTP_HEADER = barrel.hpp\
-	sio_request.hpp\
+HTTP_HEADER = sio_request.hpp\
 	sio_response.hpp\
 	sio_http_codes.hpp\
 	sio_client.hpp\
@@ -44,8 +42,7 @@ UTILITY_SRC = sio_socket.cpp\
 	sio_utils.cpp\
 
 # utility headers
-UTILITY_HEADER = sio_barrel.hpp\
-	sio_socket.hpp\
+UTILITY_HEADER = sio_socket.hpp\
 	sio_helpers.hpp\
 	sio_utils.hpp\
 

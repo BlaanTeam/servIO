@@ -91,6 +91,19 @@ void Request::consumeStream(istream &stream) {
 }
 
 // Getters
+
+string Request::getPath(void) const {
+	return _path;
+}
+
+string Request::getQuery(void) const {
+	return _query;
+}
+
+short Request::getState(void) const {
+	return _state;
+}
+
 bool Request::valid() const {
 	return (_state & ~REQ_INVALID && _state & ~REQ_INIT);
 }

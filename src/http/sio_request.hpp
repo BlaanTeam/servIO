@@ -39,6 +39,11 @@ class Request {
 
 	void consumeStream(istream &stream);
 
+	// Getters
+	string getPath(void) const;
+	string getQuery(void) const;
+	short  getState(void) const;
+
 	bool valid() const;
 };
 

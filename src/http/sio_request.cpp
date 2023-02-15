@@ -20,7 +20,7 @@ void Request::parseFirstLine(string &line) {
 		int idx = 0;
 		while (idx < httpMethodCount && httpMethods[idx] != buff)
 			idx++;
-		_method = (HttpMethod)idx;
+		_method = (HttpMethod)pow(2, idx);
 	}
 	getline(ss, buff, '\0');
 	if (uri[0] != '/' || httpVer != HTTP_VERSION ||
@@ -44,7 +44,7 @@ void Request::parseHeaders(string &line) {
 	string       value;
 
 	if (line == CRLF)
-		return changeState(REQ_BODY);
+		return changeState(_method & (GET | TRACE | OPTIONS | HEAD) ? REQ_DONE : REQ_BODY);
 	getline(ss, key, ':');
 	getline(ss, value, '\0');
 	if (value.length() < 3 || value.substr(value.length() - 2, 2) != CRLF)

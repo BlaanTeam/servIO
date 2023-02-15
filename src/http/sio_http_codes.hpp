@@ -1,9 +1,11 @@
 #ifndef __HTTP_CODES_H__
 #define __HTTP_CODES_H__
 
+#include <math.h>
+
+#include <map>
 #include <sstream>
 #include <string>
-#include <map>
 
 using namespace std;
 
@@ -54,12 +56,8 @@ using namespace std;
 
 class HttpStatusCode : public map<short, string> {
    public:
-
 	HttpStatusCode();
-
-	const string &getCodeDescription(const short &code);
 };
-
 
 extern HttpStatusCode httpStatusCodes;
 
@@ -70,15 +68,15 @@ extern HttpStatusCode httpStatusCodes;
 extern int httpMethodCount;
 
 enum HttpMethod {
-	GET,
-	HEAD,
-	POST,
-	PUT,
-	DELETE,
-	CONNECT,
-	OPTIONS,
-	TRACE,
-	UNKNOWN
+	GET = (1 << 0),
+	HEAD = (1 << 1),
+	POST = (1 << 2),
+	PUT = (1 << 3),
+	DELETE = (1 << 4),
+	CONNECT = (1 << 5),
+	OPTIONS = (1 << 6),
+	TRACE = (1 << 7),
+	UNKNOWN = (1 << 8)
 };
 
 extern string httpMethods[8];

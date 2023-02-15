@@ -12,10 +12,11 @@
 using namespace std;
 
 #define REQ_INIT (1 << 0)
-#define REQ_HEADER (1 << 1)
-#define REQ_BODY (1 << 2)
-#define REQ_DONE (1 << 3)
-#define REQ_INVALID (1 << 4)
+#define REQ_LINE (1 << 2)
+#define REQ_HEADER (1 << 3)
+#define REQ_BODY (1 << 4)
+#define REQ_DONE (1 << 5)
+#define REQ_INVALID (1 << 6)
 
 class Request {
 	short _state;

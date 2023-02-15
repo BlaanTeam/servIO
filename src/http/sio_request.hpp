@@ -26,7 +26,7 @@ class Request {
 	string     _path;
 	string     _query;
 	string     _line;
-	ofstream   _bodyFile;
+	// ofstream   _bodyFile;
 
 	map<string, string> _headers;
 

@@ -1,6 +1,7 @@
 #ifndef __REQUEST_H__
 #define __REQUEST_H__
 
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -25,13 +26,14 @@ class Request {
 	string     _path;
 	string     _query;
 	string     _line;
+	ofstream   _bodyFile;
 
 	map<string, string> _headers;
 
    private:
 	void parseFirstLine(string &line);
 	void parseHeaders(string &line);
-	// void parseBody(string &line);
+	void parseBody(istream &stream);
 
 	void changeState(const int &state);
 

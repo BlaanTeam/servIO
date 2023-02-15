@@ -63,6 +63,10 @@ invalid:
 	changeState(REQ_INVALID);
 }
 
+void Request::parseBody(istream &stream) {
+	(void)stream;
+}
+
 void Request::changeState(const int &state) {
 	_state = state;
 }
@@ -95,7 +99,7 @@ void Request::consumeStream(istream &stream) {
 				parseHeaders(tmp);
 				break;
 			case REQ_BODY:
-				// parseBody(tmp);
+				parseBody(stream);
 				break;
 			}
 			tmp = "";

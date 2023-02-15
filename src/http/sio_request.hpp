@@ -39,7 +39,8 @@ class Request {
 
    public:
 	Request();
-
+	Request(const Request &copy);
+	Request &operator=(const Request &rhs);
 	void consumeStream(istream &stream);
 
 	// Getters

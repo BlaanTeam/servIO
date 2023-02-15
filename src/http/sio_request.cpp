@@ -5,6 +5,15 @@ Request::Request() {
 	_method = UNKNOWN;
 }
 
+Request::Request(const Request &copy) {
+	*this = copy;
+}
+
+Request &Request::operator=(const Request &rhs) {
+	(void)rhs;
+	return *this;
+}
+
 void Request::parseFirstLine(string &line) {
 	stringstream ss(line);
 	string       buff;

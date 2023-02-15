@@ -26,18 +26,31 @@ bool Client::timedOut(void) const {
 void Client::handleRequest(istream &stream) {
 	_req.consumeStream(stream);
 
+	if (!_req.valid()) {
+		_res.setStatusCode(BAD_REQUEST);
+		_res.setConnectionStatus(false);
+		_res.addHeader("Content-Type", mimeTypes["html"]);
 
-	// Example Start !
-	fstream file("html/index.html");
+		stringstream ss;
+		buildResponseBody(BAD_REQUEST, ss);
 
-	_res.setStatusCode(200);
-	_res.setConnectionStatus(false);
-	_res.addHeader("Content-Type", mimeTypes["html"]);
-	_res.prepare();
+		_res.prepare();
+		_res.send(_connection.first, ss);
 
-	_res.send(_connection.first, file);
-	clients.purgeConnection(_connection.first);
-	// Example End !
+		clients.purgeConnection(_connection.first);
+	} else if (_req.getState() & REQ_DONE) {
+		// Example Start !
+		fstream file("html/index.html");
+
+		_res.setStatusCode(200);
+		_res.setConnectionStatus(false);
+		_res.addHeader("Content-Type", mimeTypes["html"]);
+		_res.prepare();
+
+		_res.send(_connection.first, file);
+		clients.purgeConnection(_connection.first);
+		// Example End !
+	}
 }
 
 ClientMap::ClientMap() {

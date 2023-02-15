@@ -36,3 +36,22 @@ bool iequalString(const string &s1, const string &s2) {
 			return false;
 	return true;
 }
+
+void ltrim(string &value, const string &sep) {
+	string::iterator it = value.begin();
+	while (it != value.end() && ::strchr(sep.c_str(), *it))
+		it++;
+	value.erase(value.begin(), it);
+}
+
+void rtrim(string &value, const string &sep) {
+	string::reverse_iterator it = value.rbegin();
+	while (it != value.rend() && ::strchr(sep.c_str(), *it))
+		it++;
+	value.erase(value.length() - (it - value.rbegin()));
+}
+
+void trim(string &value, const string &sep) {
+	ltrim(value, sep);
+	rtrim(value, sep);
+}

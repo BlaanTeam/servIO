@@ -59,7 +59,7 @@ void Response::send(const sockfd &fd, iostream &stream, bool chunked) {
 
 	int seek = stream.tellg();
 	stream.seekg(0, stream.end);
-	addHeader("Content-Lenght", to_string(stream.tellg()));
+	addHeader("Content-Length", to_string(stream.tellg()));
 	stream.seekg(seek);
 
 	prepare();

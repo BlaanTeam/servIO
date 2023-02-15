@@ -27,3 +27,12 @@ pair<bool, string> normpath(const string &path, const char sep) {
 	}
 	return make_pair(true, tmp);
 }
+
+bool iequalString(const string &s1, const string &s2) {
+	if (s1.length() != s2.length())
+		return false;
+	for (size_t idx = 0; idx < s1.length(); idx++)
+		if (toupper(s1[idx]) != toupper(s2[idx]))
+			return false;
+	return true;
+}

@@ -105,5 +105,5 @@ short Request::getState(void) const {
 }
 
 bool Request::valid() const {
-	return (_state & ~REQ_INVALID && _state & ~REQ_INIT);
+	return (_state & ~REQ_INVALID);
 }

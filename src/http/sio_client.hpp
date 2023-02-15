@@ -1,7 +1,7 @@
 #ifndef __CLIENT_H__
 #define __CLIENT_H__
 
-#define TIMEOUT 7000  // TODO: change it to be reasonable
+#define TIMEOUT 100000  // TODO: change it to be reasonable
 
 #include <unistd.h>
 

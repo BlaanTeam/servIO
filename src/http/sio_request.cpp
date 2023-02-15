@@ -13,9 +13,17 @@ void Request::parseFirstLine(string &line) {
 
 	ss >> buff >> uri >> httpVer;
 
-	if (!every(buff, ::isupper))
-		goto invalid;
+	string::size_type idx;
+	idx = uri.find('?');
+	_path = uri.substr(0, idx);
+	if (idx != string::npos)
+		_query = uri.substr(idx + 1);
 
+	pair<bool, string> pr = normpath(_path);
+
+	if (!every(buff, ::isupper) || !pr.first || httpVer != HTTP_VERSION)
+		goto invalid;
+	_path = pr.second;
 	{
 		int idx = 0;
 		while (idx < httpMethodCount && httpMethods[idx] != buff)
@@ -23,13 +31,10 @@ void Request::parseFirstLine(string &line) {
 		_method = (HttpMethod)pow(2, idx);
 	}
 	getline(ss, buff, '\0');
-	if (uri[0] != '/' || httpVer != HTTP_VERSION || (buff != CRLF && buff != LF))
+	if ((buff != CRLF && buff != LF))
 		goto invalid;
-	string::size_type idx;
-	idx = uri.find('?');
-	_path = uri.substr(0, idx);
-	if (idx != string::npos)
-		_query = uri.substr(idx + 1);
+	cerr << "New Path -> " << _path << endl;
+	cerr << "Query -> " << _query << endl;
 	changeState(REQ_HEADER);
 	return;
 
@@ -62,6 +67,24 @@ invalid:
 
 void Request::changeState(const int &state) {
 	_state = state;
+}
+
+bool Request::invalidPath(string &path) {
+	stack<string> components;
+	char         *component = (char *)strtok(strdup(path.c_str()), "/");
+	while (component) {
+		if (strcmp(component, ".") == 0)
+			continue;
+		else if (strcmp(component, "..") == 0) {
+			if (components.empty())
+				return false;
+			components.pop();
+		} else {
+			components.push(component);
+			component = strtok(NULL, "/");
+		}
+	}
+	return true;
 }
 
 void Request::consumeStream(istream &stream) {

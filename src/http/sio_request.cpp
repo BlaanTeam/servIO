@@ -33,8 +33,6 @@ void Request::parseFirstLine(string &line) {
 	getline(ss, buff, '\0');
 	if ((buff != CRLF && buff != LF))
 		goto invalid;
-	cerr << "New Path -> " << _path << endl;
-	cerr << "Query -> " << _query << endl;
 	changeState(REQ_HEADER);
 	return;
 
@@ -67,24 +65,6 @@ invalid:
 
 void Request::changeState(const int &state) {
 	_state = state;
-}
-
-bool Request::invalidPath(string &path) {
-	stack<string> components;
-	char         *component = (char *)strtok(strdup(path.c_str()), "/");
-	while (component) {
-		if (strcmp(component, ".") == 0)
-			continue;
-		else if (strcmp(component, "..") == 0) {
-			if (components.empty())
-				return false;
-			components.pop();
-		} else {
-			components.push(component);
-			component = strtok(NULL, "/");
-		}
-	}
-	return true;
 }
 
 void Request::consumeStream(istream &stream) {

@@ -23,8 +23,7 @@ void Request::parseFirstLine(string &line) {
 		_method = (HttpMethod)pow(2, idx);
 	}
 	getline(ss, buff, '\0');
-	if (uri[0] != '/' || httpVer != HTTP_VERSION ||
-	    buff != CRLF)
+	if (uri[0] != '/' || httpVer != HTTP_VERSION || (buff != CRLF && buff != LF))
 		goto invalid;
 	string::size_type idx;
 	idx = uri.find('?');
@@ -43,13 +42,18 @@ void Request::parseHeaders(string &line) {
 	string       key;
 	string       value;
 
-	if (line == CRLF)
+	if (line == CRLF || line == LF) {
 		return changeState(_method & (GET | TRACE | OPTIONS | HEAD) ? REQ_DONE : REQ_BODY);
+	}
 	getline(ss, key, ':');
 	getline(ss, value, '\0');
-	if (value.length() < 3 || value.substr(value.length() - 2, 2) != CRLF)
+	size_t n = 1;
+	if (value.length() > 1 && value.substr(value.length() - 2) == CRLF)
+		n = 2;
+	string tmp = value.substr(value.length() - n);
+	if (value.length() < n + 1 || (tmp != LF && tmp != CRLF))
 		goto invalid;
-	value = value.substr(0, value.length() - 2);
+	value = value.substr(0, value.length() - n);
 	_headers[key] = value;
 	return;
 invalid:
@@ -62,16 +66,26 @@ void Request::changeState(const int &state) {
 
 void Request::consumeStream(istream &stream) {
 	char chr;
+	bool empty = false;
 
 	string tmp(_line);
 
 	stream.get(chr);
-	tmp += string(1, chr);
+	tmp += strchr(CRLF, chr) && _state & REQ_INIT ? "" : string(1, chr);
 
 	while (!stream.eof()) {
-		if (tmp.find(CRLF) != string::npos) {
+		if (_state & REQ_INIT && !strchr(CRLF, chr)) {
+			if (empty) tmp += chr;
+			changeState(REQ_LINE);
+		}
+		if (_state & REQ_INIT && strchr(CRLF, chr)) {
+			stream.get(chr);
+			empty = true;
+			continue;
+		}
+		if (tmp.find(CRLF) != string::npos || tmp.find(LF) != string::npos) {
 			switch (_state) {
-			case REQ_INIT:
+			case REQ_LINE:
 				parseFirstLine(tmp);
 				break;
 			case REQ_HEADER:

@@ -34,7 +34,6 @@ void Client::handleRequest(istream &stream) {
 		stringstream ss;
 		buildResponseBody(BAD_REQUEST, ss);
 
-		_res.prepare();
 		_res.send(_connection.first, ss);
 
 		clients.purgeConnection(_connection.first);
@@ -45,7 +44,6 @@ void Client::handleRequest(istream &stream) {
 		_res.setStatusCode(200);
 		_res.setConnectionStatus(false);
 		_res.addHeader("Content-Type", mimeTypes["html"]);
-		_res.prepare();
 
 		_res.send(_connection.first, file);
 		clients.purgeConnection(_connection.first);

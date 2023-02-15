@@ -19,7 +19,7 @@
 using namespace std;
 
 class Response {
-	stringstream ss;
+	stringstream _ss;
 
 	short _statusCode;
 

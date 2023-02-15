@@ -30,12 +30,12 @@ void Response::init(void) {
 }
 
 void Response::prepare(void) {
-	ss << HTTP_VERSION << " " << to_string(_statusCode) << " " << httpStatusCodes[_statusCode] << CRLF;
+	_ss << HTTP_VERSION << " " << to_string(_statusCode) << " " << httpStatusCodes[_statusCode] << CRLF;
 
 	map<string, string>::iterator it = _headers.begin();
 
 	while (it != _headers.end()) {
-		ss << it->first << ": " << it->second << CRLF;
+		_ss << it->first << ": " << it->second << CRLF;
 		it++;
 	}
 }
@@ -63,7 +63,7 @@ void Response::send(const sockfd &fd, iostream &stream, bool chunked) {
 	stream.seekg(seek);
 
 	prepare();
-	::send(fd, ss.str().c_str(), ss.str().size(), 0);
+	::send(fd, _ss.str().c_str(), _ss.str().size(), 0);
 	::send(fd, CRLF, 2, 0);
 
 	while (stream) {

@@ -21,6 +21,7 @@ using namespace std;
 class Response {
 	stringstream _ss;
 
+	short _state;
 	short _statusCode;
 
 	map<string, string> _headers;

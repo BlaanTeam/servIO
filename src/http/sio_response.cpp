@@ -3,6 +3,7 @@
 Response::Response() {
 	init();
 	_keepAlive = true;
+	_state = RES_INIT;
 }
 
 Response::Response(const short &statusCode, const string &contentType, bool keepAlive) {
@@ -18,6 +19,7 @@ Response::Response(const Response &copy) {
 
 Response &Response::operator=(const Response &rhs) {
 	(void)rhs;
+	_state = RES_INIT;
 	return *this;
 }
 
@@ -51,6 +53,7 @@ void Response::setConnectionStatus(bool keepAlive) {
 }
 
 void Response::addHeader(const string &name, const string &value) {
+	_state = RES_HEADER;
 	_headers[name] = value;
 }
 
@@ -66,6 +69,10 @@ void Response::send(const sockfd &fd, iostream &stream, bool chunked) {
 	::send(fd, _ss.str().c_str(), _ss.str().size(), 0);
 	::send(fd, CRLF, 2, 0);
 
+	if ((_statusCode / 100) == 1 || _statusCode == 204 || _statusCode == 301) {
+		_state = RES_DONE;
+		return;
+	}
 	while (stream) {
 		char buff[(1 << 10) + 1] = {0};
 		stream.read(buff, (1 << 10));

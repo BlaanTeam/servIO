@@ -63,7 +63,7 @@ int ClientMap::purgeConnection(const sockfd &fd) {
 	iterator it = find(fd);
 	if (it != end()) {
 		_pfds->remove(fd);
-		erase(it);
+		erase(it);	
 		close(fd);
 		return 1;
 	}

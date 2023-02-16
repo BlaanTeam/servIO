@@ -9,6 +9,7 @@
 
 #include "./sio_http_codes.hpp"
 #include "utility/sio_helpers.hpp"
+#include "utility/sio_utils.hpp"
 
 using namespace std;
 
@@ -19,16 +20,31 @@ using namespace std;
 #define REQ_DONE (1 << 4)
 #define REQ_INVALID (1 << 5)
 
+#define BODY_INIT (1 << 0)
+#define BODY_OPEN (1 << 1)
+#define NORMAL_BODY (1 << 2)
+#define CHUNKED_BODY (1 << 3)
+#define LENGTHED_BODY (1 << 4)
+#define BODY_READ (CHUNKED_BODY | NORMAL_BODY | LENGTHED_BODY)
+#define BODY_DONE (1 << 5)
+
 class Request {
 	short _state;
+	short _statusCode;
 
 	HttpMethod _method;
 	string     _path;
 	string     _query;
 	string     _line;
-	// ofstream   _bodyFile;
+	ofstream   _bodyFile;
+	short      _bodyState;
+	size_t     _contentLength;
+	size_t     _content;
 
 	map<string, string> _headers;
+
+   public:
+	typedef map<string, string>::iterator headerIter;
 
    private:
 	void parseFirstLine(string &line);
@@ -41,7 +57,7 @@ class Request {
 	Request();
 	Request(const Request &copy);
 	Request &operator=(const Request &rhs);
-	void consumeStream(istream &stream);
+	void     consumeStream(istream &stream);
 
 	// Getters
 	string getPath(void) const;

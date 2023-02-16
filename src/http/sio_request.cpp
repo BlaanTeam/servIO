@@ -3,11 +3,16 @@
 Request::Request() {
 	_state = REQ_INIT;
 	_method = UNKNOWN;
+	_bodyState = BODY_INIT;
+	_statusCode = BAD_REQUEST;
+	_content = 0;
 }
 
 Request::Request(const Request &copy) {
 	*this = copy;
 }
+
+// TODO: add Request destructor to close _bodyFile
 
 Request &Request::operator=(const Request &rhs) {
 	(void)rhs;
@@ -62,6 +67,8 @@ void Request::parseHeaders(string &line) {
 	size_t n = 1;
 	if (value.length() > 1 && value.substr(value.length() - 2) == CRLF)
 		n = 2;
+	if (!value.length())
+		return;
 	string tmp = value.substr(value.length() - n);
 	if (value.length() < n + 1 || (tmp != LF && tmp != CRLF))
 		goto invalid;
@@ -73,7 +80,54 @@ invalid:
 }
 
 void Request::parseBody(istream &stream) {
-	(void)stream;
+	if (_bodyState & BODY_INIT) {
+		_bodyFile.open("/tmp/.servio_" + to_string(getmstime()) + "_body.io");
+		_bodyState = BODY_OPEN;
+	}
+	if (_bodyState & BODY_OPEN) {
+		headerIter it = _headers.find("Transfer-Encoding");
+		if (it != _headers.end()) {
+			stringstream ss(it->second);
+			string       part;
+
+			while (getline(ss, part, ',')) {
+				trim(part);
+				if (iequalString(part, "Chunked")) {
+					_bodyState = CHUNKED_BODY;
+					break;
+				}
+			}
+		}
+		it = _headers.find("Content-Length");
+		if (it != _headers.end() && _bodyState != CHUNKED_BODY) {
+			trim(it->second);
+			if (it->second.length() > 0 && it->second[0] >= '1' && it->second[0] <= '9' && every(it->second, ::isdigit))
+				_contentLength = stoi(it->second), _bodyState = LENGTHED_BODY;
+		}
+		_bodyState = _bodyState & BODY_OPEN ? NORMAL_BODY : _bodyState;
+	}
+	if (_bodyState & BODY_READ) {
+		char buff[1024] = {0};
+		switch (_bodyState) {
+		case CHUNKED_BODY:
+			cerr << "Chunked Request !" << endl;
+			stream.read(buff, 1024);
+			_bodyFile.write(buff, stream.gcount());
+			break;
+		case LENGTHED_BODY:
+			cerr << "Request With Content-Length: " << _contentLength << endl;
+			stream.read(buff, _contentLength);
+			_bodyFile.write(buff, stream.gcount());
+			break;
+		default:
+			cerr << "Request Without Content-Length !" << endl;
+			stream.read(buff, 1024);
+			_content += stream.gcount();
+			_bodyFile.write(buff, stream.gcount());
+			_bodyFile.flush();
+			break;
+		}
+	}
 }
 
 void Request::changeState(const int &state) {
@@ -90,6 +144,12 @@ void Request::consumeStream(istream &stream) {
 	tmp += strchr(CRLF, chr) && _state & REQ_INIT ? "" : string(1, chr);
 
 	while (!stream.eof()) {
+		if (_state & REQ_BODY) {
+			int seek = stream.tellg();
+			stream.seekg(seek - 1);
+			parseBody(stream);
+		}
+
 		if (_state & REQ_INIT && !strchr(CRLF, chr)) {
 			if (empty) tmp += chr;
 			changeState(REQ_LINE);
@@ -106,9 +166,6 @@ void Request::consumeStream(istream &stream) {
 				break;
 			case REQ_HEADER:
 				parseHeaders(tmp);
-				break;
-			case REQ_BODY:
-				parseBody(stream);
 				break;
 			}
 			tmp = "";

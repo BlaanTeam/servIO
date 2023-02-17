@@ -5,8 +5,8 @@
 
 #include <unistd.h>
 
-#include <map>
 #include <iostream>
+#include <map>
 
 #include "./sio_request.hpp"
 #include "./sio_response.hpp"
@@ -29,7 +29,7 @@ class Client {
 	// Getters
 	bool timedOut() const;
 
-	void handleRequest(istream &stream);
+	void handleRequest(stringstream &stream);
 };
 
 class ClientMap : public map<sockfd, Client> {

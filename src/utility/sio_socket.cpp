@@ -62,7 +62,7 @@ sockaddr  Address::getSockAddr(void) const {
     else if (_ss_family == AF_INET6)
         ((sockaddr_in6 *)&sa)->sin6_port = htons(_port);
 
-    inet_pton(_ss_family, _host.c_str(), get_in_addr(&sa)); // Todo: change it.
+    inet_pton(_ss_family, _host.c_str(), get_in_addr(&sa));  // Todo: change it.
 
     return sa;
 }

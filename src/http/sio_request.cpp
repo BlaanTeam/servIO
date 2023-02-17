@@ -79,7 +79,7 @@ invalid:
 	changeState(REQ_INVALID);
 }
 
-void Request::parseBody(istream &stream) {
+void Request::parseBody(stringstream &stream) {
 	if (_bodyState & BODY_INIT) {
 		_bodyFile.open("/tmp/.servio_" + to_string(getmstime()) + "_body.io");
 		_bodyState = BODY_OPEN;
@@ -134,7 +134,7 @@ void Request::changeState(const int &state) {
 	_state = state;
 }
 
-void Request::consumeStream(istream &stream) {
+void Request::consumeStream(stringstream &stream) {
 	char chr;
 	bool empty = false;
 

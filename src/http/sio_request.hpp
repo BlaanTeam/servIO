@@ -49,7 +49,7 @@ class Request {
    private:
 	void parseFirstLine(string &line);
 	void parseHeaders(string &line);
-	void parseBody(istream &stream);
+	void parseBody(stringstream &stream);
 
 	void changeState(const int &state);
 
@@ -57,7 +57,7 @@ class Request {
 	Request();
 	Request(const Request &copy);
 	Request &operator=(const Request &rhs);
-	void     consumeStream(istream &stream);
+	void     consumeStream(stringstream &stream);
 
 	// Getters
 	string getPath(void) const;

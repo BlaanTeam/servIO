@@ -79,10 +79,14 @@ void servio_init(const int &ac, char *const *av) {
 				int  nbyte = recv(it->fd, stream, (1 << 0xA), 0);
 				if (nbyte != -1) {
 					stream[nbyte] = 0x0;
-					istringstream iss(stream);
+					stringstream ss;
+					ss.write(stream, nbyte);
 					clients[it->fd].setTime(getmstime());
-					clients[it->fd].handleRequest(iss);
+					clients[it->fd].handleRequest(ss);
 				}
+			}
+			if (it->revents & POLLOUT) {
+				cerr << "POLLOUT" << endl;
 			}
 			if (it->revents & POLLHUP) {
 				cerr << "Client Disconnected !" << endl;

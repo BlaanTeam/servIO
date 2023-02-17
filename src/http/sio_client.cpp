@@ -23,7 +23,7 @@ bool Client::timedOut(void) const {
 
 #include <fstream>
 
-void Client::handleRequest(istream &stream) {
+void Client::handleRequest(stringstream &stream) {
 	_req.consumeStream(stream);
 
 	if (!_req.valid()) {

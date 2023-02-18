@@ -36,7 +36,7 @@ class Request {
 	string     _path;
 	string     _query;
 	string     _line;
-	ofstream   _bodyFile;
+	FILE       *_bodyFile;
 	short      _bodyState;
 	size_t     _contentLength;
 	size_t     _content;

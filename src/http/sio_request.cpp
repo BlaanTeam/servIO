@@ -6,6 +6,7 @@ Request::Request() {
 	_bodyState = BODY_INIT;
 	_statusCode = BAD_REQUEST;
 	_content = 0;
+	_bodyFile = nullptr;
 }
 
 Request::Request(const Request &copy) {
@@ -81,7 +82,8 @@ invalid:
 
 void Request::parseBody(stringstream &stream) {
 	if (_bodyState & BODY_INIT) {
-		_bodyFile.open("/tmp/.servio_" + to_string(getmstime()) + "_body.io");
+		_bodyFile = fopen(("/tmp/.servio_" + to_string(getmstime()) + "_body.io").c_str(), "w+");
+		// TODO: check if the file opened !
 		_bodyState = BODY_OPEN;
 	}
 	if (_bodyState & BODY_OPEN) {
@@ -112,21 +114,21 @@ void Request::parseBody(stringstream &stream) {
 		case CHUNKED_BODY:
 			cerr << "Chunked Request !" << endl;
 			stream.read(buff, 1024);
-			_bodyFile.write(buff, stream.gcount());
+			fwrite(buff, 1, stream.gcount(), _bodyFile);
 			break;
 		case LENGTHED_BODY:
 			cerr << "Request With Content-Length: " << _contentLength << endl;
 			stream.read(buff, _contentLength);
-			_bodyFile.write(buff, stream.gcount());
+			fwrite(buff, 1, stream.gcount(), _bodyFile);
 			break;
 		default:
 			cerr << "Request Without Content-Length !" << endl;
 			stream.read(buff, 1024);
 			_content += stream.gcount();
-			_bodyFile.write(buff, stream.gcount());
-			_bodyFile.flush();
+			fwrite(buff, 1, stream.gcount(), _bodyFile);
 			break;
 		}
+		fflush(_bodyFile);
 	}
 }
 

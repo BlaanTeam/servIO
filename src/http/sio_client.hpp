@@ -14,6 +14,7 @@
 using namespace std;
 
 class Client {
+	pollfd               *_pfd;
 	pair<sockfd, Address> _connection;
 	long long             _time;
 	Request               _req;
@@ -25,6 +26,7 @@ class Client {
 
 	// Setters
 	void setTime(const long long &time);
+	void setPollFd(const sockfd &fd, PollFd &pfd);
 
 	// Getters
 	bool timedOut() const;

@@ -36,6 +36,7 @@ static void initListeningSockets(const set<Address> &addrs, vector<Socket> &sock
 
 void servio_init(const int &ac, char *const *av) {
 	Config config;
+	char   stream[(1 << 0xA) + 1];
 
 	if (!parse_options(ac, av, config))
 		return;
@@ -75,13 +76,12 @@ void servio_init(const int &ac, char *const *av) {
 				tmp.add(newConnection.first, POLLIN);
 				clients[newConnection.first] = Client(newConnection);
 			} else if (it->revents & POLLIN) {
-				char stream[(1 << 0xA) + 1];
-				int  nbyte = recv(it->fd, stream, (1 << 0xA), 0);
+				int nbyte = recv(it->fd, stream, (1 << 0xA), 0);
 				if (nbyte != -1) {
-					stream[nbyte] = 0x0;
 					stringstream ss;
 					ss.write(stream, nbyte);
 					clients[it->fd].setTime(getmstime());
+					clients[it->fd].setPollFd(it->fd, tmp);
 					clients[it->fd].handleRequest(ss);
 				}
 			}

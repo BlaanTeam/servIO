@@ -40,7 +40,8 @@ void Client::handleRequest(stringstream &stream) {
 		stringstream ss;
 		buildResponseBody(BAD_REQUEST, ss);
 
-		_res.send(_connection.first, ss);
+		_res.setStream(&ss);
+		_res.send(_connection.first);
 
 		clients.purgeConnection(_connection.first);
 	} else if (_req.getState() & REQ_DONE) {
@@ -48,10 +49,9 @@ void Client::handleRequest(stringstream &stream) {
 		fstream file("html/index.html");
 
 		_res.setStatusCode(200);
-		_res.setConnectionStatus(false);
 		_res.addHeader("Content-Type", mimeTypes["html"]);
-
-		_res.send(_connection.first, file);
+		_res.setStream(&file);
+		_res.send(_connection.first);
 		clients.purgeConnection(_connection.first);
 		// Example End !
 	}

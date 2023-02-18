@@ -3,32 +3,42 @@
 Response::Response() {
 	init();
 	_keepAlive = true;
-	_state = RES_INIT;
+	_stream = nullptr;
+	_type = LENGTHED_RES;
 }
 
 Response::Response(const short &statusCode, const string &contentType, bool keepAlive) {
-	init();
-	addHeader("Content-Type", contentType);
 	_statusCode = statusCode;
 	_keepAlive = keepAlive;
+	_stream = nullptr;
+	_type = LENGTHED_RES;
+
+	init(contentType);
 }
 
 Response::Response(const Response &copy) {
-	(void)copy;
+	setState(RES_INIT);
+	_stream = nullptr;
+	*this = copy;
 }
 
 Response &Response::operator=(const Response &rhs) {
-	(void)rhs;
-	_state = RES_INIT;
+	if (this != &rhs) {
+		_keepAlive = rhs._keepAlive;
+		_stream = rhs._stream;
+		_state = rhs._state;
+		_type = rhs._type;
+		_headers = rhs._headers;
+	}
 	return *this;
 }
 
-void Response::init(void) {
+void Response::init(const string &contentType) {
 	// !INFO: for security reason we should hide this header in some cases !
 	addHeader("Server", NAME "/" VERSION);
 	addHeader("Date", getUTCDate());
 	addHeader("Connection", _keepAlive ? "keep-alive" : "close");
-	addHeader("Content-Type", DEFAULT_MIME_TYPE);
+	addHeader("Content-Type", contentType);
 }
 
 void Response::prepare(void) {
@@ -48,34 +58,54 @@ void Response::setStatusCode(const short &statusCode) {
 	_statusCode = statusCode;
 }
 
+void Response::setState(const int &state) {
+	_state = state;
+}
+
+void Response::setStream(iostream *stream) {
+	_stream = stream;
+}
+
 void Response::setConnectionStatus(bool keepAlive) {
 	_keepAlive = keepAlive;
 }
 
 void Response::addHeader(const string &name, const string &value) {
-	_state = RES_HEADER;
+	if (_state & RES_DONE)
+		return;
 	_headers[name] = value;
+	setState(RES_HEADER);
 }
 
-void Response::send(const sockfd &fd, iostream &stream, bool chunked) {
-	(void)chunked;  // TODO: add logic for chunked responses !
+void Response::send(const sockfd &fd) {
+	(void)fd;
 
-	int seek = stream.tellg();
-	stream.seekg(0, stream.end);
-	addHeader("Content-Length", to_string(stream.tellg()));
-	stream.seekg(seek);
-
-	prepare();
-	::send(fd, _ss.str().c_str(), _ss.str().size(), 0);
-	::send(fd, CRLF, 2, 0);
-
-	if ((_statusCode / 100) == 1 || _statusCode == 204 || _statusCode == 301) {
-		_state = RES_DONE;
-		return;
+	if (_state & (RES_INIT | RES_HEADER) && _type == LENGTHED_RES && _stream) {
+		int seek = _stream->tellg();
+		_stream->seekg(0, _stream->end);
+		addHeader("Content-Type", to_string(_stream->tellg()));
+		_stream->seekg(seek);
+		prepare();
+		::send(fd, _ss.str().c_str(), _ss.str().size(), 0);
+		::send(fd, CRLF, 2, 0);
+		setState(RES_BODY);
 	}
-	while (stream) {
-		char buff[(1 << 10) + 1] = {0};
-		stream.read(buff, (1 << 10));
-		::send(fd, buff, stream.gcount(), 0);
+
+	if ((_statusCode / 100) == 1 || _statusCode == 204 || _statusCode == 301)
+		return setState(RES_DONE);
+
+	if (_state & RES_BODY && _stream) {
+		switch (_type) {
+		case LENGTHED_RES:
+			char buff[(1 << 10)];
+			_stream->read(buff, (1 << 10));
+			::send(fd, buff, _stream->gcount(), 0);
+			setState(_stream->eof() ? RES_DONE : _state);
+			break;
+		case CHUNKED_RES:
+			break;
+		case RANGED_RES:
+			break;
+		}
 	}
 }

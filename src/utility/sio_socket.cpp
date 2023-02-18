@@ -124,11 +124,11 @@ pair<int, Address> Socket::accept(void) {
 PollFd::PollFd() {
 }
 
-class PollFd::IsExists {
+class PollFd::FindPollFd {
 	sockfd _fd;
 
    public:
-	IsExists(const sockfd &fd) : _fd(fd){};
+	FindPollFd(const sockfd &fd) : _fd(fd){};
 	bool operator()(const pollfd &pfd) {
 		return pfd.fd == _fd;
 	}
@@ -140,11 +140,15 @@ void PollFd::add(const sockfd &fd, const short &events) {
 }
 
 void PollFd::remove(const sockfd &fd) {
-	vector<pollfd>::iterator it = find_if(begin(), end(), IsExists(fd));
+	vector<pollfd>::iterator it = get(fd);
 
 	if (it != end()) {
 		erase(it);
 	}
+}
+
+PollFd::iterator PollFd::get(const sockfd &fd) {
+	return find_if(begin(), end(), FindPollFd(fd));
 }
 
 int PollFd::poll(const int &timeout) {

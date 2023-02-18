@@ -70,7 +70,7 @@ class Socket {
 };
 
 class PollFd : public vector<pollfd> {
-	class IsExists;
+	class FindPollFd;
 
    public:
 	PollFd();
@@ -78,6 +78,8 @@ class PollFd : public vector<pollfd> {
 	void remove(const sockfd &fd);
 
 	int poll(const int &timeout);
+
+	iterator get(const sockfd&fd);
 };
 
 #endif

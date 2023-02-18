@@ -37,3 +37,6 @@
 servio
 
 # End of https://www.toptal.com/developers/gitignore/api/c++
+
+# ignore prefixed files with ign_*
+ign_*

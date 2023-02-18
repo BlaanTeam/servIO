@@ -1,12 +1,86 @@
 #include "sio_request.hpp"
+Body::Body() {
+	_bodyState = BODY_INIT;
+	_contentLength = 0;
+	_content = 0;
+	_bodyFile = nullptr;
+}
+
+Body::Body(const Body &copy) {
+	*this = copy;
+}
+
+Body &Body::operator=(const Body &rhs) {
+	(void)rhs;
+	return *this;
+}
+
+void Body::setState(const int &state) {
+	_bodyState = state;
+}
+
+void Body::chooseState(map<string, string> &headers) {
+	map<string, string>::iterator it = headers.find("Transfer-Encoding");
+	if (it != headers.end()) {
+		stringstream ss(it->second);
+		string       part;
+
+		while (getline(ss, part, ',')) {
+			trim(part);
+			if (iequalString(part, "Chunked")) {
+				setState(CHUNKED_BODY);
+				break;
+			}
+		}
+	} else if ((it = headers.find("Content-Length")) != headers.end() && _bodyState != CHUNKED_BODY) {
+		trim(it->second);
+		if (it->second.length() > 0 && it->second[0] >= '1' && it->second[0] <= '9' && every(it->second, ::isdigit))
+			_contentLength = atoi(it->second.c_str()), setState(LENGTHED_BODY);
+	} else
+		setState(NORMAL_BODY);
+}
+
+void Body::consumeBody(istream &stream, Request &req) {
+
+	if (_bodyState & BODY_INIT) {
+		_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
+		_bodyFile = fopen(_filename.c_str(), "w+");
+		// TODO: check if the file openned successfully	 !!
+		chooseState(req.getHeaders());
+		cout << "Body State: " << _bodyState << endl;
+	}
+	if (_bodyState & BODY_READ) {
+		char buff[1024] = {0};
+		switch (_bodyState) {
+		case CHUNKED_BODY:
+			cerr << "Chunked Request !" << endl;
+			stream.read(buff, 1024);
+			fwrite(buff, 1, stream.gcount(), _bodyFile);
+			break;
+		case LENGTHED_BODY:
+			cerr << "Request With Content-Length: " << _contentLength << endl;
+			stream.read(buff, _contentLength);
+			fwrite(buff, 1, stream.gcount(), _bodyFile);
+			break;
+		default:
+			cerr << "Request Without Content-Length !" << endl;
+			stream.read(buff, 1024);
+			_content += stream.gcount();
+			fwrite(buff, 1, stream.gcount(), _bodyFile);
+			break;
+		}
+		fflush(_bodyFile);
+	}
+}
+
+Body::~Body() {
+	fclose(_bodyFile); // TODO: TBD !!
+}
 
 Request::Request() {
 	_state = REQ_INIT;
 	_method = UNKNOWN;
-	_bodyState = BODY_INIT;
 	_statusCode = BAD_REQUEST;
-	_content = 0;
-	_bodyFile = nullptr;
 }
 
 Request::Request(const Request &copy) {
@@ -81,55 +155,7 @@ invalid:
 }
 
 void Request::parseBody(stringstream &stream) {
-	if (_bodyState & BODY_INIT) {
-		_bodyFile = fopen(("/tmp/.servio_" + to_string(getmstime()) + "_body.io").c_str(), "w+");
-		// TODO: check if the file opened !
-		_bodyState = BODY_OPEN;
-	}
-	if (_bodyState & BODY_OPEN) {
-		headerIter it = _headers.find("Transfer-Encoding");
-		if (it != _headers.end()) {
-			stringstream ss(it->second);
-			string       part;
-
-			while (getline(ss, part, ',')) {
-				trim(part);
-				if (iequalString(part, "Chunked")) {
-					_bodyState = CHUNKED_BODY;
-					break;
-				}
-			}
-		}
-		it = _headers.find("Content-Length");
-		if (it != _headers.end() && _bodyState != CHUNKED_BODY) {
-			trim(it->second);
-			if (it->second.length() > 0 && it->second[0] >= '1' && it->second[0] <= '9' && every(it->second, ::isdigit))
-				_contentLength = stoi(it->second), _bodyState = LENGTHED_BODY;
-		}
-		_bodyState = _bodyState & BODY_OPEN ? NORMAL_BODY : _bodyState;
-	}
-	if (_bodyState & BODY_READ) {
-		char buff[1024] = {0};
-		switch (_bodyState) {
-		case CHUNKED_BODY:
-			cerr << "Chunked Request !" << endl;
-			stream.read(buff, 1024);
-			fwrite(buff, 1, stream.gcount(), _bodyFile);
-			break;
-		case LENGTHED_BODY:
-			cerr << "Request With Content-Length: " << _contentLength << endl;
-			stream.read(buff, _contentLength);
-			fwrite(buff, 1, stream.gcount(), _bodyFile);
-			break;
-		default:
-			cerr << "Request Without Content-Length !" << endl;
-			stream.read(buff, 1024);
-			_content += stream.gcount();
-			fwrite(buff, 1, stream.gcount(), _bodyFile);
-			break;
-		}
-		fflush(_bodyFile);
-	}
+	_body.consumeBody(stream, *this);
 }
 
 void Request::changeState(const int &state) {
@@ -191,6 +217,10 @@ string Request::getQuery(void) const {
 
 short Request::getState(void) const {
 	return _state;
+}
+
+map<string, string> &Request::getHeaders(void) const {
+	return (map<string, string> &)_headers;
 }
 
 bool Request::valid() const {

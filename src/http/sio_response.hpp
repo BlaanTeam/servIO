@@ -19,6 +19,7 @@
 #include "./sio_mime_types.hpp"
 #include "utility/sio_socket.hpp"
 #include "utility/sio_utils.hpp"
+#include "utility/sio_helpers.hpp"
 
 using namespace std;
 
@@ -31,7 +32,7 @@ class Response {
 
 	iostream *_stream;
 
-	map<string, string> _headers;
+	map<string, string, StringICaseCompare> _headers;
 	bool                _keepAlive;
 
    public:

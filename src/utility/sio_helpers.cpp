@@ -55,3 +55,10 @@ void trim(string &value, const string &sep) {
 	ltrim(value, sep);
 	rtrim(value, sep);
 }
+
+class ICaseCompare : binary_function<string, string, bool> {
+	class NoCaseCompare;
+
+   public:
+	bool operator()(const std::string &s1, const std::string &s2) const;
+};

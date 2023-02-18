@@ -28,24 +28,22 @@ using namespace std;
 #define BODY_READ (CHUNKED_BODY | NORMAL_BODY | LENGTHED_BODY)
 #define BODY_DONE (1 << 5)
 
-
-
 class Request;
 
 class Body {
-	FILE	*_bodyFile;
+	FILE *_bodyFile;
 
-	short    _bodyState;
-	size_t   _contentLength;
-	size_t   _content;
-	string  _filename;
+	short  _bodyState;
+	size_t _contentLength;
+	size_t _content;
+	string _filename;
 
    public:
 	Body();
 	Body(const Body &copy);
 	Body &operator=(const Body &rhs);
 	~Body();
-	void chooseState(map<string, string> &headers);
+	void chooseState(map<string, string, StringICaseCompare> &headers);
 	void setState(const int &state);
 	void consumeBody(istream &stream, Request &req);
 };
@@ -59,11 +57,11 @@ class Request : public Body {
 	string     _query;
 	string     _line;
 
-	map<string, string> _headers;
-	Body                _body;
+	map<string, string, StringICaseCompare> _headers;
+	Body                                    _body;
 
    public:
-	typedef map<string, string>::iterator headerIter;
+	typedef map<string, string, StringICaseCompare>::iterator headerIter;
 
    private:
 	void parseFirstLine(string &line);
@@ -82,7 +80,7 @@ class Request : public Body {
 	string               getPath(void) const;
 	string               getQuery(void) const;
 	short                getState(void) const;
-	map<string, string> &getHeaders(void) const;
+	map<string, string, StringICaseCompare> &getHeaders(void) const;
 
 	bool valid() const;
 };

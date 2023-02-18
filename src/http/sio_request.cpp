@@ -19,8 +19,8 @@ void Body::setState(const int &state) {
 	_bodyState = state;
 }
 
-void Body::chooseState(map<string, string> &headers) {
-	map<string, string>::iterator it = headers.find("Transfer-Encoding");
+void Body::chooseState(map<string, string, StringICaseCompare> &headers) {
+	map<string, string, StringICaseCompare>::iterator it = headers.find("Transfer-Encoding");
 	if (it != headers.end()) {
 		stringstream ss(it->second);
 		string       part;
@@ -41,7 +41,6 @@ void Body::chooseState(map<string, string> &headers) {
 }
 
 void Body::consumeBody(istream &stream, Request &req) {
-
 	if (_bodyState & BODY_INIT) {
 		_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
 		_bodyFile = fopen(_filename.c_str(), "w+");
@@ -74,7 +73,7 @@ void Body::consumeBody(istream &stream, Request &req) {
 }
 
 Body::~Body() {
-	fclose(_bodyFile); // TODO: TBD !!
+	fclose(_bodyFile);  // TODO: TBD !!
 }
 
 Request::Request() {
@@ -219,8 +218,8 @@ short Request::getState(void) const {
 	return _state;
 }
 
-map<string, string> &Request::getHeaders(void) const {
-	return (map<string, string> &)_headers;
+map<string, string, StringICaseCompare> &Request::getHeaders(void) const {
+	return (map<string, string, StringICaseCompare> &)_headers;
 }
 
 bool Request::valid() const {

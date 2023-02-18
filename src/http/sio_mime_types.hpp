@@ -4,12 +4,14 @@
 #include <map>
 #include <string>
 
+#include "utility/sio_helpers.hpp"
+
 #define DEFAULT_MIME_TYPE "text/plain"
 
 using namespace std;
 
-class MimeType : public map<string, const char *> {
-	typedef map<string, const char *> Base;
+class MimeType : public map<string, const char *, StringICaseCompare> {
+	typedef map<string, const char *, StringICaseCompare> Base;
 
    public:
 	MimeType();

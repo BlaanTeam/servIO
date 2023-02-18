@@ -18,7 +18,7 @@ static void label(MainContext *main, int &id, ostream &stream) {
 	}
 	stream << "</b></td> </tr>";
 
-	map<string, vector<string> >::iterator it = main->directives().begin();
+	map<string, vector<string>, StringICaseCompare>::iterator it = main->directives().begin();
 
 	while (it != main->directives().end()) {
 		stream << "<tr><td align=\"left\">" << it->first << "</td>";

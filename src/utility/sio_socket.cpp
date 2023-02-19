@@ -1,7 +1,7 @@
 
 #include "sio_socket.hpp"
 
-static void *get_in_addr(struct sockaddr *sa) {
+static void *getAddr(struct sockaddr *sa) {
 	if (sa->sa_family == AF_INET) {
 		return &(((struct sockaddr_in *)sa)->sin_addr);
 	}
@@ -11,9 +11,9 @@ static void *get_in_addr(struct sockaddr *sa) {
 
 // Address
 
-Address::Address() {}
+Address::Address() : _good(true) {}
 
-Address::Address(const sockfd &fd) {
+Address::Address(const sockfd &fd) : _good(true) {
 	sockaddr  sa;
 	socklen_t len = sizeof(sockaddr_storage);
 
@@ -21,14 +21,41 @@ Address::Address(const sockfd &fd) {
 	*this = Address(sa, len);
 }
 
-Address::Address(const string &host, const in_port_t &port) : _host(host), _port(port), _ss_family(AF_INET) {}
+Address::Address(const string &host, const in_port_t &port, const string &serverName) : _host(host), _port(port), _serverName(serverName), _ss_family(AF_INET), _good(true) {
+	addrinfo hints, *ret = nullptr;
 
-Address::Address(sockaddr sa, const socklen_t &len) {
+	bzero(&hints, sizeof hints);
+	hints.ai_family = _ss_family;
+
+	sockaddr_in sin;
+
+	bzero(&sin, sizeof sin);
+	sin.sin_family = _ss_family;
+
+	if (inet_pton(_ss_family, host.c_str(), &sin.sin_addr) <= 0) {
+		if (!getaddrinfo(host.c_str(), "HTTP", &hints, &ret)) {
+			*this = Address(*ret->ai_addr, ret->ai_addrlen);
+			freeaddrinfo(ret);
+			setServerName(serverName);
+			return;
+		}
+		goto invalid;
+	}
+
+	*this = Address(*(sockaddr *)&sin, sizeof(sockaddr_in));
+	setServerName(serverName);
+
+	return;
+invalid:
+	_good = false;
+}
+
+Address::Address(sockaddr sa, const socklen_t &len) : _good(true) {
 	char buff[INET6_ADDRSTRLEN];
 
 	_ss_family = sa.sa_family;
 
-	inet_ntop(sa.sa_family, (const sockaddr *)get_in_addr(&sa), buff, len);  // Todo: change it.
+	inet_ntop(sa.sa_family, (const sockaddr *)getAddr(&sa), buff, len);  // Todo: change it.
 
 	_host = string(buff);
 	_port = ntohs(((sockaddr_in *)&sa)->sin_port);
@@ -42,9 +69,12 @@ ostream &operator<<(ostream &stream, const Address &addr) {
 }
 
 // Address Setters
-
+//! TODO: TO BE DELETED
 void Address::setHost(const string &host) { _host = host; }
 void Address::setPort(const short &port) { _port = port; }
+void Address::setServerName(const string &serverName) {
+	_serverName = serverName;
+}
 
 // Address Getters
 string    Address::getHost(void) const { return _host; }
@@ -62,12 +92,16 @@ sockaddr  Address::getSockAddr(void) const {
     else if (_ss_family == AF_INET6)
         ((sockaddr_in6 *)&sa)->sin6_port = htons(_port);
 
-    inet_pton(_ss_family, _host.c_str(), get_in_addr(&sa));  // Todo: change it.
+    inet_pton(_ss_family, _host.c_str(), getAddr(&sa));  // Todo: change it.
 
     return sa;
 }
 
 socklen_t Address::getSockLen(void) const { return _ss_family == AF_INET ? sizeof(sockaddr_in) : sizeof(sockaddr_in6); }
+
+bool Address::good() const {
+	return _good;
+}
 
 // Address operator overloading
 

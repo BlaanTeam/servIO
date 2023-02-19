@@ -26,17 +26,21 @@ using namespace std;
 class Address {
 	string    _host;
 	in_port_t _port;
+	string    _serverName;
 	short     _ss_family;
+
+	bool _good;
 
    public:
 	Address();
 	Address(const sockfd &fd);
-	Address(const string &host, const in_port_t &port);
+	Address(const string &host, const in_port_t &port, const string &serverName = "_");
 	Address(sockaddr addr, const socklen_t &len);
 
 	// setters
 	void setHost(const string &host);
 	void setPort(const short &port);
+	void setServerName(const string &serverName);
 
 	// operator overloading
 	bool operator<(const Address &rhs) const;
@@ -46,6 +50,7 @@ class Address {
 	in_port_t getPort(void) const;
 	sockaddr  getSockAddr(void) const;
 	socklen_t getSockLen(void) const;
+	bool      good() const;
 
 	~Address();
 };
@@ -79,7 +84,7 @@ class PollFd : public vector<pollfd> {
 
 	int poll(const int &timeout);
 
-	iterator get(const sockfd&fd);
+	iterator get(const sockfd &fd);
 };
 
 #endif

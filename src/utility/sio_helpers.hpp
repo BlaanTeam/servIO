@@ -18,17 +18,10 @@ void rtrim(string &value, const string &sep = " ");
 void trim(string &value, const string &sep = " ");
 
 class StringICaseCompare : binary_function<string, string, bool> {
-	class CharICaseCompare : public binary_function<unsigned char, unsigned char, bool> {
-	   public:
-		bool operator()(const unsigned char &c1, const unsigned char &c2) const {
-			return ::tolower(c1) < ::tolower(c2);
-		}
-	};
+	class CharICaseCompare;
 
    public:
-	bool operator()(const std::string &s1, const std::string &s2) const {
-		return lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end(), CharICaseCompare());
-	}
+	bool operator()(const std::string &s1, const std::string &s2) const;
 };
 
 #endif

@@ -41,7 +41,7 @@ Address::Address(const string &host, const int &port, const string &serverName) 
 	sin.sin_port = htons(_port);
 
 	if (inet_pton(_ss_family, host.c_str(), &sin.sin_addr) <= 0) {
-		if (!getaddrinfo(host.c_str(), "HTTP", &hints, &ret)) {
+		if (!getaddrinfo(host.c_str(), "http", &hints, &ret)) {
 			*this = Address(*ret->ai_addr, ret->ai_addrlen);
 			freeaddrinfo(ret);
 			setServerName(serverName);
@@ -76,7 +76,7 @@ ostream &operator<<(ostream &stream, const Address &addr) {
 }
 
 // Address Setters
-//! TODO: TO BE DELETED
+
 void Address::setHost(const string &host) { _host = host; }
 void Address::setPort(const short &port) { _port = port; }
 void Address::setServerName(const string &serverName) {

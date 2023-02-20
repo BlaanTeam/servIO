@@ -34,22 +34,27 @@ static void initListeningSockets(const set<Address> &addrs, vector<Socket> &sock
 	}
 }
 
+static set<Address> getVirtualServers(MainContext<Type> *main) {
+	set<Address> addrs;
+
+	if (!main)
+		return addrs;
+
+	for (size_t idx = 0; idx < main->contexts().size(); idx++) {
+		addrs.insert(*main->contexts()[idx]->directives()["listen"].addr);
+	}
+
+	return addrs;
+}
+
 void servio_init(const int &ac, char *const *av) {
 	Config config;
 	char   stream[(1 << 0xA) + 1];
 
-	if (!parse_options(ac, av, config))
+	if (!parse_options(ac, av, config) || !config.syntaxOnly())
 		return;
 
-	// TODO: uncomment the above line!
-	// config.syntaxOnly();
-
-	// TODO: load the addresses from the config!
-	set<Address> addrs;
-
-	addrs.insert(Address("0.0.0.0", 80));
-	addrs.insert(Address("0.0.0.0", 443));
-	addrs.insert(Address("127.0.0.1", 4040));
+	set<Address> addrs = getVirtualServers(config.ast());
 
 	vector<Socket> sockets(addrs.size());
 	PollFd         pfds;

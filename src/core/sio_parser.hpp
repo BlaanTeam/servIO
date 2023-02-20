@@ -1,8 +1,9 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
-#include "./sio_ast.hpp"
-#include "./sio_lexer.hpp"
+#include "sio_ast.hpp"
+#include "sio_http_codes.hpp"
+#include "sio_lexer.hpp"
 
 class Parser {
 	string _serr;
@@ -14,21 +15,24 @@ class Parser {
 	const Token &current();
 	bool         accept(int type, const string &value = "");
 	bool         expect(int type, const string &value = "");
+	bool         updateDirectives(MainContext<vector<string> > *tree,
+	                              MainContext<vector<string> > *parent = nullptr);
 
 	Directive *parse_directive(Directive *_dir = nullptr);
 	Directive *parse_http_dir(Directive *_dir = nullptr);
 	Directive *parse_server_dir();
 	Directive *parse_location_dir();
 
-	MainContext *parse_location();
-	MainContext *parse_server();
-	MainContext *parse_main();
-	MainContext *updateDirectives(MainContext *tree, MainContext *parent = nullptr);
+	MainContext<vector<string> > *parse_location();
+	MainContext<vector<string> > *parse_server();
+	MainContext<vector<string> > *parse_main();
+
+	pair<bool, MainContext<Type> *> transfer(MainContext<vector<string> > *tree);
 
    public:
 	Parser(ifstream &cfile);
-	MainContext  *parse();
-	const string &err() const;
+	MainContext<Type> *parse();
+	const string      &err() const;
 };
 
 #endif

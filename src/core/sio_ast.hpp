@@ -24,6 +24,17 @@ enum TypeList {
 	REDIR = 1 << 5,
 };
 
+struct ErrorPage {
+	string pattern, page;
+	ErrorPage(string pattern = "", string page = "");
+};
+
+struct Redirect {
+	int    code;
+	string path;
+	Redirect(int code = 301, string path = "");
+};
+
 struct Type {
 	int type;
 	union {

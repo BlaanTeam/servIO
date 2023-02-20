@@ -1,12 +1,8 @@
 #include "sio_ast.hpp"
 
-// MainContext functions
+ErrorPage::ErrorPage(string pattern, string page) : pattern(pattern), page(page){};
 
-MainContext::MainContext() {}
-
-MainContext::MainContext(const MainContext *copy) {
-	_directives = copy->_directives;
-}
+Redirect::Redirect(int code, string path) : code(code), path(path){};
 
 Type::Type() { bzero(this, sizeof(Type)); }
 

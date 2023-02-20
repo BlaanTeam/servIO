@@ -350,4 +350,102 @@ bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	return true;
 }
 
+pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
+	if (!tree)
+		return make_pair(false, nullptr);
+
+	MainContext<Type> *ret = tree->type() & httpCtx     ? (MainContext<Type> *)new HttpContext<Type>()
+	                         : tree->type() & serverCtx ? (MainContext<Type> *)new ServerContext<Type>()
+	                                                    : (MainContext<Type> *)new LocationContext<Type>();
+
+	MainContext<>::dirIter it = tree->directives().begin();
+
+	while (it != tree->directives().end()) {
+		const string         &key = it->first;
+		const vector<string> &val = it->second;
+		Type                  tp;
+
+		if (key == "allowed_methods") {
+			tp.type = INT;
+			tp.value = 0;
+			for (size_t i = 0; i < val.size(); i++) {
+				if (val[i] == "GET")
+					tp.value |= GET;
+				else if (val[i] == "POST")
+					tp.value |= POST;
+				else
+					tp.value |= DELETE;
+			}
+		}
+
+		else if (key == "client_max_body_size") {
+			tp.type = INT;
+			tp.value = stol(val[0]);
+			if (val[0].back() == 'k')
+				tp.value *= (1LL << 10);
+			else if (val[0].back() == 'm')
+				tp.value *= (1LL << 20);
+			else if (val[0].back() == 'g')
+				tp.value *= (1LL << 30);
+		}
+
+		else if (key == "autoindex") {
+			tp.type = BOOL;
+			tp.ok = (val[0] == "on");
+		}
+
+		else if (key.substr(0, 10) == "error_page") {
+			tp.type = ERRPG;
+			tp.errPage = new ErrorPage(val[0], val[1]);
+		}
+
+		else if (key == "return") {
+			tp.type = REDIR;
+			tp.redirect = new Redirect(stoi(val[0]), val.size() == 2 ? val[1] : "");
+		}
+
+		else if (key == "listen") {
+			tp.type = ADDR;
+			const string &addr = val[0];
+			int           idx = addr.size() - 1;
+			int           port = 8080;
+			string        host = "localhost";
+
+			while (idx >= 0 && isdigit(addr[idx])) {
+				idx--;
+			}
+
+			if (idx == -1 || addr[idx] == ':') {
+				if (idx + 1 != (int)addr.size()) port = stoi(addr.substr(idx + 1));
+				if (--idx >= 0) host = addr.substr(0, idx + 1);
+			} else {
+				host = addr;
+			}
+
+			tp.addr = new Address(host, port, (*tree)["server_name"][0]);
+
+			if (!tp.addr->good()) {
+				cerr << host << ' ' << port << '\n';
+				return _serr = "invalid adress: " + addr, make_pair(false, ret);
+			}
+		}
+
+		else {  // index, root, server_name
+			tp.type = STR;
+			tp.str = new string(val[0]);
+		}
+
+		(*ret)[key] = tp;
+
+		it++;
+	}
+
+	for (size_t i = 0; i < tree->contexts().size(); i++) {
+		pair<bool, MainContext<Type> *> child = transfer(tree->contexts()[i]);
+		ret->addContext(child.second);
+		if (!child.first)
+			return make_pair(false, ret);
+	}
+
+	return make_pair(true, ret);
 }

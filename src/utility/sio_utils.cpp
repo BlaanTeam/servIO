@@ -1,6 +1,6 @@
 #include "sio_utils.hpp"
 
-static void label(MainContext *main, int &id, ostream &stream) {
+static void label(MainContext<> *main, int &id, ostream &stream) {
 	if (!main) return;
 
 	stream << "\tNode" << id << "[label=<<table border=\"0\" cellborder=\"1\">";
@@ -43,7 +43,7 @@ static void edge(int from, int to, ostream &stream) {
 	       << "Node" << to << "[wieght=9]\n";
 }
 
-static int dotDfs(MainContext *main, int &id, ostream &stream) {
+static int dotDfs(MainContext<> *main, int &id, ostream &stream) {
 	int my_id = 0, i;
 
 	my_id = id++;
@@ -58,7 +58,7 @@ static int dotDfs(MainContext *main, int &id, ostream &stream) {
 	return my_id;
 }
 
-void dumpConfigDot(MainContext *main, ostream &stream) {
+void dumpConfigDot(MainContext<> *main, ostream &stream) {
 	if (!main) return;
 	int id = 0;
 	stream << "digraph {\n";

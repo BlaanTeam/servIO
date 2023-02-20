@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void dumpConfigDot(MainContext *main, ostream &stream = cout);
+void dumpConfigDot(MainContext<> *main, ostream &stream = cout);
 
 string    getUTCDate(void);
 long long getmstime(void);

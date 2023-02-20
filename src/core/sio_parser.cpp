@@ -211,20 +211,20 @@ failed:
 	return delete dir, nullptr;
 }
 
-MainContext *Parser::parse_location() {
-	MainContext *ret = new LocationContext();
+MainContext<> *Parser::parse_location() {
+	MainContext<> *ret = new LocationContext<>();
 
 	if (!expect(WORD, "location"))
 		goto failed;
 
-	((LocationContext *)ret)->setLocation(current().value());
+	((LocationContext<> *)ret)->setLocation(current().value());
 
 	if (!expect(WORD) || !expect(OCURLY))
 		goto failed;
 
 	while (current().type() & ~CCURLY) {
 		if (current().value() == "location") {
-			MainContext *p = parse_location();
+			MainContext<> *p = parse_location();
 			if (!p)
 				goto failed;
 			ret->addContext(p);
@@ -246,15 +246,18 @@ failed:
 	return delete ret, nullptr;
 }
 
-MainContext *Parser::parse_server() {
-	MainContext *ret = new ServerContext();
+MainContext<> *Parser::parse_server() {
+	MainContext<> *ret = new ServerContext<>();
 
 	if (!expect(WORD, "server") || !expect(OCURLY))
 		goto failed;
 
+	(*ret)["listen"].push_back("localhost:8080");
+	(*ret)["server_name"].push_back("_");
+
 	while (current().type() & ~CCURLY) {
 		if (current().value() == "location") {
-			MainContext *p = parse_location();
+			MainContext<> *p = parse_location();
 			if (!p)
 				goto failed;
 			ret->addContext(p);
@@ -276,15 +279,28 @@ failed:
 	return delete ret, nullptr;
 }
 
-MainContext *Parser::parse_main() {
-	MainContext *ret = new HttpContext();
+MainContext<> *Parser::parse_main() {
+	if (current().type() == _EOF) {
+		_serr = "empty config";
+		return nullptr;
+	}
+
+	MainContext<> *ret = new HttpContext<>();
 
 	if (!expect(WORD, "http") || !expect(OCURLY))
 		goto failed;
 
+	(*ret)["root"].push_back("html");
+	(*ret)["autoindex"].push_back("off");
+	(*ret)["index"].push_back("index.html");
+	(*ret)["allowed_methods"].push_back("GET");
+	(*ret)["allowed_methods"].push_back("POST");
+	(*ret)["allowed_methods"].push_back("DELETE");
+	(*ret)["client_max_body_size"].push_back("1048576");
+
 	while (current().type() & ~CCURLY) {
 		if (current().value() == "server") {
-			MainContext *p = parse_server();
+			MainContext<> *p = parse_server();
 			if (!p)
 				goto failed;
 			ret->addContext(p);

@@ -77,10 +77,12 @@ class Request : public Body {
 	void     consumeStream(stringstream &stream);
 
 	// Getters
-	string               getPath(void) const;
-	string               getQuery(void) const;
-	short                getState(void) const;
+	string                                   getPath(void) const;
+	string                                   getQuery(void) const;
+	short                                    getState(void) const;
+	HttpMethod                               getMethod(void) const;
 	map<string, string, StringICaseCompare> &getHeaders(void) const;
+	bool                                     match(const int &state) const;
 
 	bool valid() const;
 };

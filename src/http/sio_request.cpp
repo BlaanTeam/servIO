@@ -218,10 +218,18 @@ short Request::getState(void) const {
 	return _state;
 }
 
+HttpMethod Request::getMethod(void) const {
+	return _method;
+}
+
 map<string, string, StringICaseCompare> &Request::getHeaders(void) const {
 	return (map<string, string, StringICaseCompare> &)_headers;
 }
 
 bool Request::valid() const {
 	return (_state & ~REQ_INVALID);
+}
+
+bool Request::match(const int &state) const {
+	return _state & state;
 }

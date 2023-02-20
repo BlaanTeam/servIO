@@ -101,14 +101,13 @@ Parser::Directive *Parser::parse_http_dir(Parser::Directive *_dir) {
 			_serr = "client_max_body_size directive: invalid arguments!";
 			goto failed;
 		}
-		int value = 0;
+		int    value = 0;
 		size_t last;
 		stoi(dir->second[0], &last);
 		if (!isdigit(dir->second[0][0]) || value < 0 || last < (dir->second[0].size() - 1)) {
 			_serr = "client_max_body_size directive: invalid arguments!";
 			goto failed;
-		}
-		else if (last == (dir->second[0].size() - 1) && !strchr("gmkb", dir->second[0][last])) {
+		} else if (last == (dir->second[0].size() - 1) && !strchr("gmkb", dir->second[0][last])) {
 			_serr = "client_max_body_size directive: invalid arguments!";
 			goto failed;
 		}

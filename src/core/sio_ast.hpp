@@ -5,12 +5,40 @@
 #include <string>
 #include <vector>
 
+#include "sio_socket.hpp"
+
 using namespace std;
 
 enum CtxType {
 	httpCtx = 1 << 1,
 	serverCtx = 1 << 2,
 	locationCtx = 1 << 3,
+};
+
+enum TypeList {
+	INT = 1 << 0,
+	STR = 1 << 1,
+	BOOL = 1 << 2,
+	ADDR = 1 << 3,
+	ERRPG = 1 << 4,
+	REDIR = 1 << 5,
+};
+
+struct Type {
+	int type;
+	union {
+		long long  value;
+		bool       ok;
+		string    *str;
+		Address   *addr;
+		ErrorPage *errPage;
+		Redirect  *redirect;
+	};
+	Type();
+	Type(int type);;
+	Type(Type &cpy);
+	Type &operator = (Type &cpy);
+	~Type();
 };
 
 class MainContext {

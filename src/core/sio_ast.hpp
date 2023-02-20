@@ -104,29 +104,50 @@ class MainContext {
 	};
 };
 
-class HttpContext : public MainContext {
+template <class T = vector<string> >
+class HttpContext : public MainContext<T> {
    public:
-	HttpContext();
-	HttpContext(const MainContext *copy);
-	~HttpContext();
+	HttpContext() {
+		MainContext<T>::_type = httpCtx;
+	};
+
+	HttpContext(const MainContext<T> *copy)
+	    : MainContext<T>(copy) { MainContext<T>::_type = httpCtx; }
+
+	~HttpContext(){};
 };
 
-class ServerContext : public MainContext {
+template <class T = vector<string> >
+class ServerContext : public MainContext<T> {
    public:
-	ServerContext();
-	ServerContext(const MainContext *copy);
-	~ServerContext();
+	ServerContext() { MainContext<T>::_type = serverCtx; };
+
+	ServerContext(const MainContext<T> *copy)
+	    : MainContext<T>(copy) { MainContext<T>::_type = serverCtx; }
+
+	~ServerContext(){};
 };
 
-class LocationContext : public MainContext {
+template <class T = vector<string> >
+class LocationContext : public MainContext<T> {
 	string _loc;
 
    public:
-	LocationContext(const string &loc = "");
-	const string &location() const;
-	void          setLocation(const string &loc);
-	LocationContext(const MainContext *copy);
-	~LocationContext();
+	LocationContext(const string &loc = "")
+	    : _loc(loc) { MainContext<T>::_type = locationCtx; };
+
+	LocationContext(const MainContext<T> *copy)
+	    : MainContext<T>(copy) { MainContext<T>::_type = locationCtx; }
+
+	const string &location() const {
+		return _loc;
+	}
+
+	void setLocation(const string &loc) {
+		_loc = loc;
+	}
+
+	~LocationContext(){};
 };
 
 #endif

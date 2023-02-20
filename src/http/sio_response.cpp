@@ -1,10 +1,11 @@
 #include "sio_response.hpp"
 
 Response::Response() {
-	init();
 	_keepAlive = true;
 	_stream = nullptr;
 	_type = LENGTHED_RES;
+	setState(RES_INIT);
+	init();
 }
 
 Response::Response(const short &statusCode, const string &contentType, bool keepAlive) {
@@ -12,12 +13,11 @@ Response::Response(const short &statusCode, const string &contentType, bool keep
 	_keepAlive = keepAlive;
 	_stream = nullptr;
 	_type = LENGTHED_RES;
-
+	setState(RES_INIT);
 	init(contentType);
 }
 
 Response::Response(const Response &copy) {
-	setState(RES_INIT);
 	_stream = nullptr;
 	*this = copy;
 }
@@ -38,6 +38,10 @@ void Response::init(const string &contentType) {
 	addHeader("Server", NAME "/" VERSION);
 	addHeader("Date", getUTCDate());
 	addHeader("Connection", _keepAlive ? "keep-alive" : "close");
+	if (_keepAlive)
+		addHeader("Keep-Alive", "timeout=" + (to_string((int)(TIMEOUT / 1e3))));
+	else
+		_headers.erase("Keep-Alive");
 	addHeader("Content-Type", contentType);
 }
 
@@ -71,19 +75,20 @@ void Response::setConnectionStatus(bool keepAlive) {
 }
 
 void Response::addHeader(const string &name, const string &value) {
-	if (_state & RES_DONE)
+	if (_state & (RES_DONE | RES_BODY))
 		return;
 	_headers[name] = value;
 	setState(RES_HEADER);
 }
 
+// TODO: return a boolean to check if the response end
 void Response::send(const sockfd &fd) {
 	(void)fd;
 
 	if (_state & (RES_INIT | RES_HEADER) && _type == LENGTHED_RES && _stream) {
 		int seek = _stream->tellg();
 		_stream->seekg(0, _stream->end);
-		addHeader("Content-Type", to_string(_stream->tellg()));
+		addHeader("Content-Length", to_string(_stream->tellg()));
 		_stream->seekg(seek);
 		prepare();
 		::send(fd, _ss.str().c_str(), _ss.str().size(), 0);
@@ -108,4 +113,23 @@ void Response::send(const sockfd &fd) {
 			break;
 		}
 	}
+}
+
+void Response::sendError(const sockfd &fd, const int &statusCode) {
+	setStatusCode(statusCode);
+	setConnectionStatus(false);
+	init();
+	addHeader("Content-Type", mimeTypes["html"]);
+
+	buildResponseBody(statusCode, builtInResponseBody);
+	setStream(&builtInResponseBody);
+	send(fd);
+
+	builtInResponseBody.str("");
+	builtInResponseBody.clear();
+	builtInResponseBody.seekg(builtInResponseBody.beg);
+}
+
+bool Response::match(const int &state) const {
+	return _state & state;
 }

@@ -322,18 +322,32 @@ failed:
 	return delete ret, nullptr;
 }
 
-MainContext *Parser::updateDirectives(MainContext *tree, MainContext *parent) {
+bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	if (!tree)
-		return nullptr;
+		return false;
+
+	if ((tree->type() & locationCtx) && (parent->type() & locationCtx)) {
+		const string &pre = ((LocationContext<> *)parent)->location();
+		const string &str = ((LocationContext<> *)tree)->location();
+		if (str.substr(0, pre.size()) != pre)
+			return _serr = "location \"" + str + "\" is outside location \"" + pre + "\"", false;
+	}
+
 	if (parent) {
 		map<string, vector<string> > &directives = parent->directives();
-		for (map<string, vector<string> >::iterator dir = directives.begin(); dir != directives.end(); dir++) {
+		for (MainContext<>::dirIter dir = directives.begin(); dir != directives.end(); dir++) {
 			if (tree->directives().find(dir->first) == tree->directives().end()) {
 				tree->directives().insert(*dir);
 			}
 		}
 	}
-	for (size_t i = 0; i < tree->contexts().size(); i++)
-		updateDirectives(tree->contexts()[i], tree);
-	return tree;
+
+	for (size_t i = 0; i < tree->contexts().size(); i++) {
+		if (!updateDirectives(tree->contexts()[i], tree))
+			return false;
+	}
+
+	return true;
+}
+
 }

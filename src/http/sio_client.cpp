@@ -29,32 +29,44 @@ bool Client::timedOut(void) const {
 
 #include <fstream>
 
-void Client::handleRequest(stringstream &stream) {
+bool Client::handleRequest(stringstream &stream) {
 	_req.consumeStream(stream);
 
+
 	if (!_req.valid()) {
-		_res.setStatusCode(BAD_REQUEST);
-		_res.setConnectionStatus(false);
-		_res.addHeader("Content-Type", mimeTypes["html"]);
-
-		stringstream ss;
-		buildResponseBody(BAD_REQUEST, ss);
-
-		_res.setStream(&ss);
-		_res.send(_connection.first);
-
-		clients.purgeConnection(_connection.first);
-	} else if (_req.getState() & REQ_DONE) {
-		// Example Start !
-		fstream file("html/index.html");
-
-		_res.setStatusCode(200);
-		_res.addHeader("Content-Type", mimeTypes["html"]);
-		_res.setStream(&file);
-		_res.send(_connection.first);
-		clients.purgeConnection(_connection.first);
-		// Example End !
+		_res.sendError(_connection.first, BAD_REQUEST);
+		goto purgeConnection;
 	}
+	if (_req.match(REQ_BODY | REQ_DONE)) {
+		if (_req.getMethod() & UNKNOWN) {
+			_res.sendError(_connection.first, METHOD_NOT_ALLOWED);
+			goto purgeConnection;
+		}
+		
+		if (_res.match(RES_INIT | RES_HEADER)) {
+			fstream *file = new fstream("html/index.html");  // TODO : free file
+
+			_res.setStatusCode(200);
+			_res.addHeader("Content-Type", mimeTypes["html"]);
+			_res.setStream(file);
+		}
+
+		_res.send(_connection.first);
+		if (!_res.match(RES_DONE))
+			setTime(getmstime());
+	}
+	if (_res.match(RES_BODY))
+		_pfd->events |= POLLOUT;
+	else if (_res.match(RES_DONE | RES_INIT))
+		_pfd->events &= ~POLLOUT;
+
+	return false;
+purgeConnection:
+	return clients.purgeConnection(_connection.first);
+}
+
+void Client::send(const sockfd &fd) {
+	return _res.send(fd);
 }
 
 ClientMap::ClientMap() {

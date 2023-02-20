@@ -1,8 +1,6 @@
 #ifndef __CLIENT_H__
 #define __CLIENT_H__
 
-#define TIMEOUT 100000  // TODO: change it to be reasonable
-
 #include <unistd.h>
 
 #include <iostream>
@@ -31,7 +29,9 @@ class Client {
 	// Getters
 	bool timedOut() const;
 
-	void handleRequest(stringstream &stream);
+	bool handleRequest(stringstream &stream);
+
+	void send(const sockfd &fd);
 };
 
 class ClientMap : public map<sockfd, Client> {

@@ -24,17 +24,17 @@ typedef int sockfd;
 using namespace std;
 
 class Address {
-	string    _host;
-	in_port_t _port;
-	string    _serverName;
-	short     _ss_family;
+	string       _host;
+	unsigned int _port;
+	string       _serverName;
+	short        _ss_family;
 
 	bool _good;
 
    public:
 	Address();
 	Address(const sockfd &fd);
-	Address(const string &host, const in_port_t &port, const string &serverName = "_");
+	Address(const string &host, const int &port, const string &serverName = "_");
 	Address(sockaddr addr, const socklen_t &len);
 
 	// setters
@@ -47,7 +47,7 @@ class Address {
 
 	// getters
 	string    getHost(void) const;
-	in_port_t getPort(void) const;
+	int       getPort(void) const;
 	sockaddr  getSockAddr(void) const;
 	socklen_t getSockLen(void) const;
 	bool      good() const;

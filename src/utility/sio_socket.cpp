@@ -21,16 +21,24 @@ Address::Address(const sockfd &fd) : _good(true) {
 	*this = Address(sa, len);
 }
 
-Address::Address(const string &host, const in_port_t &port, const string &serverName) : _host(host), _port(port), _serverName(serverName), _ss_family(AF_INET), _good(true) {
+Address::Address(const string &host, const int &port, const string &serverName) : _host(host), _port(port), _serverName(serverName), _ss_family(AF_INET), _good(true) {
 	addrinfo hints, *ret = nullptr;
+
+	if (_port < 0 || port >= (1 << 16)) {
+		_good = false;
+		return;
+	}
 
 	bzero(&hints, sizeof hints);
 	hints.ai_family = _ss_family;
 
 	sockaddr_in sin;
 
+	sin.sin_port = htons(_port);
+
 	bzero(&sin, sizeof sin);
 	sin.sin_family = _ss_family;
+	sin.sin_port = htons(_port);
 
 	if (inet_pton(_ss_family, host.c_str(), &sin.sin_addr) <= 0) {
 		if (!getaddrinfo(host.c_str(), "HTTP", &hints, &ret)) {
@@ -44,7 +52,6 @@ Address::Address(const string &host, const in_port_t &port, const string &server
 
 	*this = Address(*(sockaddr *)&sin, sizeof(sockaddr_in));
 	setServerName(serverName);
-
 	return;
 invalid:
 	_good = false;
@@ -77,24 +84,24 @@ void Address::setServerName(const string &serverName) {
 }
 
 // Address Getters
-string    Address::getHost(void) const { return _host; }
-in_port_t Address::getPort(void) const { return _port; }
-sockaddr  Address::getSockAddr(void) const {
-    sockaddr sa;
+string   Address::getHost(void) const { return _host; }
+int      Address::getPort(void) const { return _port; }
+sockaddr Address::getSockAddr(void) const {
+	sockaddr sa;
 
-    bzero(&sa, sizeof(sockaddr));
+	bzero(&sa, sizeof(sockaddr));
 
-    sa.sa_family = _ss_family;
-    sa.sa_len = getSockLen();
+	sa.sa_family = _ss_family;
+	sa.sa_len = getSockLen();
 
-    if (_ss_family == AF_INET)
-        ((sockaddr_in *)&sa)->sin_port = htons(_port);
-    else if (_ss_family == AF_INET6)
-        ((sockaddr_in6 *)&sa)->sin6_port = htons(_port);
+	if (_ss_family == AF_INET)
+		((sockaddr_in *)&sa)->sin_port = htons(_port);
+	else if (_ss_family == AF_INET6)
+		((sockaddr_in6 *)&sa)->sin6_port = htons(_port);
 
-    inet_pton(_ss_family, _host.c_str(), getAddr(&sa));  // Todo: change it.
+	inet_pton(_ss_family, _host.c_str(), getAddr(&sa));  // Todo: change it.
 
-    return sa;
+	return sa;
 }
 
 socklen_t Address::getSockLen(void) const { return _ss_family == AF_INET ? sizeof(sockaddr_in) : sizeof(sockaddr_in6); }

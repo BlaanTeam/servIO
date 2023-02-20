@@ -82,11 +82,13 @@ void servio_init(const int &ac, char *const *av) {
 					ss.write(stream, nbyte);
 					clients[it->fd].setTime(getmstime());
 					clients[it->fd].setPollFd(it->fd, tmp);
-					clients[it->fd].handleRequest(ss);
+					if (clients[it->fd].handleRequest(ss))
+						continue;
 				}
 			}
 			if (it->revents & POLLOUT) {
 				cerr << "POLLOUT" << endl;
+				clients[it->fd].send(it->fd);
 			}
 			if (it->revents & POLLHUP) {
 				cerr << "Client Disconnected !" << endl;

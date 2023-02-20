@@ -56,9 +56,13 @@ void trim(string &value, const string &sep) {
 	rtrim(value, sep);
 }
 
-class ICaseCompare : binary_function<string, string, bool> {
-	class NoCaseCompare;
-
+class StringICaseCompare::CharICaseCompare : public binary_function<unsigned char, unsigned char, bool> {
    public:
-	bool operator()(const std::string &s1, const std::string &s2) const;
+	bool operator()(const unsigned char &c1, const unsigned char &c2) const {
+		return ::tolower(c1) < ::tolower(c2);
+	}
 };
+
+bool StringICaseCompare::operator()(const std::string &s1, const std::string &s2) const {
+	return lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end(), CharICaseCompare());
+}

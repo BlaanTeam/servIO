@@ -16,7 +16,7 @@ class Config {
 	string           _path;
 	mutable ifstream _file_stream;
 
-	MainContext *_asTree;
+	MainContext<Type> *_asTree;
 
    private:
 	bool parse();
@@ -32,7 +32,7 @@ class Config {
 	void setPath(const string &path);
 
 	// getters
-	MainContext *ast();
+	MainContext<Type> *ast();
 	string       getPath(void) const;
 	bool         good(void) const;
 };

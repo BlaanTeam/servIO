@@ -6,12 +6,20 @@ Parser::Parser(ifstream &cfile) {
 	_lex.tokenizer(cfile);
 };
 
-MainContext *Parser::parse() {
-	if (current().type() == _EOF) {
-		_serr = "empty config";
-		return nullptr;
-	}
-	return updateDirectives(parse_main());
+MainContext<Type> *Parser::parse() {
+	MainContext<> *tree = parse_main();
+
+	if (!updateDirectives(tree))
+		return delete tree, nullptr;
+
+	pair<bool, MainContext<Type> *> ret = transfer(tree);
+
+	delete tree;
+
+	if (!ret.first)
+		return delete ret.second, nullptr;
+
+	return ret.second;
 };
 
 const string &Parser::err() const {

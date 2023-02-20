@@ -63,6 +63,7 @@ extern HttpStatusCode httpStatusCodes;
 
 
 
+
 // TODO : change name of the current file
 
 extern int httpMethodCount;
@@ -91,5 +92,7 @@ extern string httpMethods[8];
 #define VERSION "1.0.0"
 
 void buildResponseBody(const short &statusCode, stringstream &stream);
+
+extern stringstream builtInResponseBody;
 
 #endif

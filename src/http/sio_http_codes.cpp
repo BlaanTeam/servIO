@@ -67,3 +67,5 @@ void buildResponseBody(const short &statusCode, stringstream &stream) {
 	       << "</body>" << endl
 	       << "</html>" << endl;
 }
+
+stringstream builtInResponseBody;

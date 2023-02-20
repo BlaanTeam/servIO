@@ -52,28 +52,56 @@ struct Type {
 	~Type();
 };
 
+template <class T = vector<string> >
 class MainContext {
    protected:
-	CtxType                                        _type;
-	vector<MainContext *>                          _contexts;
-	map<string, vector<string> >                   _directives;
-	typedef map<string, vector<string> >::iterator dirIter;
-	typedef pair<string, vector<string> >          Directive;
+	CtxType                  _type;
+	vector<MainContext<T> *> _contexts;
+	map<string, T>           _directives;
 
    public:
-	MainContext();
-	MainContext(const MainContext *copy);
+	typedef typename map<string, T>::iterator dirIter;
+	typedef pair<string, T>                   Directive;
 
-	CtxType                       type();
-	map<string, vector<string> > &directives();
-	vector<MainContext *>        &contexts();
+	MainContext() {}
 
-	void            addContext(MainContext *ctx);
-	void            addDirective(const Directive &dir);
-	void            rmDirective(const string &dir);
-	vector<string> &operator[](const string &dir);
+	MainContext(const MainContext<T> *copy) {
+		_directives = copy->_directives;
+	}
 
-	virtual ~MainContext();
+	CtxType type() {
+		return _type;
+	}
+
+	map<string, T> &directives() {
+		return _directives;
+	}
+
+	vector<MainContext<T> *> &contexts() {
+		return _contexts;
+	}
+
+	void addContext(MainContext<T> *ctx) {
+		_contexts.push_back(ctx);
+	}
+
+	void addDirective(const Directive &dir) {
+		_directives[dir.first] = dir.second;
+	}
+
+	void rmDirective(const string &dir) {
+		dirIter it = _directives.find(dir);
+		if (it != _directives.end()) _directives.erase(it);
+	}
+
+	T &operator[](const string &dir) {
+		return _directives[dir];
+	}
+
+	virtual ~MainContext() {
+		for (size_t idx = 0; idx < _contexts.size(); idx++)
+			delete _contexts[idx];
+	};
 };
 
 class HttpContext : public MainContext {

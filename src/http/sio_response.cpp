@@ -33,6 +33,10 @@ Response &Response::operator=(const Response &rhs) {
 	return *this;
 }
 
+Response::~Response() {
+	delete _stream;
+}
+
 void Response::init(const string &contentType) {
 	// !INFO: for security reason we should hide this header in some cases !
 	addHeader("Server", NAME "/" VERSION);

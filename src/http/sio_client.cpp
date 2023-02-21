@@ -32,7 +32,6 @@ bool Client::timedOut(void) const {
 bool Client::handleRequest(stringstream &stream) {
 	_req.consumeStream(stream);
 
-
 	if (!_req.valid()) {
 		_res.sendError(_connection.first, BAD_REQUEST);
 		goto purgeConnection;
@@ -42,10 +41,9 @@ bool Client::handleRequest(stringstream &stream) {
 			_res.sendError(_connection.first, METHOD_NOT_ALLOWED);
 			goto purgeConnection;
 		}
-		
-		if (_res.match(RES_INIT | RES_HEADER)) {
-			fstream *file = new fstream("html/index.html");  // TODO : free file
 
+		if (_res.match(RES_INIT | RES_HEADER)) {
+			fstream *file = new fstream("html/index.html");
 			_res.setStatusCode(200);
 			_res.addHeader("Content-Type", mimeTypes["html"]);
 			_res.setStream(file);

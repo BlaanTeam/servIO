@@ -41,7 +41,7 @@ Address::Address(const string &host, const int &port, const string &serverName) 
 	sin.sin_port = htons(_port);
 
 	if (inet_pton(_ss_family, host.c_str(), &sin.sin_addr) <= 0) {
-		if (!getaddrinfo(host.c_str(), "http", &hints, &ret)) {
+		if (!getaddrinfo(host.c_str(), to_string(port).c_str(), &hints, &ret)) {
 			*this = Address(*ret->ai_addr, ret->ai_addrlen);
 			freeaddrinfo(ret);
 			setServerName(serverName);

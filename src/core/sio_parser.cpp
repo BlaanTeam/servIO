@@ -252,7 +252,7 @@ MainContext<> *Parser::parse_server() {
 	if (!expect(WORD, "server") || !expect(OCURLY))
 		goto failed;
 
-	(*ret)["listen"].push_back("localhost:8080");
+	(*ret)["listen"].push_back("0.0.0.0:8080");
 	(*ret)["server_name"].push_back("_");
 
 	while (current().type() & ~CCURLY) {
@@ -409,7 +409,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 			const string &addr = val[0];
 			int           idx = addr.size() - 1;
 			int           port = 8080;
-			string        host = "localhost";
+			string        host = "0.0.0.0";
 
 			while (idx >= 0 && isdigit(addr[idx])) {
 				idx--;

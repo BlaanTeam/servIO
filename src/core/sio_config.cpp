@@ -50,3 +50,17 @@ string Config::getPath(void) const {
 bool Config::good(void) const {
 	return _file_stream.good();
 }
+
+VirtualServer *Config::match(const Address &addr, const string &host) {
+	vector<VirtualServer *> servers;
+
+	for (size_t idx = 0; idx < _asTree->contexts().size(); idx++)
+		if (*(*(VirtualServer *)_asTree->contexts()[idx])["listen"].addr == addr)
+			servers.push_back((VirtualServer *)_asTree->contexts()[idx]);
+
+	for (size_t idx = 0; idx < servers.size(); idx++)
+		if ((*servers[idx])["server_name"].servName->find(host))
+			return servers[idx];
+
+	return servers[0];
+}

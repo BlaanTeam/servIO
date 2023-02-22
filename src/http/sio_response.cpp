@@ -125,13 +125,10 @@ void Response::sendError(const sockfd &fd, const int &statusCode) {
 	init();
 	addHeader("Content-Type", mimeTypes["html"]);
 
-	buildResponseBody(statusCode, builtInResponseBody);
-	setStream(&builtInResponseBody);
+	stringstream *ss = new stringstream;
+	buildResponseBody(statusCode, *ss);
+	setStream(ss);
 	send(fd);
-
-	builtInResponseBody.str("");
-	builtInResponseBody.clear();
-	builtInResponseBody.seekg(builtInResponseBody.beg);
 }
 
 bool Response::match(const int &state) const {

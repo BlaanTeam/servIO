@@ -96,8 +96,6 @@ extern string httpMethods[8];
 
 void buildResponseBody(const short &statusCode, stringstream &stream);
 
-extern stringstream builtInResponseBody;
-
 void buildDirectoryListing(const string &path, stringstream &stream);
 
 #endif

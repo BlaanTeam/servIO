@@ -43,17 +43,18 @@ struct ServerName : public vector<string> {
 struct Type {
 	int type;
 	union {
-		long long  value;
-		bool       ok;
-		string    *str;
-		Address   *addr;
-		ErrorPage *errPage;
-		Redirect  *redirect;
+		long long   value;
+		bool        ok;
+		string     *str;
+		Address    *addr;
+		ErrorPage  *errPage;
+		Redirect   *redirect;
+		ServerName *servName;
 	};
 	Type();
-	Type(int type);;
+	Type(int type);
 	Type(Type &cpy);
-	Type &operator = (Type &cpy);
+	Type &operator=(Type &cpy);
 	~Type();
 };
 

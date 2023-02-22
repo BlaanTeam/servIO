@@ -25,11 +25,13 @@ Type &Type::operator = (Type &cpy) {
 	else if (type & ADDR) delete addr;
 	else if (type & ERRPG) delete errPage;
 	else if (type & REDIR) delete redirect;
+	else if (type & SERV_NAME) delete servName;
 	type = cpy.type;
 	if (type & STR) str = new string(*cpy.str);
 	else if (type & ADDR) addr = new Address(*cpy.addr);
 	else if (type & ERRPG) errPage = new ErrorPage(*cpy.errPage);
 	else if (type & REDIR) redirect = new Redirect(*cpy.redirect);
+	else if (type & SERV_NAME) servName = new ServerName(*cpy.servName);
 	else if (type & BOOL) ok = cpy.ok;
 	else value = cpy.value;
 	return *this;
@@ -40,4 +42,5 @@ Type::~Type() {
 	else if (type & ADDR) delete addr;
 	else if (type & ERRPG) delete errPage;
 	else if (type & REDIR) delete redirect;
+	else if (type & SERV_NAME) delete servName;
 }

@@ -164,12 +164,12 @@ Parser::Directive *Parser::parse_server_dir() {
 	}
 
 	if (dir->first == "server_name") {
-		if (dir->second.size() > 512) { // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_max_size
+		if (dir->second.size() > 512) {  // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_max_size
 			_serr = "server_name: too many arguments!";
 			goto failed;
 		}
 		for (size_t i = 0; i < dir->second.size(); i++) {
-			if (dir->second[i].size() > 64) { // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_bucket_size
+			if (dir->second[i].size() > 64) {  // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_bucket_size
 				_serr = "server_name: invlid argument!";
 				goto failed;
 			}
@@ -364,6 +364,11 @@ bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	return true;
 }
 
+static void updateRootDirective(string *value) {
+	if (value->length() > 0 && (*value)[0] != '/')
+		*value = PREFIX_FOLDER "/" + *value;
+}
+
 pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 	if (!tree)
 		return make_pair(false, nullptr);
@@ -390,9 +395,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 				else
 					tp.value |= DELETE;
 			}
-		}
-
-		else if (key == "client_max_body_size") {
+		} else if (key == "client_max_body_size") {
 			tp.type = INT;
 			tp.value = stol(val[0]);
 			if (val[0].back() == 'k')
@@ -401,24 +404,16 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 				tp.value *= (1LL << 20);
 			else if (val[0].back() == 'g')
 				tp.value *= (1LL << 30);
-		}
-
-		else if (key == "autoindex") {
+		} else if (key == "autoindex") {
 			tp.type = BOOL;
 			tp.ok = (val[0] == "on");
-		}
-
-		else if (key.substr(0, 10) == "error_page") {
+		} else if (key.substr(0, 10) == "error_page") {
 			tp.type = ERRPG;
 			tp.errPage = new ErrorPage(val[0], val[1]);
-		}
-
-		else if (key == "return") {
+		} else if (key == "return") {
 			tp.type = REDIR;
 			tp.redirect = new Redirect(stoi(val[0]), val.size() == 2 ? val[1] : "");
-		}
-
-		else if (key == "listen") {
+		} else if (key == "listen") {
 			tp.type = ADDR;
 			const string &addr = val[0];
 			int           idx = addr.size() - 1;
@@ -442,17 +437,16 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 				cerr << host << ' ' << port << '\n';
 				return _serr = "invalid adress: " + addr, make_pair(false, ret);
 			}
-		}
-
-		else if (key == "server_name") {
+		} else if (key == "server_name") {
 			tp.type = SERV_NAME;
 			tp.servName = new ServerName(val);
-		}
-
-		else {  // index, root
+		} else {  // index, root
 			tp.type = STR;
 			tp.str = new string(val[0]);
 		}
+
+		if (key == "root")
+			updateRootDirective(tp.str);
 
 		(*ret)[key] = tp;
 

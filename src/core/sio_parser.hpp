@@ -5,6 +5,10 @@
 #include "sio_http_codes.hpp"
 #include "sio_lexer.hpp"
 
+#ifndef PREFIX_FOLDER
+#define PREFIX_FOLDER ""
+#endif
+
 class Parser {
 	string _serr;
 	Lexer  _lex;

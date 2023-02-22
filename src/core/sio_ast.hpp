@@ -22,6 +22,7 @@ enum TypeList {
 	ADDR = 1 << 3,
 	ERRPG = 1 << 4,
 	REDIR = 1 << 5,
+	SERV_NAME = 2 << 6,
 };
 
 struct ErrorPage {
@@ -33,6 +34,10 @@ struct Redirect {
 	int    code;
 	string path;
 	Redirect(int code = 301, string path = "");
+};
+
+struct ServerName : public vector<string> {
+	bool find(const string &name);
 };
 
 struct Type {

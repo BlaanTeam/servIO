@@ -4,6 +4,10 @@ ErrorPage::ErrorPage(string pattern, string page) : pattern(pattern), page(page)
 
 Redirect::Redirect(int code, string path) : code(code), path(path){};
 
+bool ServerName::find(const string &name) {
+	return ::find(begin(), end(), name) != end();
+}
+
 Type::Type() { bzero(this, sizeof(Type)); }
 
 Type::Type(int type) {

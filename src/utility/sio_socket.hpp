@@ -26,7 +26,6 @@ using namespace std;
 class Address {
 	string       _host;
 	unsigned int _port;
-	string       _serverName;
 	short        _ss_family;
 
 	bool _good;
@@ -34,13 +33,12 @@ class Address {
    public:
 	Address();
 	Address(const sockfd &fd);
-	Address(const string &host, const int &port, const string &serverName = "_");
+	Address(const string &host, const int &port);
 	Address(sockaddr addr, const socklen_t &len);
 
 	// setters
 	void setHost(const string &host);
 	void setPort(const short &port);
-	void setServerName(const string &serverName);
 
 	// operator overloading
 	bool operator<(const Address &rhs) const;

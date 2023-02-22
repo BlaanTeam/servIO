@@ -21,7 +21,7 @@ Address::Address(const sockfd &fd) : _good(true) {
 	*this = Address(sa, len);
 }
 
-Address::Address(const string &host, const int &port, const string &serverName) : _host(host), _port(port), _serverName(serverName), _ss_family(AF_INET), _good(true) {
+Address::Address(const string &host, const int &port) : _host(host), _port(port), _ss_family(AF_INET), _good(true) {
 	addrinfo hints, *ret = nullptr;
 
 	if (_port < 0 || port >= (1 << 16)) {
@@ -44,14 +44,12 @@ Address::Address(const string &host, const int &port, const string &serverName) 
 		if (!getaddrinfo(host.c_str(), to_string(port).c_str(), &hints, &ret)) {
 			*this = Address(*ret->ai_addr, ret->ai_addrlen);
 			freeaddrinfo(ret);
-			setServerName(serverName);
 			return;
 		}
 		goto invalid;
 	}
 
 	*this = Address(*(sockaddr *)&sin, sizeof(sockaddr_in));
-	setServerName(serverName);
 	return;
 invalid:
 	_good = false;
@@ -79,9 +77,6 @@ ostream &operator<<(ostream &stream, const Address &addr) {
 
 void Address::setHost(const string &host) { _host = host; }
 void Address::setPort(const short &port) { _port = port; }
-void Address::setServerName(const string &serverName) {
-	_serverName = serverName;
-}
 
 // Address Getters
 string   Address::getHost(void) const { return _host; }

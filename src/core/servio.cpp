@@ -46,7 +46,6 @@ static set<Address> getVirtualServers(MainContext<Type> *main) {
 }
 
 void servio_init(const int &ac, char *const *av) {
-	Config config;
 	char   stream[(1 << 0xA) + 1];
 
 	if (!parse_options(ac, av, config) || !config.syntaxOnly())

@@ -37,4 +37,6 @@ class Config {
 	bool         good(void) const;
 };
 
+extern Config config;
+
 #endif

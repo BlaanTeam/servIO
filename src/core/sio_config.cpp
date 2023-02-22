@@ -1,5 +1,7 @@
 #include "sio_config.hpp"
 
+Config config;
+
 Config::Config(const string &path) {
 	setPath(path);
 }

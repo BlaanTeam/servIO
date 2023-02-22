@@ -8,6 +8,7 @@
 
 #include "./sio_request.hpp"
 #include "./sio_response.hpp"
+#include "core/sio_config.hpp"
 
 using namespace std;
 

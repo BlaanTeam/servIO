@@ -40,10 +40,8 @@ static set<Address> getVirtualServers(MainContext<Type> *main) {
 	if (!main)
 		return addrs;
 
-	for (size_t idx = 0; idx < main->contexts().size(); idx++) {
-		addrs.insert(*main->contexts()[idx]->directives()["listen"].addr);
-	}
-
+	for (size_t idx = 0; idx < main->contexts().size(); idx++)
+		addrs.insert(*(*main->contexts()[idx])["listen"].addr);
 	return addrs;
 }
 
@@ -56,9 +54,10 @@ void servio_init(const int &ac, char *const *av) {
 
 	set<Address> addrs = getVirtualServers(config.ast());
 
-	vector<Socket> sockets(addrs.size());
+	vector<Socket> sockets;
 	PollFd         pfds;
 
+	sockets.reserve(addrs.size());
 	initListeningSockets(addrs, sockets, pfds);
 
 	while (true) {

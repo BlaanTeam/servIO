@@ -3,7 +3,11 @@ NAME = servio
 
 CC = c++
 
-CFLAGS = -Wall -Wextra -Werror -ggdb -std=c++98
+PREFIX_FOLDER = $(shell pwd)
+
+CFLAGS = -Wall -Wextra -Werror -ggdb -std=c++98 -D PREFIX_FOLDER=\"$(PREFIX_FOLDER)\"
+
+
 
 
 # core files

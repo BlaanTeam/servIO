@@ -155,10 +155,24 @@ Parser::Directive *Parser::parse_server_dir() {
 	if (!dir)
 		return nullptr;
 
-	if (dir->first == "listen" || dir->first == "server_name") {
+	if (dir->first == "listen") {
 		if (dir->second.size() != 1) {
-			_serr = dir->first + " directive: invalid arguments!";
+			_serr = "listen directive: invalid arguments!";
 			goto failed;
+		}
+		return dir;
+	}
+
+	if (dir->first == "server_name") {
+		if (dir->second.size() > 512) { // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_max_size
+			_serr = "server_name: too many arguments!";
+			goto failed;
+		}
+		for (size_t i = 0; i < dir->second.size(); i++) {
+			if (dir->second[i].size() > 64) { // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_bucket_size
+				_serr = "server_name: invlid argument!";
+				goto failed;
+			}
 		}
 		return dir;
 	}
@@ -422,7 +436,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 				host = addr;
 			}
 
-			tp.addr = new Address(host, port, (*tree)["server_name"][0]);
+			tp.addr = new Address(host, port);
 
 			if (!tp.addr->good()) {
 				cerr << host << ' ' << port << '\n';
@@ -430,7 +444,12 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 			}
 		}
 
-		else {  // index, root, server_name
+		else if (key == "server_name") {
+			tp.type = SERV_NAME;
+			tp.servName = new ServerName(val);
+		}
+
+		else {  // index, root
 			tp.type = STR;
 			tp.str = new string(val[0]);
 		}

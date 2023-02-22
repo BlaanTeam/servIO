@@ -89,11 +89,14 @@ void Response::addHeader(const string &name, const string &value) {
 void Response::send(const sockfd &fd) {
 	(void)fd;
 
-	if (_state & (RES_INIT | RES_HEADER) && _type == LENGTHED_RES && _stream) {
-		int seek = _stream->tellg();
-		_stream->seekg(0, _stream->end);
-		addHeader("Content-Length", to_string(_stream->tellg()));
-		_stream->seekg(seek);
+	if (_state & (RES_INIT | RES_HEADER)) {
+		if (_type == LENGTHED_RES && _stream)
+			setupLengthedBody();
+		else if (_type == CHUNKED_RES)
+			setupChunkedBody();
+		else if (_type == RANGED_RES)
+			setupRangedBody();
+
 		prepare();
 		::send(fd, _ss.str().c_str(), _ss.str().size(), 0);
 		::send(fd, CRLF, 2, 0);
@@ -106,14 +109,13 @@ void Response::send(const sockfd &fd) {
 	if (_state & RES_BODY && _stream) {
 		switch (_type) {
 		case LENGTHED_RES:
-			char buff[(1 << 10)];
-			_stream->read(buff, (1 << 10));
-			::send(fd, buff, _stream->gcount(), 0);
-			setState(_stream->eof() ? RES_DONE : _state);
+			sendLengthedBody(fd);
 			break;
 		case CHUNKED_RES:
+			sendChunkedBody(fd);
 			break;
 		case RANGED_RES:
+			sendRangedBody(fd);
 			break;
 		}
 	}
@@ -133,4 +135,35 @@ void Response::sendError(const sockfd &fd, const int &statusCode) {
 
 bool Response::match(const int &state) const {
 	return _state & state;
+}
+
+// private functions
+
+void Response::setupLengthedBody() {
+	size_t seek = _stream->tellg();
+	_stream->seekg(0, _stream->end);
+	addHeader("Content-Length", to_string(_stream->tellg()));
+	_stream->seekg(seek);
+}
+
+void Response::sendLengthedBody(const sockfd &fd) {
+	char buff[(1 << 10)];
+	_stream->read(buff, (1 << 10));
+	::send(fd, buff, _stream->gcount(), 0);
+	setState(_stream->eof() ? RES_DONE : _state);
+}
+
+void Response::setupChunkedBody() {
+	addHeader("Transfer-Encoding", "Chunked");
+}
+
+void Response::sendChunkedBody(const sockfd &fd) {
+	(void)fd;
+}
+
+void Response::setupRangedBody() {
+}
+
+void Response::sendRangedBody(const sockfd &fd) {
+	(void)fd;
 }

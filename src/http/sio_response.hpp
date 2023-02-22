@@ -22,8 +22,8 @@
 #include "utility/sio_socket.hpp"
 #include "utility/sio_utils.hpp"
 
-
 #define TIMEOUT 15000  // TODO: change it to be reasonable
+#define CHUNK_SIZE 1024
 
 using namespace std;
 
@@ -62,8 +62,17 @@ class Response {
 
 	void sendError(const sockfd &fd, const int &statusCode);
 
-	
 	bool match(const int &state) const;
+
+   private:
+	void sendLengthedBody(const sockfd &fd);
+	void setupLengthedBody(void);
+
+	void sendChunkedBody(const sockfd &fd);
+	void setupChunkedBody(void);
+
+	void sendRangedBody(const sockfd &fd);
+	void setupRangedBody(void);
 };
 
 #endif

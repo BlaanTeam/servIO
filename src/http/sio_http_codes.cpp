@@ -69,3 +69,33 @@ void buildResponseBody(const short &statusCode, stringstream &stream) {
 }
 
 stringstream builtInResponseBody;
+
+void buildDirectoryListing(const string &path, stringstream &stream) {
+	DIR *dir = opendir(path.c_str());
+	if (!dir)
+		return;
+
+	stream << "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Index of /awbx/</title>"
+	       << "<style> body { font-family: Arial, sans-serif; font-size: 16px; } h1 { text-align: center; } table { width: 100%; border-collapse: collapse; margin-top: 20px; } th, td { padding: 10px; text-align: left; } th { background-color: #eee; } tr:nth-child(even) { background-color: #f2f2f2; } a { color: #000; text-decoration: none; } a:hover { text-decoration: underline; }</style> "
+	       << "</head><body><h1> Index of" << path /*Todo: use last directory in title */ << "</h1><table><thead><tr><th>Name</th><th>Last Modified</th><th>Size(bytes)</th></tr></thead><tbody>"
+	       << "<tr><td> <a href=\"../\">../</a></td> <td>-</td> <td>-</td></tr><tr>";
+	struct dirent *entry;
+
+	while ((entry = readdir(dir))) {
+		if (entry->d_namlen < 1 || entry->d_name[0] == '.')
+			continue;
+
+		struct stat info;
+		stat((path + "/" + entry->d_name).c_str(), &info);
+
+		string d_name(entry->d_name);
+		d_name += S_ISDIR(info.st_mode) ? "/" : "";
+
+		char dateBuffer[0xFF] = {0};
+		strftime(dateBuffer, 0xFF, "%d-%b-%Y %H:%M", localtime(&info.st_mtimespec.tv_sec));
+
+		stream << "<td><a href=\"" << d_name << "\">" << d_name << "</a></td> <td>" << dateBuffer << "</td> <td>" << (S_ISDIR(info.st_mode) ? "-" : to_string(info.st_size)) << "</td> </tr>";
+	}
+	stream << "</tbody></table></body></html>";
+	closedir(dir);
+}

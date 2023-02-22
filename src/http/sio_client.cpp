@@ -45,7 +45,7 @@ bool Client::handleRequest(stringstream &stream) {
 		if (_res.match(RES_INIT | RES_HEADER)) {
 			stringstream *file = new stringstream;
 
-			buildDirectoryListing("/etc", *file);
+			buildDirectoryListing(".", *file);
 			_res.setStatusCode(200);
 			_res.addHeader("Content-Type", mimeTypes["html"]);
 			_res.setStream(file);

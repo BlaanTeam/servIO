@@ -1,8 +1,14 @@
 #ifndef __HTTP_CODES_H__
 #define __HTTP_CODES_H__
 
+#include <dirent.h>
 #include <math.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
+#include <iomanip>
 #include <map>
 #include <sstream>
 #include <string>
@@ -61,9 +67,6 @@ class HttpStatusCode : public map<short, string> {
 
 extern HttpStatusCode httpStatusCodes;
 
-
-
-
 // TODO : change name of the current file
 
 extern int httpMethodCount;
@@ -94,5 +97,7 @@ extern string httpMethods[8];
 void buildResponseBody(const short &statusCode, stringstream &stream);
 
 extern stringstream builtInResponseBody;
+
+void buildDirectoryListing(const string &path, stringstream &stream);
 
 #endif

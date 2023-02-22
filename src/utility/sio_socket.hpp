@@ -43,6 +43,8 @@ class Address {
 	// operator overloading
 	bool operator<(const Address &rhs) const;
 
+	bool operator==(const Address &rhs) const;
+
 	// getters
 	string    getHost(void) const;
 	int       getPort(void) const;

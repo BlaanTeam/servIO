@@ -111,6 +111,11 @@ bool Address::operator<(const Address &rhs) const {
 	return lexicographical_compare(_host.begin(), _host.end(), rhs._host.begin(), rhs._host.end()) || _port < rhs._port;
 }
 
+bool Address::operator==(const Address &rhs) const {
+	// ! TODO: refactor this (TEAM)!
+	return (_host == rhs._host || _host == "0.0.0.0") && _port == rhs._port;
+}
+
 // Socket
 Socket::Socket(int domain, int type, int protocol) {
 	good = true;

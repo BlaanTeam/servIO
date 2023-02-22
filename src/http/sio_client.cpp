@@ -43,7 +43,9 @@ bool Client::handleRequest(stringstream &stream) {
 		}
 
 		if (_res.match(RES_INIT | RES_HEADER)) {
-			fstream *file = new fstream("html/index.html");
+			stringstream *file = new stringstream;
+
+			buildDirectoryListing("/etc", *file);
 			_res.setStatusCode(200);
 			_res.addHeader("Content-Type", mimeTypes["html"]);
 			_res.setStream(file);
@@ -63,8 +65,13 @@ purgeConnection:
 	return clients.purgeConnection(_connection.first);
 }
 
-void Client::send(const sockfd &fd) {
-	return _res.send(fd);
+void Client::handleResponse(const sockfd &fd) {
+	_res.send(fd);
+
+	if (_res.match(RES_BODY))
+		_pfd->events |= POLLOUT;
+	else if (_res.match(RES_DONE | RES_INIT))
+		_pfd->events &= ~POLLOUT;
 }
 
 ClientMap::ClientMap() {

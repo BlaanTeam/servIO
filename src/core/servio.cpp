@@ -93,7 +93,8 @@ void servio_init(const int &ac, char *const *av) {
 			}
 			if (it->revents & POLLOUT) {
 				cerr << "POLLOUT" << endl;
-				clients[it->fd].send(it->fd);
+				clients[it->fd].setPollFd(it->fd, tmp);
+				clients[it->fd].handleResponse(it->fd);
 			}
 			if (it->revents & POLLHUP) {
 				cerr << "Client Disconnected !" << endl;

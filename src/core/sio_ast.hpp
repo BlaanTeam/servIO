@@ -37,6 +37,7 @@ struct Redirect {
 };
 
 struct ServerName : public vector<string> {
+	ServerName(const vector<string> &vec);
 	bool find(const string &name);
 };
 

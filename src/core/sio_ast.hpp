@@ -54,8 +54,8 @@ struct Type {
 	};
 	Type();
 	Type(int type);
-	Type(Type &cpy);
-	Type &operator=(Type &cpy);
+	Type(const Type &cpy);
+	Type &operator=(const Type &cpy);
 	~Type();
 };
 

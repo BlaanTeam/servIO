@@ -17,12 +17,12 @@ Type::Type(int type) {
 	this->type = type;
 }
 
-Type::Type(Type &cpy) {
+Type::Type(const Type &cpy) {
 	bzero(this, sizeof(Type));
 	*this = cpy;
 }
 
-Type &Type::operator = (Type &cpy) {
+Type &Type::operator = (const Type &cpy) {
 	if (type & STR) delete str;
 	else if (type & ADDR) delete addr;
 	else if (type & ERRPG) delete errPage;

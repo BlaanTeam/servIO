@@ -377,7 +377,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 
 	MainContext<Type> *ret = tree->type() & httpCtx     ? (MainContext<Type> *)new HttpContext<Type>()
 	                         : tree->type() & serverCtx ? (MainContext<Type> *)new ServerContext<Type>()
-	                                                    : (MainContext<Type> *)new LocationContext<Type>();
+	                                                    : (MainContext<Type> *)new LocationContext<Type>(((LocationContext<> *)tree)->location());
 
 	MainContext<>::dirIter it = tree->directives().begin();
 

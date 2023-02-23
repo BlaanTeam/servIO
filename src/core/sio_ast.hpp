@@ -157,4 +157,47 @@ class LocationContext : public MainContext<T> {
 	~LocationContext(){};
 };
 
+template <>
+class ServerContext<Type> : public MainContext<Type> {
+   private:
+	int commonPrefix(const string &s1, const string &s2, int start = 0) {
+		int ret = start;
+		while (s1[ret] && s2[ret] && s1[ret] == s2[ret])
+			ret++;
+		return ret;
+	}
+	pair<int, LocationContext<Type> *> search(LocationContext<Type> *tree, const string &path, int parentCommonPrefix = 0) {
+		int                                currentCommonPrefix = commonPrefix(tree->location(), path, parentCommonPrefix);
+		pair<int, LocationContext<Type> *> ans = make_pair(currentCommonPrefix, tree);
+		if (currentCommonPrefix == parentCommonPrefix)
+			return ans;
+		for (size_t i = 0; i < tree->contexts().size(); i++) {
+			pair<int, LocationContext<Type> *> p = search((LocationContext<Type> *)tree->contexts()[i], path, currentCommonPrefix);
+			if (p.first > ans.first) {
+				ans = p;
+			}
+		}
+		return ans;
+	}
+
+   public:
+	ServerContext() { MainContext<Type>::_type = serverCtx; };
+
+	ServerContext(const MainContext<Type> *copy)
+	    : MainContext<Type>(copy) { MainContext<Type>::_type = serverCtx; }
+
+	LocationContext<Type> *match(const string &path) {
+		pair<int, LocationContext<Type> *> ans = make_pair(0, nullptr);
+		for (size_t i = 0; i < _contexts.size(); i++) {
+			pair<int, LocationContext<Type> *> p = search((LocationContext<Type> *)_contexts[i], path);
+			if (p.first > ans.first) {
+				ans = p;
+			}
+		}
+		return ans.second;
+	}
+
+	~ServerContext(){};
+};
+
 #endif

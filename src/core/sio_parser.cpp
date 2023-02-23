@@ -151,6 +151,7 @@ failed:
 
 Parser::Directive *Parser::parse_server_dir() {
 	Parser::Directive *dir = parse_directive();
+	string directiveName = dir->first;
 
 	if (!dir)
 		return nullptr;
@@ -182,7 +183,7 @@ Parser::Directive *Parser::parse_server_dir() {
 	}
 
 	if (_serr.substr(0, 4) == "http") {
-		_serr = "server context: " + dir->first + ": invalid directive!";
+		_serr = "server context: " + directiveName + ": invalid directive!";
 	}
 
 	return nullptr;
@@ -193,6 +194,7 @@ failed:
 
 Parser::Directive *Parser::parse_location_dir() {
 	Parser::Directive *dir = parse_directive();
+	string directiveName = dir->first;
 
 	if (!dir)
 		return nullptr;
@@ -216,7 +218,7 @@ Parser::Directive *Parser::parse_location_dir() {
 	}
 
 	if (_serr.substr(0, 4) == "http") {
-		_serr = "location context: " + dir->first + ": invalid directive!";
+		_serr = "location context: " + directiveName + ": invalid directive!";
 	}
 
 	return nullptr;

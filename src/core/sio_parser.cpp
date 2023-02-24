@@ -115,7 +115,7 @@ Parser::Directive *Parser::parse_http_dir(Parser::Directive *_dir) {
 	}
 
 	if (dir->first == "error_page") {
-		if (dir->second.size() != 2) {
+		if (dir->second.size() != 2 || dir->second[0].size() > 3) {
 			_serr = "error_page directive: invalid arguments!";
 			goto failed;
 		}

@@ -372,8 +372,18 @@ bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 		}
 	}
 
+	bool has_slash_location = 0;
+
 	for (size_t i = 0; i < tree->contexts().size(); i++) {
+		if (tree->type() == serverCtx && ((LocationContext<> *)tree->contexts()[i])->location() == "/")
+			has_slash_location = 1;
 		if (!updateDirectives(tree->contexts()[i], tree))
+			return false;
+	}
+
+	if (tree->type() == serverCtx && !has_slash_location) {
+		tree->contexts().push_back(new LocationContext<>("/"));
+		if (!updateDirectives(tree->contexts().back(), tree))
 			return false;
 	}
 

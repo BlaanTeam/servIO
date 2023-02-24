@@ -167,15 +167,14 @@ class ServerContext<Type> : public MainContext<Type> {
 		return ret;
 	}
 	pair<int, LocationContext<Type> *> search(LocationContext<Type> *tree, const string &path, int parentCommonPrefix = 0) {
-		int                                currentCommonPrefix = commonPrefix(tree->location(), path, parentCommonPrefix);
+		int currentCommonPrefix = commonPrefix(tree->location(), path, parentCommonPrefix);
+		if (currentCommonPrefix != (int)tree->location().size())
+			return make_pair(-1, nullptr);
 		pair<int, LocationContext<Type> *> ans = make_pair(currentCommonPrefix, tree);
-		if (currentCommonPrefix == parentCommonPrefix || (currentCommonPrefix == parentCommonPrefix + 1 && parentCommonPrefix && path[currentCommonPrefix - 1] == '/'))
-			return ans;
 		for (size_t i = 0; i < tree->contexts().size(); i++) {
 			pair<int, LocationContext<Type> *> p = search((LocationContext<Type> *)tree->contexts()[i], path, currentCommonPrefix);
-			if (p.first == ans.first || (p.first == ans.first + 1 && ans.first && path[p.first - 1] == '/'))
-				continue;
-			ans = p;
+			if (p.first > ans.first)
+				ans = p;
 		}
 		return ans;
 	}

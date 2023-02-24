@@ -10,6 +10,7 @@
 #include "./sio_http_codes.hpp"
 #include "utility/sio_helpers.hpp"
 #include "utility/sio_utils.hpp"
+#include "./sio_request_body.hpp"
 
 using namespace std;
 
@@ -20,35 +21,9 @@ using namespace std;
 #define REQ_DONE (1 << 4)
 #define REQ_INVALID (1 << 5)
 
-#define BODY_INIT (1 << 0)
-#define BODY_OPEN (1 << 1)
-#define NORMAL_BODY (1 << 2)
-#define CHUNKED_BODY (1 << 3)
-#define LENGTHED_BODY (1 << 4)
-#define BODY_READ (CHUNKED_BODY | NORMAL_BODY | LENGTHED_BODY)
-#define BODY_DONE (1 << 5)
+class Body;
 
-class Request;
-
-class Body {
-	FILE *_bodyFile;
-
-	short  _bodyState;
-	size_t _contentLength;
-	size_t _content;
-	string _filename;
-
-   public:
-	Body();
-	Body(const Body &copy);
-	Body &operator=(const Body &rhs);
-	~Body();
-	void chooseState(map<string, string, StringICaseCompare> &headers);
-	void setState(const int &state);
-	void consumeBody(istream &stream, Request &req);
-};
-
-class Request : public Body {
+class Request {
 	short _state;
 	short _statusCode;
 

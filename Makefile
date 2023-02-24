@@ -28,6 +28,7 @@ CORE_HEADER = servio.hpp\
 
 # http files
 HTTP_SRC = sio_request.cpp\
+	sio_request_body.cpp\
 	sio_response.cpp\
 	sio_http_codes.cpp\
 	sio_client.cpp\
@@ -36,6 +37,7 @@ HTTP_SRC = sio_request.cpp\
 
 # http headers
 HTTP_HEADER = sio_request.hpp\
+	sio_request_body.hpp\
 	sio_response.hpp\
 	sio_http_codes.hpp\
 	sio_client.hpp\

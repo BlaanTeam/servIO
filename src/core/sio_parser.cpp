@@ -151,7 +151,7 @@ failed:
 
 Parser::Directive *Parser::parse_server_dir() {
 	Parser::Directive *dir = parse_directive();
-	string directiveName = dir->first;
+	string             directiveName = dir->first;
 
 	if (!dir)
 		return nullptr;
@@ -178,6 +178,20 @@ Parser::Directive *Parser::parse_server_dir() {
 		return dir;
 	}
 
+	if (dir->first == "return") {
+		if (dir->second.empty() || dir->second.size() > 2) {
+			_serr = "return directive: invalid arguments!";
+			goto failed;
+		}
+		size_t sz;
+		stoi(dir->second[0], &sz);
+		if (sz != dir->second[0].size()) {  // is integer
+			_serr = "return directive: invalid arguments!";
+			goto failed;
+		}
+		return dir;
+	}
+
 	if (parse_http_dir(dir)) {
 		return dir;
 	}
@@ -194,7 +208,7 @@ failed:
 
 Parser::Directive *Parser::parse_location_dir() {
 	Parser::Directive *dir = parse_directive();
-	string directiveName = dir->first;
+	string             directiveName = dir->first;
 
 	if (!dir)
 		return nullptr;

@@ -41,7 +41,7 @@ bool Parser::accept(int type, const string &value) {
 bool Parser::expect(int type, const string &value) {
 	if (!accept(type, value)) {
 		if (_serr.empty())
-			_serr = "LINE " + to_string(current().line()) + ": expected token <" + name(type) + (value[0]? ":" + value + ">": ">") + ", but found \"" + current().value() + "\" !";
+			_serr = "LINE " + to_string(current().line()) + ": expected token <" + name(type) + (value[0] ? ":" + value + ">" : ">") + ", but found \"" + current().value() + "\" !";
 		return false;
 	}
 	return true;
@@ -151,12 +151,13 @@ failed:
 
 Parser::Directive *Parser::parse_server_dir() {
 	Parser::Directive *dir = parse_directive();
-	string             directiveName = dir->first;
 
 	if (!dir)
 		return nullptr;
 
-	if (dir->first == "listen") {
+	string directiveName = dir->first;
+
+	if (directiveName == "listen") {
 		if (dir->second.size() != 1) {
 			_serr = "listen directive: invalid arguments!";
 			goto failed;
@@ -164,7 +165,7 @@ Parser::Directive *Parser::parse_server_dir() {
 		return dir;
 	}
 
-	if (dir->first == "server_name") {
+	if (directiveName == "server_name") {
 		if (dir->second.size() > 512) {  // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_max_size
 			_serr = "server_name: too many arguments!";
 			goto failed;
@@ -178,7 +179,7 @@ Parser::Directive *Parser::parse_server_dir() {
 		return dir;
 	}
 
-	if (dir->first == "return") {
+	if (directiveName == "return") {
 		if (dir->second.empty() || dir->second.size() > 2) {
 			_serr = "return directive: invalid arguments!";
 			goto failed;
@@ -208,12 +209,13 @@ failed:
 
 Parser::Directive *Parser::parse_location_dir() {
 	Parser::Directive *dir = parse_directive();
-	string             directiveName = dir->first;
 
 	if (!dir)
 		return nullptr;
 
-	if (dir->first == "return") {
+	string directiveName = dir->first;
+
+	if (directiveName == "return") {
 		if (dir->second.empty() || dir->second.size() > 2) {
 			_serr = "return directive: invalid arguments!";
 			goto failed;

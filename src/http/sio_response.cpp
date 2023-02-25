@@ -187,8 +187,8 @@ void Response::setupLengthedBody() {
 void Response::sendLengthedBody(const sockfd &fd) {
 	char buff[(1 << 10)];
 
-	if (!_stream->read(buff, (1 << 10)).good())
-		::send(fd, buff, _stream->gcount(), 0);
+	_stream->read(buff, (1 << 10));
+	::send(fd, buff, _stream->gcount(), 0);
 	setState(_stream->eof() ? RES_DONE : _state);
 }
 

@@ -22,6 +22,8 @@ enum TokenType {
 	_EOF = 1 << 7
 };
 
+string name(int type);
+
 class Token {
 	TokenType _type;
 	string    _value;
@@ -35,6 +37,7 @@ class Token {
 	TokenType     type(void) const;
 	const string &value(void) const;
 	size_t        line(void) const;
+	string        name() const;
 };
 
 class Lexer : public deque<Token> {

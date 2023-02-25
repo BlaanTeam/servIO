@@ -1,39 +1,19 @@
 #include "sio_lexer.hpp"
 
-/*
-
-<main> = "http" "{" {<key-val> <server> <key-val>}+ "}"
-
-<server> = "server" "{" {<key-val> | <location>} "}"
-
-<location> = "location" <WORD> "{" {<location>} "}"
-
-<key-val> = { {<WORD>}+ ";" }
-
-<WORD> = config file literals
-
-*/
-
-// class MainContext {
-// 	map<string, string> directives;
-// 	vector<MainContext> contexts;
-// };
-
-// class HttpContext : public MainContext {};
-
-// class ServerContext : public HttpContext {};
-
-// class LocationContext: public ServerContext {
-// 	LocationContext()
-// };
 const char *TokenNames[7] = {
     "WORD",
-    "OCURLY",
-    "CCURLY",
+    "OPEN CURLY BRACE",
+    "CLOSING CURLY BRACE",
     "SEMICOLON",
-    "DQOUTE",
-    "SQOUTE",
-    "_EOF"};
+    "DOUBLE QOUTE",
+    "SINGLE QOUTE",
+    "END OF FILE"};
+
+string name(int type) {
+	if (type > (1 << 7))
+		return "UNKNOWN";
+	return TokenNames[(int)log2(int(type)) - 1];
+}
 
 // Token Class
 
@@ -53,6 +33,10 @@ const string &Token::value(void) const {
 
 size_t Token::line(void) const {
 	return _line;
+}
+
+string Token::name() const {
+	return ::name(_type);
 }
 
 // Lexer Class

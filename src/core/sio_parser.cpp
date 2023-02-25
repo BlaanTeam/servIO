@@ -41,7 +41,7 @@ bool Parser::accept(int type, const string &value) {
 bool Parser::expect(int type, const string &value) {
 	if (!accept(type, value)) {
 		if (_serr.empty())
-			_serr = "LINE " + to_string(current().line()) + ": parse error!";
+			_serr = "LINE " + to_string(current().line()) + ": expected token <" + name(type) + (value[0]? ":" + value + ">": ">") + ", but found \"" + current().value() + "\" !";
 		return false;
 	}
 	return true;

@@ -62,8 +62,9 @@ class Response {
 
 	void send(const sockfd &fd);
 
-	void setupError(const int &statusCode);
+	void setupErrorResponse(const int &statusCode);
 	void setupDirectoryListing(const string &path, const string &title);
+	void setupNormalResponse(const string &path, iostream *file);
 
 	bool match(const int &state) const;
 

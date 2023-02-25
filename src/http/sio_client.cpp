@@ -34,16 +34,17 @@ bool Client::handleRequest(stringstream &stream) {
 	VirtualServer *virtualServer = config.match(Address(_connection.first), host);
 
 	if (!_req.valid()) {
-		_res.setupError(BAD_REQUEST);
+		_res.setupErrorResponse(BAD_REQUEST);
 		goto purgeConnection;
 	}
+
 	if (_req.match(REQ_BODY | REQ_DONE) && virtualServer) {
 		if (_res.match(RES_INIT | RES_HEADER)) {
 			Location *location = virtualServer->match(_req.getPath());
-			iostream *file = nullptr;
+			string    path = _req.getPath();
 
 			if (_req.getMethod() & UNKNOWN || (location && !location->isAllowedMethod(_req.getMethod()))) {
-				_res.setupError(METHOD_NOT_ALLOWED);
+				_res.setupErrorResponse(METHOD_NOT_ALLOWED);
 				goto sendResponse;
 			}
 
@@ -54,48 +55,43 @@ bool Client::handleRequest(stringstream &stream) {
 			}
 
 			struct stat fileStat;
-			string      path = _req.getPath();
 			bzero(&fileStat, sizeof fileStat);
-			if (!location || !location->found(path, fileStat)) {
-				_res.setupError(NOT_FOUND);
+			if (!location || (!location->found(path, fileStat) && !location->isRedirectable())) {
+				_res.setupErrorResponse(NOT_FOUND);
 				goto sendResponse;
 			}
 
+			// TODO: check if the location configured as CGI or UPLOAD or REDIRECT !
+
 			if (S_ISDIR(fileStat.st_mode)) {
 				string tmp = path + location->getIndex();
-				if (!access(tmp.c_str(), F_OK | R_OK)) {
-					file = new fstream(tmp, ios::in);
-					path = tmp;
-				} else if (location->isAutoIndexable()) {
+				if (!access(tmp.c_str(), F_OK | R_OK))
+					_res.setupNormalResponse(tmp, new fstream(tmp, ios::in));
+				else if (location->isAutoIndexable())
 					_res.setupDirectoryListing(path, _req.getPath());
-					goto sendResponse;
-				} else {
-					_res.setupError(FORBIDDEN);
-					goto sendResponse;
-				}
+				else
+					_res.setupErrorResponse(FORBIDDEN);
 			} else {
-				if (!access(path.c_str(), F_OK | R_OK)) {
-					file = new fstream(path, ios::in);
-				} else {
-					_res.setupError(FORBIDDEN);
-					goto sendResponse;
-				}
+				if (!access(path.c_str(), F_OK | R_OK))
+					_res.setupNormalResponse(path, new fstream(path, ios::in));
+				else
+					_res.setupErrorResponse(FORBIDDEN);
 			}
-			_res.setStatusCode(200);
-			_res.addHeader("Content-Type", mimeTypes.choiceMimeType(path));
-			_res.setStream(file);
 		}
 	sendResponse:
 		_res.send(_connection.first);
 		if (!_res.match(RES_DONE))
 			setTime(getmstime());
 	}
+
 	if (_res.match(RES_BODY))
 		_pfd->events |= POLLOUT;
 	else if (_res.match(RES_DONE | RES_INIT))
 		_pfd->events &= ~POLLOUT;
 
-	return false;
+	if (_res.keepAlive())
+		return false;
+
 purgeConnection:
 	return clients.purgeConnection(_connection.first);
 }

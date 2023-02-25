@@ -125,16 +125,12 @@ void Response::send(const sockfd &fd) {
 	}
 }
 
-void Response::setupError(const int &statusCode) {
+void Response::setupErrorResponse(const int &statusCode) {
 	setStatusCode(statusCode);
 	setConnectionStatus(false);
 	init();
 	addHeader("Content-Type", mimeTypes["html"]);
 	setStream(buildResponseBody(statusCode));
-}
-
-bool Response::match(const int &state) const {
-	return _state & state;
 }
 
 void Response::setupDirectoryListing(const string &path, const string &title) {
@@ -145,19 +141,35 @@ void Response::setupDirectoryListing(const string &path, const string &title) {
 	setStream(buildDirectoryListing(path, title));
 }
 
+void Response::setupNormalResponse(const string &path, iostream *file) {
+	// TODO: check if the file is openned !
+	setStatusCode(200);
+	setConnectionStatus(true);
+	init();
+	addHeader("Content-Type", mimeTypes.choiceMimeType(path));
+	setStream(file);
+}
+
+bool Response::match(const int &state) const {
+	return _state & state;
+}
 // private functions
 
 void Response::setupLengthedBody() {
 	size_t seek = _stream->tellg();
 	_stream->seekg(0, _stream->end);
-	addHeader("Content-Length", to_string(_stream->tellg()));
+
+	size_t contentLength = _stream->tellg() < 0 ? (streampos)0 : _stream->tellg();
+	addHeader("Content-Length", to_string(contentLength));
+
 	_stream->seekg(seek);
 }
 
 void Response::sendLengthedBody(const sockfd &fd) {
 	char buff[(1 << 10)];
-	_stream->read(buff, (1 << 10));
-	::send(fd, buff, _stream->gcount(), 0);
+
+	if (!_stream->read(buff, (1 << 10)).good())
+		::send(fd, buff, _stream->gcount(), 0);
 	setState(_stream->eof() ? RES_DONE : _state);
 }
 

@@ -58,6 +58,8 @@ class Response {
 
 	void setConnectionStatus(bool keepAlive = true);
 
+	bool keepAlive(void) const;
+
 	void send(const sockfd &fd);
 
 	void setupError(const int &statusCode);

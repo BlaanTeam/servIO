@@ -78,6 +78,10 @@ void Response::setConnectionStatus(bool keepAlive) {
 	_keepAlive = keepAlive;
 }
 
+bool Response::keepAlive(void) const {
+	return _keepAlive;
+}
+
 void Response::addHeader(const string &name, const string &value) {
 	if (_state & (RES_DONE | RES_BODY))
 		return;

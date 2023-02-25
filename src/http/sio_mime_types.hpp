@@ -16,6 +16,8 @@ class MimeType : public map<string, const char *, StringICaseCompare> {
    public:
 	MimeType();
 
+	mapped_type &choiceMimeType(const string &path);
+
 	mapped_type &operator[](const key_type &key);
 };
 

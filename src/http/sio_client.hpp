@@ -34,6 +34,8 @@ class Client {
 	bool handleRequest(stringstream &stream);
 
 	void handleResponse(const sockfd &fd);
+
+	void reset(void);
 };
 
 class ClientMap : public map<sockfd, Client> {

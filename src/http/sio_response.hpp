@@ -32,6 +32,7 @@ class Response {
 
 	short _statusCode;
 	short _type;
+	short _state;
 
 	iostream *_stream;
 
@@ -39,7 +40,6 @@ class Response {
 	bool                                    _keepAlive;
 
    public:
-	short _state;
 	Response();
 	Response(const short &statusCode, const string &contentType = DEFAULT_MIME_TYPE, bool keepAlive = true);
 	Response(const Response &copy);
@@ -67,6 +67,8 @@ class Response {
 	void setupNormalResponse(const string &path, iostream *file);
 
 	bool match(const int &state) const;
+
+	void reset(void);
 
    private:
 	void sendLengthedBody(const sockfd &fd);

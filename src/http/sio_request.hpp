@@ -58,6 +58,8 @@ class Request {
 	HttpMethod                               getMethod(void) const;
 	map<string, string, StringICaseCompare> &getHeaders(void) const;
 	bool                                     match(const int &state) const;
+	
+	void reset(void);
 
 	bool valid() const;
 };

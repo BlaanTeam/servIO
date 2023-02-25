@@ -28,7 +28,9 @@ bool Client::timedOut(void) const {
 }
 
 bool Client::handleRequest(stringstream &stream) {
+	reset();
 	_req.consumeStream(stream);
+
 	string host = _req.getHeaders()["Host"];
 	trim(host);
 	VirtualServer *virtualServer = config.match(Address(_connection.first), host);
@@ -56,7 +58,7 @@ bool Client::handleRequest(stringstream &stream) {
 
 			struct stat fileStat;
 			bzero(&fileStat, sizeof fileStat);
-			if (!location || (!location->found(path, fileStat) && !location->isRedirectable())) {
+			if (!location || (!location->found(path, fileStat) /*&& !location->isRedirectable()*/)) {  //! the location does not inherit the `return`
 				_res.setupErrorResponse(NOT_FOUND);
 				goto sendResponse;
 			}
@@ -103,6 +105,14 @@ void Client::handleResponse(const sockfd &fd) {
 		_pfd->events |= POLLOUT;
 	else if (_res.match(RES_DONE | RES_INIT))
 		_pfd->events &= ~POLLOUT;
+	reset();
+}
+
+void Client::reset(void) {
+	if (_req.match(REQ_DONE) && _res.match(RES_DONE)) {
+		_req.reset();
+		_res.reset();
+	}
 }
 
 ClientMap::ClientMap() {

@@ -153,6 +153,25 @@ void Response::setupNormalResponse(const string &path, iostream *file) {
 bool Response::match(const int &state) const {
 	return _state & state;
 }
+
+void Response::reset(void) {
+	// clear the headers
+	_headers.clear();
+
+	// clear the stringstream
+	_ss.str("");
+	_ss.clear();
+
+	delete _stream;
+	_stream = nullptr;
+
+	_keepAlive = true;
+	_type = LENGTHED_RES;
+
+	setState(RES_INIT);
+	init();
+}
+
 // private functions
 
 void Response::setupLengthedBody() {

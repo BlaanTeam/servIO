@@ -157,3 +157,18 @@ bool Request::valid() const {
 bool Request::match(const int &state) const {
 	return _state & state;
 }
+
+void Request::reset(void) {
+	_state = REQ_INIT;
+	_method = UNKNOWN;
+	_statusCode = BAD_REQUEST;
+	
+
+	_path = "";
+	_query = "";
+
+	// clear the headers
+	_headers.clear();
+	// TODO: ask anass about body resetting !
+	// _body.reset();
+}

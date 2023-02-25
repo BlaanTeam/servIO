@@ -52,12 +52,20 @@ void Body::parseChunkedBody(istream &stream) {
 		stream.read(buff, _chunkedLength - _content);
 		_content += stream.gcount();
 		fwrite(buff, 1, stream.gcount(), _bodyFile);
+		char c = stream.get();
+		if (c == '\r') {
+			c = stream.get();
+			if (c != '\n') {
+				goto invalid;
+			}
+		}
 		if (_chunkedLength > _content)
 			_readingState = ONGION_BODY;
-		else
+		else {
 			_readingState = START_BODY;
-	}
-	if (_readingState & START_BODY) {
+			_content = 0;
+		}
+	} else if (_readingState & START_BODY) {
 		char c = stream.get();
 		while (!stream.eof() && c != '\r' && c != '\n') {
 			if (isxdigit(c))
@@ -69,7 +77,7 @@ void Body::parseChunkedBody(istream &stream) {
 		if (c == '\r') {
 			c = stream.get();
 			if (c != '\n') {
-				_readingState = BODY_ERROR;
+				goto invalid;
 			}
 		}
 		if (tmp.length() > 0 && _readingState != BODY_ERROR) {
@@ -85,8 +93,10 @@ void Body::parseChunkedBody(istream &stream) {
 				fwrite(buff, 1, stream.gcount(), _bodyFile);
 				if (_chunkedLength > _content)
 					_readingState = ONGION_BODY;
-				else
+				else {
 					_readingState = START_BODY;
+					_content = 0;
+				}
 				char c = stream.get();
 				if (c == '\r') {
 					c = stream.get();

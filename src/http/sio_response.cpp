@@ -121,20 +121,24 @@ void Response::send(const sockfd &fd) {
 	}
 }
 
-void Response::sendError(const sockfd &fd, const int &statusCode) {
+void Response::setupError(const int &statusCode) {
 	setStatusCode(statusCode);
 	setConnectionStatus(false);
 	init();
 	addHeader("Content-Type", mimeTypes["html"]);
-
-	stringstream *ss = new stringstream;
-	buildResponseBody(statusCode, *ss);
-	setStream(ss);
-	send(fd);
+	setStream(buildResponseBody(statusCode));
 }
 
 bool Response::match(const int &state) const {
 	return _state & state;
+}
+
+void Response::setupDirectoryListing(const string &path, const string &title) {
+	setStatusCode(200);
+	setConnectionStatus(true);
+	init();
+	addHeader("Content-Type", mimeTypes["html"]);
+	setStream(buildDirectoryListing(path, title));
 }
 
 // private functions

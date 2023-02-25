@@ -60,7 +60,8 @@ class Response {
 
 	void send(const sockfd &fd);
 
-	void sendError(const sockfd &fd, const int &statusCode);
+	void setupError(const int &statusCode);
+	void setupDirectoryListing(const string &path, const string &title);
 
 	bool match(const int &state) const;
 

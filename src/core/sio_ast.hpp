@@ -1,10 +1,15 @@
 #ifndef __AST_H__
 #define __AST_H__
 
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <map>
 #include <string>
 #include <vector>
 
+#include "http/sio_http_codes.hpp"
 #include "sio_socket.hpp"
 
 using namespace std;
@@ -111,6 +116,62 @@ class MainContext {
 	};
 };
 
+template <>
+class MainContext<Type> {
+   protected:
+	CtxType                     _type;
+	vector<MainContext<Type> *> _contexts;
+	map<string, Type>           _directives;
+
+   public:
+	typedef map<string, Type>::iterator dirIter;
+	typedef pair<string, Type>          Directive;
+
+	MainContext() {}
+
+	MainContext(const MainContext<Type> *copy) {
+		_directives = copy->_directives;
+	}
+
+	CtxType type() {
+		return _type;
+	}
+
+	map<string, Type> &directives() {
+		return _directives;
+	}
+
+	vector<MainContext<Type> *> &contexts() {
+		return _contexts;
+	}
+
+	void addContext(MainContext<Type> *ctx) {
+		_contexts.push_back(ctx);
+	}
+
+	void addDirective(const Directive &dir) {
+		_directives[dir.first] = dir.second;
+	}
+
+	void rmDirective(const string &dir) {
+		dirIter it = _directives.find(dir);
+		if (it != _directives.end()) _directives.erase(it);
+	}
+
+	Type &operator[](const string &dir) {
+		return _directives[dir];
+	}
+
+	bool isRedirectable() {
+		return _directives.find("return") != _directives.end();
+	}
+
+	virtual ~MainContext() {
+		for (size_t idx = 0; idx < _contexts.size(); idx++)
+			delete _contexts[idx];
+	};
+};
+
 template <class T = vector<string> >
 class HttpContext : public MainContext<T> {
    public:
@@ -152,6 +213,45 @@ class LocationContext : public MainContext<T> {
 
 	void setLocation(const string &loc) {
 		_loc = loc;
+	}
+
+	~LocationContext(){};
+};
+template <>
+class LocationContext<Type> : public MainContext<Type> {
+	string _loc;
+
+   public:
+	LocationContext(const string &loc = "")
+	    : _loc(loc) { MainContext<Type>::_type = locationCtx; };
+
+	LocationContext(const MainContext<Type> *copy)
+	    : MainContext<Type>(copy) { MainContext<Type>::_type = locationCtx; }
+
+	const string &location() const {
+		return _loc;
+	}
+
+	void setLocation(const string &loc) {
+		_loc = loc;
+	}
+
+	bool isAutoIndexable() {
+		return _directives["autoindex"].ok;
+	}
+
+	bool isAllowedMethod(const HttpMethod &method) {
+		return _directives["allowed_methods"].value & method;
+	}
+
+	bool found(string &path, struct stat &stat) {
+		path = (*_directives["root"].str) + path;
+
+		return ::stat(path.c_str(), &stat) == 0;
+	}
+
+	string getIndex(void) {
+		return *(_directives["index"].str);
 	}
 
 	~LocationContext(){};

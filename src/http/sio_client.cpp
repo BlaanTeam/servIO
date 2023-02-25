@@ -27,30 +27,65 @@ bool Client::timedOut(void) const {
 	return getmstime() - _time > TIMEOUT;
 }
 
-#include <fstream>
-
 bool Client::handleRequest(stringstream &stream) {
 	_req.consumeStream(stream);
+	string host = _req.getHeaders()["Host"];
+	trim(host);
+	VirtualServer *virtualServer = config.match(Address(_connection.first), host);
 
 	if (!_req.valid()) {
-		_res.sendError(_connection.first, BAD_REQUEST);
+		_res.setupError(BAD_REQUEST);
 		goto purgeConnection;
 	}
-	if (_req.match(REQ_BODY | REQ_DONE)) {
-		if (_req.getMethod() & UNKNOWN) {
-			_res.sendError(_connection.first, METHOD_NOT_ALLOWED);
-			goto purgeConnection;
-		}
-
+	if (_req.match(REQ_BODY | REQ_DONE) && virtualServer) {
 		if (_res.match(RES_INIT | RES_HEADER)) {
-			stringstream *file = new stringstream;
+			Location *location = virtualServer->match(_req.getPath());
+			iostream *file = nullptr;
 
-			buildDirectoryListing(".", *file);
+			if (_req.getMethod() & UNKNOWN || (location && !location->isAllowedMethod(_req.getMethod()))) {
+				_res.setupError(METHOD_NOT_ALLOWED);
+				goto sendResponse;
+			}
+
+			if (virtualServer->isRedirectable()) {
+				// Handler Return logic !
+				cerr << "Redicection !" << endl;
+				return false;
+			}
+
+			struct stat fileStat;
+			string      path = _req.getPath();
+			bzero(&fileStat, sizeof fileStat);
+			if (!location || !location->found(path, fileStat)) {
+				_res.setupError(NOT_FOUND);
+				goto sendResponse;
+			}
+
+			if (S_ISDIR(fileStat.st_mode)) {
+				string tmp = path + location->getIndex();
+				if (!access(tmp.c_str(), F_OK | R_OK)) {
+					file = new fstream(tmp, ios::in);
+					path = tmp;
+				} else if (location->isAutoIndexable()) {
+					_res.setupDirectoryListing(path, _req.getPath());
+					goto sendResponse;
+				} else {
+					_res.setupError(FORBIDDEN);
+					goto sendResponse;
+				}
+			} else {
+				if (!access(path.c_str(), F_OK | R_OK)) {
+					file = new fstream(path, ios::in);
+				} else {
+					_res.setupError(FORBIDDEN);
+					goto sendResponse;
+				}
+			}
 			_res.setStatusCode(200);
-			_res.addHeader("Content-Type", mimeTypes["html"]);
+			_res.addHeader("Content-Type", mimeTypes.choiceMimeType(path));
 			_res.setStream(file);
 		}
-
+	sendResponse:
 		_res.send(_connection.first);
 		if (!_res.match(RES_DONE))
 			setTime(getmstime());

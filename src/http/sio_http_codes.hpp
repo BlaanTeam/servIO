@@ -94,8 +94,8 @@ extern string httpMethods[8];
 #define NAME "ServIo"
 #define VERSION "1.0.0"
 
-void buildResponseBody(const short &statusCode, stringstream &stream);
+iostream *buildResponseBody(const short &statusCode);
 
-void buildDirectoryListing(const string &path, stringstream &stream);
+iostream *buildDirectoryListing(const string &path, const string &title);
 
 #endif

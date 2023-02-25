@@ -58,27 +58,28 @@ int httpMethodCount = 8;
 
 string httpMethods[8] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
 
-void buildResponseBody(const short &statusCode, stringstream &stream) {
-	stream << "<html>" << endl
-	       << "<head><title>" << statusCode << " " << httpStatusCodes[statusCode] << "</title></head>" << endl
-	       << "<body>" << endl
-	       << "<center><h1>" << statusCode << " " << httpStatusCodes[statusCode] << "</h1></center>" << endl
-	       << "<hr><center>" NAME "/" VERSION "</center>" << endl
-	       << "</body>" << endl
-	       << "</html>" << endl;
+iostream *buildResponseBody(const short &statusCode) {
+	iostream *stream = new stringstream;
+	(*stream) << "<html>" << endl
+	          << "<head><title>" << statusCode << " " << httpStatusCodes[statusCode] << "</title></head>" << endl
+	          << "<body>" << endl
+	          << "<center><h1>" << statusCode << " " << httpStatusCodes[statusCode] << "</h1></center>" << endl
+	          << "<hr><center>" NAME "/" VERSION "</center>" << endl
+	          << "</body>" << endl
+	          << "</html>" << endl;
+	return stream;
 }
 
-stringstream builtInResponseBody;
-
-void buildDirectoryListing(const string &path, stringstream &stream) {
+iostream *buildDirectoryListing(const string &path, const string &title) {
 	DIR *dir = opendir(path.c_str());
 	if (!dir)
-		return;
+		return nullptr;
+	iostream *stream = new stringstream;
 
-	stream << "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Index of /awbx/</title>"
-	       << "<style> body { font-family: Arial, sans-serif; font-size: 16px; } h1 { text-align: center; } table { width: 100%; border-collapse: collapse; margin-top: 20px; } th, td { padding: 10px; text-align: left; } th { background-color: #eee; } tr:nth-child(even) { background-color: #f2f2f2; } a { color: #000; text-decoration: none; } a:hover { text-decoration: underline; }</style> "
-	       << "</head><body><h1> Index of" << path /*Todo: use last directory in title */ << "</h1><table><thead><tr><th>Name</th><th>Last Modified</th><th>Size(bytes)</th></tr></thead><tbody>"
-	       << "<tr><td> <a href=\"../\">../</a></td> <td>-</td> <td>-</td></tr><tr>";
+	(*stream) << "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Index of " << title << "</title>"
+	          << "<style> body { font-family: Arial, sans-serif; font-size: 16px; } h1 { text-align: center; } table { width: 100%; border-collapse: collapse; margin-top: 20px; } th, td { padding: 10px; text-align: left; } th { background-color: #eee; } tr:nth-child(even) { background-color: #f2f2f2; } a { color: #000; text-decoration: none; } a:hover { text-decoration: underline; }</style> "
+	          << "</head><body><h1> Index of " << title << "</h1><table><thead><tr><th>Name</th><th>Last Modified</th><th>Size(bytes)</th></tr></thead><tbody>"
+	          << "<tr><td> <a href=\"../\">../</a></td> <td>-</td> <td>-</td></tr><tr>";
 	struct dirent *entry;
 
 	while ((entry = readdir(dir))) {
@@ -94,8 +95,9 @@ void buildDirectoryListing(const string &path, stringstream &stream) {
 		char dateBuffer[0xFF] = {0};
 		strftime(dateBuffer, 0xFF, "%d-%b-%Y %H:%M", localtime(&info.st_mtimespec.tv_sec));
 
-		stream << "<td><a href=\"" << d_name << "\">" << d_name << "</a></td> <td>" << dateBuffer << "</td> <td>" << (S_ISDIR(info.st_mode) ? "-" : to_string(info.st_size)) << "</td> </tr>";
+		(*stream) << "<td><a href=\"" << d_name << "\">" << d_name << "</a></td> <td>" << dateBuffer << "</td> <td>" << (S_ISDIR(info.st_mode) ? "-" : to_string(info.st_size)) << "</td> </tr>";
 	}
-	stream << "</tbody></table></body></html>";
+	(*stream) << "</tbody></table></body></html>";
 	closedir(dir);
+	return stream;
 }

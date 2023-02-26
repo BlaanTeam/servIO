@@ -36,7 +36,7 @@ bool Client::handleRequest(stringstream &stream) {
 	VirtualServer *virtualServer = config.match(Address(_connection.first), host);
 
 	if (!_req.valid()) {
-		_res.setupErrorResponse(BAD_REQUEST);
+		_res.setupErrorResponse(BAD_REQUEST, virtualServer, true);
 		goto purgeConnection;
 	}
 
@@ -46,7 +46,7 @@ bool Client::handleRequest(stringstream &stream) {
 			string    path = _req.getPath();
 
 			if (_req.getMethod() & UNKNOWN || (location && !location->isAllowedMethod(_req.getMethod()))) {
-				_res.setupErrorResponse(METHOD_NOT_ALLOWED);
+				_res.setupErrorResponse(METHOD_NOT_ALLOWED, location, true);
 				goto sendResponse;
 			}
 
@@ -59,7 +59,7 @@ bool Client::handleRequest(stringstream &stream) {
 			struct stat fileStat;
 			bzero(&fileStat, sizeof fileStat);
 			if (!location || (!location->found(path, fileStat) /*&& !location->isRedirectable()*/)) {  //! the location does not inherit the `return`
-				_res.setupErrorResponse(NOT_FOUND);
+				_res.setupErrorResponse(NOT_FOUND, location ? (MainContext<Type> *)location : (MainContext<Type> *)virtualServer, true);
 				goto sendResponse;
 			}
 
@@ -72,12 +72,12 @@ bool Client::handleRequest(stringstream &stream) {
 				else if (location->isAutoIndexable())
 					_res.setupDirectoryListing(path, _req.getPath());
 				else
-					_res.setupErrorResponse(FORBIDDEN);
+					_res.setupErrorResponse(FORBIDDEN, location, true);
 			} else {
 				if (!access(path.c_str(), F_OK | R_OK))
 					_res.setupNormalResponse(path, new fstream(path, ios::in));
 				else
-					_res.setupErrorResponse(FORBIDDEN);
+					_res.setupErrorResponse(FORBIDDEN, location, true);
 			}
 		}
 	sendResponse:
@@ -91,10 +91,11 @@ bool Client::handleRequest(stringstream &stream) {
 	else if (_res.match(RES_DONE | RES_INIT))
 		_pfd->events &= ~POLLOUT;
 
-	if (_res.keepAlive())
-		return false;
 
 purgeConnection:
+
+	if (_res.keepAlive() || !_res.match(RES_DONE))
+		return false;
 	return clients.purgeConnection(_connection.first);
 }
 

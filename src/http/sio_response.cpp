@@ -125,11 +125,27 @@ void Response::send(const sockfd &fd) {
 	}
 }
 
-void Response::setupErrorResponse(const int &statusCode) {
+void Response::setupErrorResponse(const int &statusCode, MainContext<Type> *ctx, bool isBuiltIn) {
 	setStatusCode(statusCode);
 	setConnectionStatus(false);
 	init();
 	addHeader("Content-Type", mimeTypes["html"]);
+
+	if (ctx) {
+		ErrorPage *errPage = ctx->getErrorPage(statusCode);
+		if (errPage) {
+			if (!errPage->exists() && isBuiltIn)
+				setupErrorResponse(NOT_FOUND, ctx, false);
+			else if (!errPage->exists())
+				setStream(buildResponseBody(NOT_FOUND));
+			else {
+				addHeader("Content-Type", mimeTypes.choiceMimeType(errPage->page));
+				setStream(new fstream(errPage->page, ios::in));
+			}
+			return;
+		}
+	}
+
 	setStream(buildResponseBody(statusCode));
 }
 

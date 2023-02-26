@@ -66,3 +66,10 @@ class StringICaseCompare::CharICaseCompare : public binary_function<unsigned cha
 bool StringICaseCompare::operator()(const std::string &s1, const std::string &s2) const {
 	return lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end(), CharICaseCompare());
 }
+
+string joinPath(const string &parentDir, const string &childDir) {
+	string path(parentDir);
+	if (parentDir.back() != '/')
+		path += "/";
+	return path + childDir;
+}

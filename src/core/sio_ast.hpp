@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "http/sio_http_codes.hpp"
+#include "utility/sio_helpers.hpp"
 #include "sio_socket.hpp"
 
 using namespace std;
@@ -33,6 +34,13 @@ enum TypeList {
 struct ErrorPage {
 	string pattern, page;
 	ErrorPage(string pattern = "", string page = "");
+
+	bool match(const int &errorCode) const;
+	bool exists() const;
+	void setRoot(const string &root);
+
+	private:
+		bool _root; // TODO : try to set the root in the transfer function !
 };
 
 struct Redirect {
@@ -164,6 +172,15 @@ class MainContext<Type> {
 
 	bool isRedirectable() {
 		return _directives.find("return") != _directives.end();
+	}
+
+	ErrorPage *getErrorPage(const int &errorCode) {
+		for (dirIter it = _directives.begin(); it != _directives.end(); it++)
+			if (it->second.type & ERRPG && it->second.errPage->match(errorCode)) {
+				it->second.errPage->setRoot(*_directives["root"].str);
+				return it->second.errPage;
+			}
+		return nullptr;
 	}
 
 	virtual ~MainContext() {

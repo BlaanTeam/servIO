@@ -136,9 +136,11 @@ void Response::setupErrorResponse(const int &statusCode, MainContext<Type> *ctx,
 		if (errPage) {
 			if (!errPage->exists() && isBuiltIn)
 				setupErrorResponse(NOT_FOUND, ctx, false);
-			else if (!errPage->exists())
+			else if (!errPage->exists()) {
+				if (errno == EACCES && !isBuiltIn)
+					return setupErrorResponse(FORBIDDEN, ctx, true);
 				setStream(buildResponseBody(NOT_FOUND));
-			else {
+			} else {
 				addHeader("Content-Type", mimeTypes.choiceMimeType(errPage->page));
 				setStream(new fstream(errPage->page, ios::in));
 			}

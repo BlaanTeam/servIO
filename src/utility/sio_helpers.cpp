@@ -69,7 +69,7 @@ bool StringICaseCompare::operator()(const std::string &s1, const std::string &s2
 
 string joinPath(const string &parentDir, const string &childDir) {
 	string path(parentDir);
-	if (parentDir.back() != '/')
+	if (parentDir.back() != '/' && childDir.front() != '/')
 		path += "/";
 	return path + childDir;
 }

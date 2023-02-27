@@ -213,7 +213,18 @@ void Response::setupChunkedBody() {
 }
 
 void Response::sendChunkedBody(const sockfd &fd) {
-	(void)fd;
+	char buff[(1 << 10)];
+
+	_stream->read(buff, (1 << 10));
+	if (_stream->gcount() > 0) {
+		_ss << hex << _stream->gcount() << CRLF;
+		::send(fd, _ss.str().c_str(), _ss.str().size(), 0);
+		::send(fd, buff, _stream->gcount(), 0);
+		::send(fd, CRLF, 2, 0);
+		_ss.str("");
+		_ss.clear();
+	}
+	setState(_stream->eof() ? RES_DONE : _state);
 }
 
 void Response::setupRangedBody() {

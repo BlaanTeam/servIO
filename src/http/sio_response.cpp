@@ -107,8 +107,8 @@ void Response::send(const sockfd &fd) {
 		setState(RES_BODY);
 	}
 
-	if ((_statusCode / 100) == 1 || _statusCode == 204 || _statusCode == 301)
-		return setState(RES_DONE);
+	// if ((_statusCode / 100) == 1 || _statusCode == 204 || _statusCode == 301)
+	// 	return setState(RES_DONE);
 
 	if (_state & RES_BODY && _stream) {
 		switch (_type) {
@@ -149,6 +149,24 @@ void Response::setupErrorResponse(const int &statusCode, MainContext<Type> *ctx,
 	}
 
 	setStream(buildResponseBody(statusCode));
+}
+
+void Response::setupRedirectResponse(Redirect *redir, MainContext<Type> *ctx) {
+	redir->prepare(ctx);
+
+	setStatusCode(redir->code);
+	init();
+	addHeader("Content-Type", mimeTypes["html"]);
+
+	if (redir->isRedirect) {
+		addHeader("Location", redir->path);
+		setStream(buildResponseBody(redir->code));
+		return;
+	}
+	addHeader("Content-Type", mimeTypes[""]);
+	iostream *ss = new stringstream;
+	(*ss) << redir->path;
+	setStream(ss);
 }
 
 void Response::setupDirectoryListing(const string &path, const string &title) {

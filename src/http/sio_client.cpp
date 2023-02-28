@@ -45,28 +45,37 @@ bool Client::handleRequest(stringstream &stream) {
 			Location *location = virtualServer->match(_req.getPath());
 			string    path = _req.getPath();
 
-			if (_req.getMethod() & UNKNOWN || (location && !location->isAllowedMethod(_req.getMethod()))) {
+			if (virtualServer->isRedirectable()) {
+				_res.setupRedirectResponse(virtualServer->getRedir(), virtualServer);
+				goto sendResponse;
+			}
+
+			if (!location) {  //! the location does not inherit the `return`
+				_res.setupErrorResponse(NOT_FOUND, virtualServer, true);
+				goto sendResponse;
+			} else if (location->isRedirectable()) {
+				_res.setupRedirectResponse(location->getRedir(), location);
+				goto sendResponse;
+			} else if (!location->isAllowedMethod(_req.getMethod())) {
 				_res.setupErrorResponse(METHOD_NOT_ALLOWED, location, true);
 				goto sendResponse;
 			}
 
-			if (virtualServer->isRedirectable()) {
-				// Handler Return logic !
-				cerr << "Redicection !" << endl;
-				return false;
-			}
+			// TODO: check if the location configured as CGI or UPLOAD
 
 			struct stat fileStat;
 			bzero(&fileStat, sizeof fileStat);
-			if (!location || (!location->found(path, fileStat) /*&& !location->isRedirectable()*/)) {  //! the location does not inherit the `return`
-				_res.setupErrorResponse(NOT_FOUND, location ? (MainContext<Type> *)location : (MainContext<Type> *)virtualServer, true);
-				goto sendResponse;
-			}
+			if (!location->found(path, fileStat)) {
+				_res.setupErrorResponse(NOT_FOUND, location, true);
+			} else if (S_ISDIR(fileStat.st_mode)) {
+				// ? INFO : redirect in case uri without `/` in the ending
+				if (_req.getPath().length() > 1 && _req.getPath()[_req.getPath().length() - 1] != '/') {
+					Redirect redir(MOVED_PERMANENTLY, joinPath(_req.getPath(), "/"), true);
+					_res.setupRedirectResponse(&redir, location);
+					goto sendResponse;
+				}
 
-			// TODO: check if the location configured as CGI or UPLOAD or REDIRECT !
-
-			if (S_ISDIR(fileStat.st_mode)) {
-				string tmp = path + location->getIndex();
+				string tmp = joinPath(path, location->getIndex());
 				if (!access(tmp.c_str(), F_OK | R_OK))
 					_res.setupNormalResponse(tmp, new fstream(tmp, ios::in));
 				else if (location->isAutoIndexable())
@@ -90,7 +99,6 @@ bool Client::handleRequest(stringstream &stream) {
 		_pfd->events |= POLLOUT;
 	else if (_res.match(RES_DONE | RES_INIT))
 		_pfd->events &= ~POLLOUT;
-
 
 purgeConnection:
 

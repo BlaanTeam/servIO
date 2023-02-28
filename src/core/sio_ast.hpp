@@ -11,7 +11,7 @@
 
 #include "http/sio_http_codes.hpp"
 #include "utility/sio_helpers.hpp"
-#include "sio_socket.hpp"
+#include "utility/sio_socket.hpp"
 
 using namespace std;
 
@@ -39,15 +39,11 @@ struct ErrorPage {
 	bool exists() const;
 	void setRoot(const string &root);
 
-	private:
-		bool _root; // TODO : try to set the root in the transfer function !
+   private:
+	bool _root;  // TODO : try to set the root in the transfer function !
 };
 
-struct Redirect {
-	int    code;
-	string path;
-	Redirect(int code = 301, string path = "");
-};
+struct Redirect;
 
 struct ServerName : public vector<string> {
 	ServerName(const vector<string> &vec);
@@ -174,6 +170,10 @@ class MainContext<Type> {
 		return _directives.find("return") != _directives.end();
 	}
 
+	Redirect *getRedir() {
+		return _directives["return"].redirect;
+	}
+
 	ErrorPage *getErrorPage(const int &errorCode) {
 		for (dirIter it = _directives.begin(); it != _directives.end(); it++)
 			if (it->second.type & ERRPG && it->second.errPage->match(errorCode)) {
@@ -187,6 +187,15 @@ class MainContext<Type> {
 		for (size_t idx = 0; idx < _contexts.size(); idx++)
 			delete _contexts[idx];
 	};
+};
+
+struct Redirect {
+	int    code;
+	string path;
+	bool   isRedirect;
+	bool   isLocal;
+	Redirect(int code = 301, string path = "", bool isLocal = false);
+	void prepare(MainContext<Type> *ctx);
 };
 
 template <class T = vector<string> >

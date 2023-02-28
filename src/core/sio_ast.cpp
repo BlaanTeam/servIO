@@ -16,15 +16,25 @@ bool ErrorPage::exists() const {
 }
 
 void ErrorPage::setRoot(const string &root) {
-	// ! TODO : this function will be removed !
-	if (!_root)
-	{
+	// ! TODO : this function will be removed ! tell oussama
+	if (!_root) {
 		page = joinPath(root, page);
 		_root = true;
 	}
 }
 
-Redirect::Redirect(int code, string path) : code(code), path(path){};
+Redirect::Redirect(int code, string path, bool isLocal) : code(code), path(path), isLocal(isLocal) { //! TODO: change isLocal to _isLocal !!
+	isRedirect = (code == 301 || code == 302 || code == 303 || code == 307 || code == 308);
+};
+
+void Redirect::prepare(MainContext<Type> *ctx) {
+	if (isRedirect) {
+		ServerName *serverName = ctx->directives()["server_name"].servName;
+
+		if (path.length() > 0 && path[0] == '/' && !isLocal)
+			path = joinPath((*serverName)[0], path);
+	}
+}
 
 ServerName::ServerName(const vector<string> &vec) : vector<string>(vec) {}
 

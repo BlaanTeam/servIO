@@ -25,6 +25,8 @@ pair<bool, string> normpath(const string &path, const char sep) {
 			tmp += "/";
 		tmp += components[idx];
 	}
+	if (path.length() && path[path.length() - 1] == '/')
+		tmp = joinPath(tmp, "/");	
 	return make_pair(true, tmp);
 }
 

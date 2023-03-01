@@ -354,16 +354,14 @@ failed:
 	return delete ret, nullptr;
 }
 
-static void updateRootDirective(string *value) {
-	if (value->length() > 0 && (*value)[0] != '/')
-		*value = PREFIX_FOLDER "/" + *value;
+static void updateRootDirective(string &value) {
+	if (value.length() > 0 && value[0] != '/')
+		value = PREFIX_FOLDER "/" + value;
 }
 
 bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	if (!tree)
 		return false;
-	
-	updateRootDirective(&(*tree)["root"][0]);
 
 	if ((tree->type() & locationCtx) && (parent->type() & locationCtx)) {
 		const string &pre = ((LocationContext<> *)parent)->location();
@@ -406,6 +404,8 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 	MainContext<Type> *ret = tree->type() & httpCtx     ? (MainContext<Type> *)new HttpContext<Type>()
 	                         : tree->type() & serverCtx ? (MainContext<Type> *)new ServerContext<Type>()
 	                                                    : (MainContext<Type> *)new LocationContext<Type>(((LocationContext<> *)tree)->location());
+
+	updateRootDirective((*tree)["root"][0]);
 
 	MainContext<>::dirIter it = tree->directives().begin();
 

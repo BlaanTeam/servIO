@@ -412,39 +412,45 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 	while (it != tree->directives().end()) {
 		const string         &key = it->first;
 		const vector<string> &val = it->second;
-		Type                  tp;
+		Type                  typ;
 
 		if (key == "allowed_methods") {
-			tp.type = INT;
-			tp.value = 0;
+			typ.type = INT;
+			typ.value = 0;
+			
 			for (size_t i = 0; i < val.size(); i++) {
-				if (val[i] == "GET")
-					tp.value |= GET;
-				else if (val[i] == "POST")
-					tp.value |= POST;
-				else
-					tp.value |= DELETE;
+				if (val[i] == "GET")       typ.value |= GET;
+				else if (val[i] == "POST") typ.value |= POST;
+				else /*DELETE*/            typ.value |= DELETE;
 			}
-		} else if (key == "client_max_body_size") {
-			tp.type = INT;
-			tp.value = stol(val[0]);
-			if (val[0].back() == 'k')
-				tp.value *= (1LL << 10);
-			else if (val[0].back() == 'm')
-				tp.value *= (1LL << 20);
-			else if (val[0].back() == 'g')
-				tp.value *= (1LL << 30);
-		} else if (key == "autoindex") {
-			tp.type = BOOL;
-			tp.ok = (val[0] == "on");
-		} else if (key.substr(0, 10) == "error_page") {
-			tp.type = ERRPG;
-			tp.errPage = new ErrorPage(val[0], val[1][0] == '/'? val[1]: (*tree)["root"][0] + "/" + val[1]);
-		} else if (key == "return") {
-			tp.type = REDIR;
-			tp.redirect = new Redirect(stoi(val[0]), val.size() == 2 ? val[1] : "");
-		} else if (key == "listen") {
-			tp.type = ADDR;
+		}
+		
+		else if (key == "client_max_body_size") {
+			typ.type = INT;
+			typ.value = stol(val[0]);
+
+			if (val[0].back() == 'k')      typ.value *= (1LL << 10);
+			else if (val[0].back() == 'm') typ.value *= (1LL << 20);
+			else if (val[0].back() == 'g') typ.value *= (1LL << 30);
+		}
+		
+		else if (key == "autoindex") {
+			typ.type = BOOL;
+			typ.ok = (val[0] == "on");
+		}
+		
+		else if (key.substr(0, 10) == "error_page") {
+			typ.type = ERRPG;
+			typ.errPage = new ErrorPage(val[0], val[1][0] == '/'? val[1]: (*tree)["root"][0] + "/" + val[1]);
+		}
+		
+		else if (key == "return") {
+			typ.type = REDIR;
+			typ.redirect = new Redirect(stoi(val[0]), val.size() == 2 ? val[1] : "");
+		}
+		
+		else if (key == "listen") {
+			typ.type = ADDR;
 			const string &addr = val[0];
 			int           idx = addr.size() - 1;
 			int           port = 8080;
@@ -456,26 +462,30 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 
 			if (idx == -1 || addr[idx] == ':') {
 				if (idx + 1 != (int)addr.size()) port = stoi(addr.substr(idx + 1));
-				if (--idx >= 0) host = addr.substr(0, idx + 1);
+				if (--idx >= 0)                  host = addr.substr(0, idx + 1);
 			} else {
 				host = addr;
 			}
 
-			tp.addr = new Address(host, port);
+			typ.addr = new Address(host, port);
 
-			if (!tp.addr->good()) {
+			if (!typ.addr->good()) {
 				cerr << host << ' ' << port << '\n';
 				return _serr = "invalid adress: " + addr, make_pair(false, ret);
 			}
-		} else if (key == "server_name") {
-			tp.type = SERV_NAME;
-			tp.servName = new ServerName(val);
-		} else {  // index, root
-			tp.type = STR;
-			tp.str = new string(val[0]);
+		}
+		
+		else if (key == "server_name") {
+			typ.type = SERV_NAME;
+			typ.servName = new ServerName(val);
+		}
+		
+		else {  // index, root
+			typ.type = STR;
+			typ.str = new string(val[0]);
 		}
 
-		(*ret)[key] = tp;
+		(*ret)[key] = typ;
 
 		it++;
 	}

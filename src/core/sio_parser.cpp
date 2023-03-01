@@ -357,6 +357,8 @@ failed:
 bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	if (!tree)
 		return false;
+	
+	updateRootDirective(&(*tree)["root"][0]);
 
 	if ((tree->type() & locationCtx) && (parent->type() & locationCtx)) {
 		const string &pre = ((LocationContext<> *)parent)->location();
@@ -472,9 +474,6 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 			tp.type = STR;
 			tp.str = new string(val[0]);
 		}
-
-		if (key == "root")
-			updateRootDirective(tp.str);
 
 		(*ret)[key] = tp;
 

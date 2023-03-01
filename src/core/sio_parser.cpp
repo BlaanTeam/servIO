@@ -368,7 +368,7 @@ bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	if (parent) {
 		map<string, vector<string> > &directives = parent->directives();
 		for (MainContext<>::dirIter dir = directives.begin(); dir != directives.end(); dir++) {
-			if (tree->directives().find(dir->first) == tree->directives().end()) {
+			if (dir->first != "return" && tree->directives().find(dir->first) == tree->directives().end()) {
 				tree->directives().insert(*dir);
 			}
 		}

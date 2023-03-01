@@ -354,6 +354,11 @@ failed:
 	return delete ret, nullptr;
 }
 
+static void updateRootDirective(string *value) {
+	if (value->length() > 0 && (*value)[0] != '/')
+		*value = PREFIX_FOLDER "/" + *value;
+}
+
 bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	if (!tree)
 		return false;
@@ -392,11 +397,6 @@ bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	}
 
 	return true;
-}
-
-static void updateRootDirective(string *value) {
-	if (value->length() > 0 && (*value)[0] != '/')
-		*value = PREFIX_FOLDER "/" + *value;
 }
 
 pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {

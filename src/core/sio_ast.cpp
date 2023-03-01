@@ -55,43 +55,32 @@ Type::Type(const Type &cpy) {
 }
 
 Type &Type::operator=(const Type &cpy) {
-	if (type & STR)
-		delete str;
-	else if (type & ADDR)
-		delete addr;
-	else if (type & ERRPG)
-		delete errPage;
-	else if (type & REDIR)
-		delete redirect;
-	else if (type & SERV_NAME)
-		delete servName;
+	switch (type) {
+		case STR:       delete str;      break ;
+		case ADDR:      delete addr;     break ;
+		case ERRPG:     delete errPage;  break ;
+		case REDIR:     delete redirect; break ;
+		case SERV_NAME: delete servName; break ;
+	}
 	type = cpy.type;
-	if (type & STR)
-		str = new string(*cpy.str);
-	else if (type & ADDR)
-		addr = new Address(*cpy.addr);
-	else if (type & ERRPG)
-		errPage = new ErrorPage(*cpy.errPage);
-	else if (type & REDIR)
-		redirect = new Redirect(*cpy.redirect);
-	else if (type & SERV_NAME)
-		servName = new ServerName(*cpy.servName);
-	else if (type & BOOL)
-		ok = cpy.ok;
-	else
-		value = cpy.value;
+	switch (type) {
+		case BOOL:      ok = cpy.ok;                              break ;
+		case INT:       value = cpy.value;                        break ;
+		case STR:       str = new string(*cpy.str);               break ;
+		case ADDR:      addr = new Address(*cpy.addr);            break ;
+		case ERRPG:     errPage = new ErrorPage(*cpy.errPage);    break ;
+		case REDIR:     redirect = new Redirect(*cpy.redirect);   break ;
+		case SERV_NAME: servName = new ServerName(*cpy.servName); break ;
+	}
 	return *this;
 }
 
 Type::~Type() {
-	if (type & STR)
-		delete str;
-	else if (type & ADDR)
-		delete addr;
-	else if (type & ERRPG)
-		delete errPage;
-	else if (type & REDIR)
-		delete redirect;
-	else if (type & SERV_NAME)
-		delete servName;
+	switch (type) {
+		case STR:       delete str;      break ;
+		case ADDR:      delete addr;     break ;
+		case ERRPG:     delete errPage;  break ;
+		case REDIR:     delete redirect; break ;
+		case SERV_NAME: delete servName; break ;
+	}
 }

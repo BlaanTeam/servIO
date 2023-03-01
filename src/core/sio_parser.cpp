@@ -437,7 +437,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 			tp.ok = (val[0] == "on");
 		} else if (key.substr(0, 10) == "error_page") {
 			tp.type = ERRPG;
-			tp.errPage = new ErrorPage(val[0], val[1]);
+			tp.errPage = new ErrorPage(val[0], val[1][0] == '/'? val[1]: (*tree)["root"][0] + "/" + val[1]);
 		} else if (key == "return") {
 			tp.type = REDIR;
 			tp.redirect = new Redirect(stoi(val[0]), val.size() == 2 ? val[1] : "");

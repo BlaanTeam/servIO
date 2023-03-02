@@ -33,8 +33,10 @@ void Request::parseFirstLine(string &line) {
 
 	pair<bool, string> pr = normpath(_path);
 
-	if (!every(buff, ::isupper) || !pr.first || httpVer != HTTP_VERSION)
+	if (uri.size() > 2048 ||!every(buff, ::isupper) || !pr.first || httpVer != HTTP_VERSION){
+		_statusCode = (uri.size() > 2048) ? REQUEST_URI_TOO_LONG :_statusCode;
 		goto invalid;
+	}
 	_path = pr.second;
 	{
 		int idx = 0;
@@ -146,6 +148,10 @@ HttpMethod Request::getMethod(void) const {
 	return _method;
 }
 
+short Request::getStatusCode(void) const {
+	return _statusCode;
+}
+
 map<string, string, StringICaseCompare> &Request::getHeaders(void) const {
 	return (map<string, string, StringICaseCompare> &)_headers;
 }
@@ -156,7 +162,7 @@ bool Request::valid() const {
 
 bool Request::match(const int &state) const {
 	return _state & state;
-}
+} 
 
 void Request::reset(void) {
 	_state = REQ_INIT;

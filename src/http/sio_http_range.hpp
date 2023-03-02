@@ -34,6 +34,7 @@ class Range {
 
 	// Getters
 	bool valid(void) const;
+	vector<RangeSpecifier> getRangeSpecifiers(void) const;
 };
 
 #endif

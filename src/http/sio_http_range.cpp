@@ -73,3 +73,7 @@ invalid:
 bool Range::valid(void) const {
 	return _valid;
 }
+
+vector<RangeSpecifier> Range::getRangeSpecifiers(void) const {
+	return rangeSpecifiers;
+}

@@ -44,7 +44,7 @@ class Lexer : public deque<Token> {
    public:
 	Lexer();
 
-	void tokenizer(ifstream &file);
+	bool tokenizer(ifstream &file);
 };
 
 #endif

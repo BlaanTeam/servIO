@@ -43,9 +43,10 @@ string Token::name() const {
 
 Lexer::Lexer() {}
 
-void Lexer::tokenizer(ifstream &file) {
+bool Lexer::tokenizer(ifstream &file) {
 	char   chr;
 	size_t line = 1;
+	string value;
 
 	file.get(chr);
 	while (!file.eof()) {
@@ -65,12 +66,24 @@ void Lexer::tokenizer(ifstream &file) {
 		case '}':
 			push_back(Token(chr == '}' ? CCURLY : OCURLY, string(1, chr), line));
 			break;
+		case '\"':
+			// push_back(Token(DQOUTE, string(1, chr), line));
+			file.get(chr);
+			while (chr != '\"' && !file.eof()) {
+				value += chr;
+				file.get(chr);
+			}
+			push_back(Token(WORD, value, line));
+			value.clear();
+			if (chr != '\"')
+				return false;
+			break;
 		case ';':
 			push_back(Token(SEMICOLON, string(1, chr), line));
 			break;
 		default:
 			string word;
-			while (!strchr("{};", chr) && !isspace(chr) && !file.eof()) {
+			while (!strchr("{};\"", chr) && !isspace(chr) && !file.eof()) {
 				if (chr == '\\')
 					file.get(chr);
 				word += string(1, chr);
@@ -86,4 +99,6 @@ void Lexer::tokenizer(ifstream &file) {
 	// reset seek of the file to the beginning !
 	file.clear();
 	file.seekg(0);
+	
+	return true;
 }

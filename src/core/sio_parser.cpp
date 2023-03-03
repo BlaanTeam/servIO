@@ -3,10 +3,14 @@
 // Public member functions
 
 Parser::Parser(ifstream &cfile) {
-	_lex.tokenizer(cfile);
+	if (!_lex.tokenizer(cfile))
+		_serr = "LINE " + to_string(_lex.back().line()) + ": found EOF while looking for matching `\"'";
 };
 
 MainContext<Type> *Parser::parse() {
+	if (!_serr.empty())
+		return nullptr;
+
 	MainContext<> *tree = parse_main();
 
 	if (!updateDirectives(tree))

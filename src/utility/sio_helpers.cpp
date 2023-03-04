@@ -26,7 +26,7 @@ pair<bool, string> normpath(const string &path, const char sep) {
 		tmp += components[idx];
 	}
 	if (path.length() && path[path.length() - 1] == '/')
-		tmp = joinPath(tmp, "/");	
+		tmp = joinPath(tmp, "/");
 	return make_pair(true, tmp);
 }
 
@@ -73,5 +73,7 @@ string joinPath(const string &parentDir, const string &childDir) {
 	string path(parentDir);
 	if (parentDir.back() != '/' && childDir.front() != '/')
 		path += "/";
+	else if (parentDir.back() == '/' && childDir.front() == '/')
+		return parentDir.substr(0, parentDir.length() - 1) + childDir;
 	return path + childDir;
 }

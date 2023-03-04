@@ -7,6 +7,8 @@ Body::Body() {
 	_contentLength = 0;
 	_chunkedLength = 0;
 	_bodyFile = nullptr;
+	_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
+	_bodyFile = fopen(_filename.c_str(), "w+");
 }
 
 Body::Body(const Body &copy) {
@@ -132,8 +134,6 @@ void Body::parseNormalBody(istream &stream) {
 
 void Body::consumeBody(istream &stream, Request *req) {
 	if (_bodyState & BODY_INIT) {
-		_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
-		_bodyFile = fopen(_filename.c_str(), "w+");
 		// TODO: check if the file openned successfully	 !!
 		chooseState(req->getHeaders());
 		cout << "Body State: " << _bodyState << endl;

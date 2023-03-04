@@ -162,6 +162,10 @@ void Body::consumeBody(istream &stream, Request *req) {
 	}
 }
 
+int Body::getFileno() const {
+	return _bodyFile ? fileno(_bodyFile) : -1;
+}
+
 Body::~Body() {
 	fclose(_bodyFile);  // TODO: TBD !!
 }

@@ -49,6 +49,8 @@ class Body {
 	void chooseState(map<string, string, StringICaseCompare> &headers);
 	void setState(const int &state);
 	void consumeBody(istream &stream, Request *req);
+
+	int getFileno() const;
 };
 
 #include "./sio_request.hpp"

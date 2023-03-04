@@ -7,6 +7,7 @@
 #include <iostream>
 #include <map>
 
+#include "./sio_cgi.hpp"
 #include "./sio_request.hpp"
 #include "./sio_response.hpp"
 #include "core/sio_config.hpp"
@@ -19,6 +20,11 @@ class Client {
 	long long             _time;
 	Request               _req;
 	Response              _res;
+
+	MainContext<Type> *_ctx;
+
+	int   _fds[2];
+	pid_t _pid;
 
    public:
 	Client();
@@ -34,6 +40,8 @@ class Client {
 	bool handleRequest(stringstream &stream);
 
 	void handleResponse(const sockfd &fd);
+
+	bool isInternalServerError();
 
 	void reset(void);
 };

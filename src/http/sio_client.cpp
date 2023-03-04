@@ -1,6 +1,7 @@
 #include "sio_client.hpp"
 
 Client::Client() {
+	bzero(_fds, sizeof _fds);
 	_time = getmstime();
 }
 
@@ -35,16 +36,16 @@ bool Client::handleRequest(stringstream &stream) {
 	trim(host);
 	VirtualServer *virtualServer = config.match(Address(_connection.first), host);
 
-	if (!_req.valid()) {
-		_res.setupErrorResponse(BAD_REQUEST, virtualServer, true);
-		goto purgeConnection;
-	}
+	_ctx = virtualServer;
 
-	if (_req.match(REQ_BODY | REQ_DONE) && virtualServer) {
+	if (!_req.valid())
+		_res.setupErrorResponse(_req.getStatusCode(), virtualServer, true);
+	else if (_req.match(REQ_BODY | REQ_DONE) && virtualServer) {
 		if (_res.match(RES_INIT | RES_HEADER)) {
 			Location *location = virtualServer->match(_req.getPath());
 			string    path = _req.getPath();
 
+			_ctx = location;
 			if (virtualServer->isRedirectable()) {
 				_res.setupRedirectResponse(virtualServer->getRedir(), virtualServer);
 				goto sendResponse;
@@ -62,6 +63,35 @@ bool Client::handleRequest(stringstream &stream) {
 			}
 
 			// TODO: check if the location configured as CGI or UPLOAD
+			size_t locationLength = location->location().length();
+			size_t pathLength = _req.getPath().length();
+
+			if (location->isCGI() && pathLength > locationLength) {  // ! INFO: why this condition !
+				CGI cgi(".py", location, &_req, &_res);
+				if (cgi.valid()) {
+					cgi.init();
+					pipe(_fds);
+					_pid = fork();
+					if (!_pid) {
+						int fd = _req.getFileno();
+						lseek(fd, 0, SEEK_SET);
+
+						dup2(fd, STDIN_FILENO);
+						dup2(_fds[1], STDOUT_FILENO);
+
+						close(fd);
+						close(_fds[0]);
+						close(_fds[1]);
+						cgi.setenv();
+						execvp(cgi._scriptFileName.c_str(), (char *[]){NULL});
+						perror("execvp");
+						exit(1);
+					}
+					close(_fds[1]);
+					_res.setupCGIResponse(_fds[0]);
+					goto sendResponse;
+				}
+			}
 
 			struct stat fileStat;
 			bzero(&fileStat, sizeof fileStat);
@@ -69,7 +99,7 @@ bool Client::handleRequest(stringstream &stream) {
 				_res.setupErrorResponse(NOT_FOUND, location, true);
 			} else if (S_ISDIR(fileStat.st_mode)) {
 				// ? INFO : redirect in case uri without `/` in the ending
-				if (_req.getPath().length() > 1 && _req.getPath()[_req.getPath().length() - 1] != '/') {
+				if (pathLength > 1 && _req.getPath()[pathLength - 1] != '/') {
 					Redirect redir(MOVED_PERMANENTLY, joinPath(_req.getPath(), "/"), true);
 					_res.setupRedirectResponse(&redir, location);
 					goto sendResponse;
@@ -91,6 +121,11 @@ bool Client::handleRequest(stringstream &stream) {
 		}
 	sendResponse:
 		_res.send(_connection.first);
+		if (isInternalServerError()) {  // TODO: refactor this code!
+			_res.setupErrorResponse(INTERNAL_SERVER_ERROR, _ctx, true);
+			_res.send(_connection.first);
+			return false;
+		}
 		if (!_res.match(RES_DONE))
 			setTime(getmstime());
 	}
@@ -100,8 +135,6 @@ bool Client::handleRequest(stringstream &stream) {
 	else if (_res.match(RES_DONE | RES_INIT))
 		_pfd->events &= ~POLLOUT;
 
-purgeConnection:
-
 	if (_res.keepAlive() || !_res.match(RES_DONE))
 		return false;
 	return clients.purgeConnection(_connection.first);
@@ -109,6 +142,11 @@ purgeConnection:
 
 void Client::handleResponse(const sockfd &fd) {
 	_res.send(fd);
+	// ! maybe this will be useless
+	if (isInternalServerError()) {  // TODO: refactor this code!
+		_res.setupErrorResponse(INTERNAL_SERVER_ERROR, _ctx, true);
+		_res.send(fd);
+	}
 
 	if (_res.match(RES_BODY))
 		_pfd->events |= POLLOUT;
@@ -117,8 +155,17 @@ void Client::handleResponse(const sockfd &fd) {
 	reset();
 }
 
+bool Client::isInternalServerError() {
+	int status;
+	int ret = waitpid(_pid, &status, WNOHANG);
+	if (ret == _pid && ((WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status)))))
+		return true;
+	return false;
+}
+
 void Client::reset(void) {
 	if (_req.match(REQ_DONE) && _res.match(RES_DONE)) {
+		close(_fds[0]);  // TODO: close it in the destructor also !
 		_req.reset();
 		_res.reset();
 	}

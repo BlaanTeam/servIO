@@ -34,6 +34,7 @@ HTTP_SRC = sio_request.cpp\
 	sio_client.cpp\
 	sio_mime_types.cpp\
 	sio_http_range.cpp\
+	sio_cgi.cpp\
 
 # http headers
 HTTP_HEADER = sio_request.hpp\
@@ -43,6 +44,7 @@ HTTP_HEADER = sio_request.hpp\
 	sio_client.hpp\
 	sio_mime_types.hpp\
 	sio_http_range.hpp\
+	sio_cgi.hpp\
 
 # utility files
 UTILITY_SRC = sio_socket.cpp\

@@ -91,15 +91,16 @@ void Response::addHeader(const string &name, const string &value) {
 
 // TODO: return a boolean to check if the response end
 void Response::send(const sockfd &fd) {
-	(void)fd;
-
 	if (_state & (RES_INIT | RES_HEADER)) {
-		if (_type == LENGTHED_RES && _stream)
+		if (_type & LENGTHED_RES && _stream)
 			setupLengthedBody();
-		else if (_type == CHUNKED_RES)
+		else if (_type & CHUNKED_RES)
 			setupChunkedBody();
-		else if (_type == RANGED_RES)
+		else if (_type & RANGED_RES)
 			setupRangedBody();
+		else if (_type & CGI_RES)
+			if (!setupCGIBody())
+				return;
 
 		prepare();
 		::send(fd, _ss.str().c_str(), _ss.str().size(), 0);
@@ -110,7 +111,7 @@ void Response::send(const sockfd &fd) {
 	// if ((_statusCode / 100) == 1 || _statusCode == 204 || _statusCode == 301)
 	// 	return setState(RES_DONE);
 
-	if (_state & RES_BODY && _stream) {
+	if (_state & RES_BODY)  // && _stream) { ! TODO: check _stream
 		switch (_type) {
 		case LENGTHED_RES:
 			sendLengthedBody(fd);
@@ -121,11 +122,14 @@ void Response::send(const sockfd &fd) {
 		case RANGED_RES:
 			sendRangedBody(fd);
 			break;
+		case CGI_RES:
+			sendCGIBody(fd);
+			break;
 		}
-	}
 }
 
 void Response::setupErrorResponse(const int &statusCode, MainContext<Type> *ctx, bool isBuiltIn) {
+	_type = LENGTHED_RES;
 	setStatusCode(statusCode);
 	setConnectionStatus(false);
 	init();
@@ -147,11 +151,11 @@ void Response::setupErrorResponse(const int &statusCode, MainContext<Type> *ctx,
 			return;
 		}
 	}
-
 	setStream(buildResponseBody(statusCode));
 }
 
 void Response::setupRedirectResponse(Redirect *redir, MainContext<Type> *ctx) {
+	_type = LENGTHED_RES;
 	redir->prepare(ctx);
 
 	setStatusCode(redir->code);
@@ -170,6 +174,7 @@ void Response::setupRedirectResponse(Redirect *redir, MainContext<Type> *ctx) {
 }
 
 void Response::setupDirectoryListing(const string &path, const string &title) {
+	_type = LENGTHED_RES;
 	setStatusCode(200);
 	setConnectionStatus(true);
 	init();
@@ -178,12 +183,49 @@ void Response::setupDirectoryListing(const string &path, const string &title) {
 }
 
 void Response::setupNormalResponse(const string &path, iostream *file) {
+	_type = LENGTHED_RES;
 	// TODO: check if the file is openned !
 	setStatusCode(200);
 	setConnectionStatus(true);
 	init();
 	addHeader("Content-Type", mimeTypes.choiceMimeType(path));
 	setStream(file);
+}
+
+void Response::parseHeaders(stringstream &ss) {
+	string key;
+	string value;
+
+	if (ss.str() == CRLF || ss.str() == LF) {
+		return changeState(RES_BODY);
+	}
+	getline(ss, key, ':');
+	getline(ss, value, '\0');
+	size_t n = 1;
+	if (value.length() > 1 && value.substr(value.length() - 2) == CRLF)
+		n = 2;
+	if (!value.length())
+		return;
+	string tmp = value.substr(value.length() - n);
+	if (value.length() < n + 1 || (tmp != LF && tmp != CRLF))
+		goto invalid;
+	value = value.substr(0, value.length() - n);
+	_headers[key] = value;
+	return;
+invalid:
+	changeState(REQ_INVALID);
+}
+
+void Response::changeState(const int &state) {
+	_state = state;
+}
+
+void Response::setupCGIResponse(const int &fd) {
+	_type = CGI_RES;
+	_fd = fd;
+
+	setStatusCode(OK);
+	setConnectionStatus(true);
 }
 
 bool Response::match(const int &state) const {
@@ -252,4 +294,40 @@ void Response::setupRangedBody() {
 
 void Response::sendRangedBody(const sockfd &fd) {
 	(void)fd;
+}
+
+bool Response::setupCGIBody() {
+	string line = "";
+	int    nbyte;
+	char   chr;
+	bool   got = false;
+	while ((nbyte = read(_fd, &chr, 1)) > 0) {
+		line += chr;
+		if (line.find(CRLF) != string::npos || line.find(LF) != string::npos) {
+			stringstream ss(line);
+			parseHeaders(ss);
+			line = "";
+			if (_state & RES_BODY)
+				break;
+		}
+		got = true;
+	}
+	if (nbyte <= 0 && !got)
+		return false;
+	changeState(RES_HEADER);  // reset the state to header!
+	string contentType = _headers["Content-Type"];
+	if (contentType.empty())
+		contentType = mimeTypes[""];
+	addHeader("Content-Type", contentType);
+	init(contentType);
+	return true;
+}
+
+void Response::sendCGIBody(const sockfd &fd) {
+	char buff[(1 << 10)];
+	int  nbyte = read(_fd, buff, (1 << 10));
+	if (nbyte <= 0)
+		setState(RES_DONE);
+	else
+		::send(fd, buff, nbyte, 0);
 }

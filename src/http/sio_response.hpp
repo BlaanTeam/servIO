@@ -9,6 +9,7 @@
 #define LENGTHED_RES (1 << 0)
 #define CHUNKED_RES (1 << 1)
 #define RANGED_RES (1 << 2)
+#define CGI_RES (1 << 3)
 
 #include <iostream>
 #include <map>
@@ -35,6 +36,7 @@ class Response {
 	short _state;
 
 	iostream *_stream;
+	int       _fd;
 
 	map<string, string, StringICaseCompare> _headers;
 	bool                                    _keepAlive;
@@ -66,6 +68,7 @@ class Response {
 	void setupRedirectResponse(Redirect *redir, MainContext<Type> *ctx);
 	void setupDirectoryListing(const string &path, const string &title);
 	void setupNormalResponse(const string &path, iostream *file);
+	void setupCGIResponse(const int &fd);
 
 	bool match(const int &state) const;
 
@@ -80,6 +83,12 @@ class Response {
 
 	void sendRangedBody(const sockfd &fd);
 	void setupRangedBody(void);
+
+	void parseHeaders(stringstream &ss);
+	void changeState(const int &state);
+
+	void sendCGIBody(const sockfd &fd);
+	bool setupCGIBody();
 };
 
 #endif

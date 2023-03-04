@@ -10,6 +10,10 @@
 #define CHUNKED_RES (1 << 1)
 #define RANGED_RES (1 << 2)
 
+#define INIT_LENGTH (1 << 0)
+#define ONGOING_LENGTH (1 << 1)
+#define DONE_LENGTH (1 << 2)
+
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -21,6 +25,7 @@
 #include "utility/sio_helpers.hpp"
 #include "utility/sio_socket.hpp"
 #include "utility/sio_utils.hpp"
+#include "./sio_http_range.hpp"
 
 #define TIMEOUT 15000  // TODO: change it to be reasonable
 #define CHUNK_SIZE 1024
@@ -33,6 +38,9 @@ class Response {
 	short _statusCode;
 	short _type;
 	short _state;
+	Range _range;
+	int  _length;
+	short _lengthState;
 
 	iostream *_stream;
 
@@ -80,6 +88,10 @@ class Response {
 
 	void sendRangedBody(const sockfd &fd);
 	void setupRangedBody(void);
+
+	void noLastRange(const sockfd &fd, RangeSpecifier &range);
+	void noFirstRange(const sockfd &fd, RangeSpecifier &range);
+	void normalRange(const sockfd &fd, RangeSpecifier &range);
 };
 
 #endif

@@ -11,8 +11,6 @@
 
 using namespace std;
 
-extern char **environ;
-
 class CGI {
 	string _scriptName;
 	string _pathInfo;

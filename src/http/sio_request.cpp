@@ -33,8 +33,8 @@ void Request::parseFirstLine(string &line) {
 
 	pair<bool, string> pr = normpath(_path);
 
-	if (uri.size() > 2048 ||!every(buff, ::isupper) || !pr.first || httpVer != HTTP_VERSION){
-		_statusCode = (uri.size() > 2048) ? REQUEST_URI_TOO_LONG :_statusCode;
+	if (uri.size() > 2048 || !every(buff, ::isupper) || !pr.first || httpVer != HTTP_VERSION) {
+		_statusCode = (uri.size() > 2048) ? REQUEST_URI_TOO_LONG : _statusCode;
 		goto invalid;
 	}
 	_path = pr.second;
@@ -144,12 +144,12 @@ short Request::getState(void) const {
 	return _state;
 }
 
-HttpMethod Request::getMethod(void) const {
-	return _method;
+int Request::getStatusCode() const {
+	return _statusCode;
 }
 
-short Request::getStatusCode(void) const {
-	return _statusCode;
+HttpMethod Request::getMethod(void) const {
+	return _method;
 }
 
 map<string, string, StringICaseCompare> &Request::getHeaders(void) const {
@@ -162,13 +162,12 @@ bool Request::valid() const {
 
 bool Request::match(const int &state) const {
 	return _state & state;
-} 
+}
 
 void Request::reset(void) {
 	_state = REQ_INIT;
 	_method = UNKNOWN;
 	_statusCode = BAD_REQUEST;
-	
 
 	_path = "";
 	_query = "";

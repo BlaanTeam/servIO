@@ -8,9 +8,9 @@
 #include <string>
 
 #include "./sio_http_codes.hpp"
+#include "./sio_request_body.hpp"
 #include "utility/sio_helpers.hpp"
 #include "utility/sio_utils.hpp"
-#include "./sio_request_body.hpp"
 
 using namespace std;
 
@@ -55,10 +55,12 @@ class Request {
 	string                                   getPath(void) const;
 	string                                   getQuery(void) const;
 	short                                    getState(void) const;
+	int                                      getStatusCode() const;
+	int                                      getFileno() const;
 	HttpMethod                               getMethod(void) const;
 	map<string, string, StringICaseCompare> &getHeaders(void) const;
 	bool                                     match(const int &state) const;
-	
+
 	void reset(void);
 
 	bool valid() const;

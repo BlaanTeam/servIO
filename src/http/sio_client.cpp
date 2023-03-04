@@ -147,7 +147,7 @@ bool Client::handleRequest(stringstream &stream) {
 
 	if (_res.keepAlive() || !_res.match(RES_DONE))
 		return false;
-	return clients.purgeConnection(_connection.first);
+	return true; 
 }
 
 void Client::handleResponse(const sockfd &fd) {

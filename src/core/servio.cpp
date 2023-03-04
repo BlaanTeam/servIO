@@ -85,8 +85,11 @@ void servio_init(const int &ac, char *const *av) {
 					ss.write(stream, nbyte);
 					clients[it->fd].setTime(getmstime());
 					clients[it->fd].setPollFd(it->fd, tmp);
-					if (clients[it->fd].handleRequest(ss))
+					if (clients[it->fd].handleRequest(ss))  //! need more tests !!!
+					{
+						clients.purgeConnection(it->fd);
 						continue;
+					}
 				}
 			}
 			if (it->revents & POLLOUT) {

@@ -148,6 +148,10 @@ int Request::getStatusCode() const {
 	return _statusCode;
 }
 
+int Request::getFileno() const {
+	return _body.getFileno();
+}
+
 HttpMethod Request::getMethod(void) const {
 	return _method;
 }
@@ -158,6 +162,16 @@ map<string, string, StringICaseCompare> &Request::getHeaders(void) const {
 
 bool Request::valid() const {
 	return (_state & ~REQ_INVALID);
+}
+
+bool Request::isTooLarge(const int &clientMaxSize) {
+	headerIter it = _headers.find("Content-Length");
+	if (it == _headers.end())
+		return false;
+	trim(it->second);
+	if (!every(it->second, ::isdigit))
+		return false;
+	return stoi(it->second) > clientMaxSize;
 }
 
 bool Request::match(const int &state) const {

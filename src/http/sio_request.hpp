@@ -64,6 +64,7 @@ class Request {
 	void reset(void);
 
 	bool valid() const;
+	bool isTooLarge(const int &clientMaxSize) ;
 };
 
 #endif

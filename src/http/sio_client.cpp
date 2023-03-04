@@ -1,11 +1,14 @@
 #include "sio_client.hpp"
 
 Client::Client() {
-	bzero(_fds, sizeof _fds);
+	_fds[0] = -1;
+	_fds[1] = -1;
 	_time = getmstime();
 }
 
 Client::Client(const pair<sockfd, Address> &connection) {
+	_fds[0] = -1;
+	_fds[1] = -1;
 	_time = getmstime();
 	_connection = connection;
 }
@@ -34,13 +37,15 @@ bool Client::handleRequest(stringstream &stream) {
 
 	string host = _req.getHeaders()["Host"];
 	trim(host);
-	VirtualServer *virtualServer = config.match(Address(_connection.first), host);
+	VirtualServer *virtualServer = config.match(Address(_connection.first), "_");
 
 	_ctx = virtualServer;
 
 	if (!_req.valid())
 		_res.setupErrorResponse(_req.getStatusCode(), virtualServer, true);
-	else if (_req.match(REQ_BODY | REQ_DONE) && virtualServer) {
+	else if (_req.isTooLarge(virtualServer->directives()["client_max_body_size"].value))
+		_res.setupErrorResponse(REQUEST_ENTITY_TOO_LARGE, virtualServer, true);
+	else if (_req.match(REQ_BODY | REQ_DONE)) {
 		if (_res.match(RES_INIT | RES_HEADER)) {
 			Location *location = virtualServer->match(_req.getPath());
 			string    path = _req.getPath();
@@ -119,17 +124,19 @@ bool Client::handleRequest(stringstream &stream) {
 					_res.setupErrorResponse(FORBIDDEN, location, true);
 			}
 		}
-	sendResponse:
+	}
+sendResponse:
+	_res.send(_connection.first);
+	if (isInternalServerError()) {  // TODO: refactor this code!
+		_res.setupErrorResponse(INTERNAL_SERVER_ERROR, _ctx, true);
 		_res.send(_connection.first);
-		if (isInternalServerError()) {  // TODO: refactor this code!
-			_res.setupErrorResponse(INTERNAL_SERVER_ERROR, _ctx, true);
-			_res.send(_connection.first);
-			return false;
-		}
-		if (!_res.match(RES_DONE))
-			setTime(getmstime());
+		return false;
 	}
 
+	if (!_res.match(RES_DONE))
+		setTime(getmstime());
+
+	// TODO: add this in a function !
 	if (_res.match(RES_BODY))
 		_pfd->events |= POLLOUT;
 	else if (_res.match(RES_DONE | RES_INIT))
@@ -148,6 +155,7 @@ void Client::handleResponse(const sockfd &fd) {
 		_res.send(fd);
 	}
 
+	// TODO: add this in a function !
 	if (_res.match(RES_BODY))
 		_pfd->events |= POLLOUT;
 	else if (_res.match(RES_DONE | RES_INIT))

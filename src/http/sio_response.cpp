@@ -94,9 +94,9 @@ void Response::send(const sockfd &fd) {
 	if (_state & (RES_INIT | RES_HEADER)) {
 		if (_type & LENGTHED_RES && _stream)
 			setupLengthedBody();
-		else if (_type & CHUNKED_RES)
+		else if (_type & CHUNKED_RES)  // TODO: check if _stream isn't null!!
 			setupChunkedBody();
-		else if (_type & RANGED_RES)
+		else if (_type & RANGED_RES) // TODO: check if _stream isn't null!!
 			setupRangedBody();
 		else if (_type & CGI_RES)
 			if (!setupCGIBody())

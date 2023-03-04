@@ -96,7 +96,7 @@ void Response::send(const sockfd &fd) {
 			setupLengthedBody();
 		else if (_type & CHUNKED_RES)  // TODO: check if _stream isn't null!!
 			setupChunkedBody();
-		else if (_type & RANGED_RES) // TODO: check if _stream isn't null!!
+		else if (_type & RANGED_RES)  // TODO: check if _stream isn't null!!
 			setupRangedBody();
 		else if (_type & CGI_RES)
 			if (!setupCGIBody())
@@ -253,6 +253,8 @@ void Response::reset(void) {
 // private functions
 
 void Response::setupLengthedBody() {
+	if (!_stream)
+		return;
 	size_t seek = _stream->tellg();
 	_stream->seekg(0, _stream->end);
 
@@ -263,6 +265,8 @@ void Response::setupLengthedBody() {
 }
 
 void Response::sendLengthedBody(const sockfd &fd) {
+	if (!_stream)
+		return;
 	char buff[(1 << 10)];
 
 	_stream->read(buff, (1 << 10));
@@ -275,6 +279,8 @@ void Response::setupChunkedBody() {
 }
 
 void Response::sendChunkedBody(const sockfd &fd) {
+	if (!_stream)
+		return;
 	char buff[(1 << 10)];
 
 	_stream->read(buff, (1 << 10));

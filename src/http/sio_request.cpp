@@ -171,7 +171,7 @@ bool Request::isTooLarge(const int &clientMaxSize) {
 	trim(it->second);
 	if (!every(it->second, ::isdigit))
 		return false;
-	return stoi(it->second) > clientMaxSize;
+	return atoll(it->second.c_str()) > clientMaxSize;
 }
 
 bool Request::match(const int &state) const {

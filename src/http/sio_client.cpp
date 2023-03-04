@@ -41,11 +41,14 @@ bool Client::handleRequest(stringstream &stream) {
 
 	_ctx = virtualServer;
 
-	if (!_req.valid())
+	if (!_req.valid()) {
 		_res.setupErrorResponse(_req.getStatusCode(), virtualServer, true);
-	else if (_req.isTooLarge(virtualServer->directives()["client_max_body_size"].value))
+		goto sendResponse;
+
+	} else if (_req.isTooLarge(virtualServer->directives()["client_max_body_size"].value)) {
 		_res.setupErrorResponse(REQUEST_ENTITY_TOO_LARGE, virtualServer, true);
-	else if (_req.match(REQ_BODY | REQ_DONE)) {
+		goto sendResponse;
+	} else if (_req.match(REQ_BODY | REQ_DONE)) {
 		if (_res.match(RES_INIT | RES_HEADER)) {
 			Location *location = virtualServer->match(_req.getPath());
 			string    path = _req.getPath();
@@ -124,17 +127,17 @@ bool Client::handleRequest(stringstream &stream) {
 					_res.setupErrorResponse(FORBIDDEN, location, true);
 			}
 		}
-	}
-sendResponse:
-	_res.send(_connection.first);
-	if (isInternalServerError()) {  // TODO: refactor this code!
-		_res.setupErrorResponse(INTERNAL_SERVER_ERROR, _ctx, true);
+	sendResponse:
 		_res.send(_connection.first);
-		return false;
-	}
+		if (isInternalServerError()) {  // TODO: refactor this code!
+			_res.setupErrorResponse(INTERNAL_SERVER_ERROR, _ctx, true);
+			_res.send(_connection.first);
+			return false;
+		}
 
-	if (!_res.match(RES_DONE))
-		setTime(getmstime());
+		if (!_res.match(RES_DONE))
+			setTime(getmstime());
+	}
 
 	// TODO: add this in a function !
 	if (_res.match(RES_BODY))

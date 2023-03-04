@@ -260,12 +260,10 @@ void  Response::noLastRange(const sockfd &fd,RangeSpecifier &range) {
 			if (_length > (1 << 10)) {
 				_stream->read(buff, (1 << 10));
 				::send(fd, buff, _stream->gcount(), 0);
-				::send(fd, CRLF, 2, 0);
 				_length -= _stream->gcount();
 			} else {
 				_stream->read(buff, _length);
 				::send(fd, buff, _stream->gcount(), 0);
-				::send(fd, CRLF, 2, 0);
 				_length -= _stream->gcount();
 				_lengthState = DONE_LENGTH;
 			}
@@ -281,12 +279,10 @@ void Response::noFirstRange(const sockfd &fd, RangeSpecifier &range) {
 	if (_length > (1 << 10)) {
 		_stream->read(buff, (1 << 10));
 		::send(fd, buff, _stream->gcount(), 0);
-		::send(fd, CRLF, 2, 0);
 		_length -= _stream->gcount();
 	} else {
 		_stream->read(buff, _length);
 		::send(fd, buff, _stream->gcount(), 0);
-		::send(fd, CRLF, 2, 0);
 		_length -= _stream->gcount();
 		_lengthState = DONE_LENGTH;
 	}
@@ -302,12 +298,10 @@ void	Response::normalRange(const sockfd &fd, RangeSpecifier &range) {
 	if (_length > (1 << 10)) {
 		_stream->read(buff, (1 << 10));
 		::send(fd, buff, _stream->gcount(), 0);
-		::send(fd, CRLF, 2, 0);
 		_length -= _stream->gcount();
 	} else {
 		_stream->read(buff, _length);
 		::send(fd, buff, _stream->gcount(), 0);
-		::send(fd, CRLF, 2, 0);
 		_length -= _stream->gcount();
 		_lengthState = DONE_LENGTH;
 	}

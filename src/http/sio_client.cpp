@@ -141,9 +141,7 @@ bool Client::handleRequest(stringstream &stream) {
 
 	togglePollOut();
 
-	if (_res.keepAlive() || !_res.match(RES_DONE))
-		return false;
-	return true;
+	return isPurgeable();
 }
 
 void Client::handleResponse(const sockfd &fd) {
@@ -164,6 +162,10 @@ bool Client::isInternalServerError() {
 	if (ret == _pid && ((WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status)))))
 		return true;
 	return false;
+}
+
+bool Client::isPurgeable(void) const {
+	return !(_res.keepAlive() || !_res.match(RES_DONE));
 }
 
 void Client::reset(void) {

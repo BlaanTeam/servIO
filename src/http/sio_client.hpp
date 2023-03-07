@@ -43,6 +43,8 @@ class Client {
 
 	bool isInternalServerError();
 
+	bool isPurgeable() const;
+
 	void reset(void);
 	
 	void togglePollOut(void);

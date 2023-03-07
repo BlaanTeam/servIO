@@ -12,5 +12,6 @@
 using namespace std;
 
 void servio_init(const int &ac, char *const *av);
+void handleSignals(void);
 
 #endif

@@ -106,3 +106,8 @@ void servio_init(const int &ac, char *const *av) {
 		pfds = tmp;
 	}
 }
+
+void handleSignals(void) {
+	signal(SIGPIPE, SIG_IGN);
+	// signal(SIGCHLD, SIG_IGN); // TODO: TBD
+}

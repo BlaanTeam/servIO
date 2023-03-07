@@ -37,10 +37,8 @@ struct ErrorPage {
 
 	bool match(const int &errorCode) const;
 	bool exists() const;
-	void setRoot(const string &root);
 
    private:
-	bool _root;  // TODO : try to set the root in the transfer function !
 };
 
 struct Redirect;
@@ -179,10 +177,8 @@ class MainContext<Type> {
 
 	ErrorPage *getErrorPage(const int &errorCode) {
 		for (dirIter it = _directives.begin(); it != _directives.end(); it++)
-			if (it->second.type & ERRPG && it->second.errPage->match(errorCode)) {
-				it->second.errPage->setRoot(*_directives["root"].str);
+			if (it->second.type & ERRPG && it->second.errPage->match(errorCode))
 				return it->second.errPage;
-			}
 		return nullptr;
 	}
 

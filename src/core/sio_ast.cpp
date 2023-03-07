@@ -15,15 +15,7 @@ bool ErrorPage::exists() const {
 	return !access(page.c_str(), F_OK | R_OK);
 }
 
-void ErrorPage::setRoot(const string &root) {
-	// ! TODO : this function will be removed ! tell oussama
-	if (!_root) {
-		page = joinPath(root, page);
-		_root = true;
-	}
-}
-
-Redirect::Redirect(int code, string path, bool isLocal) : code(code), path(path), isLocal(isLocal) { //! TODO: change isLocal to _isLocal !!
+Redirect::Redirect(int code, string path, bool isLocal) : code(code), path(path), isLocal(isLocal) {  //! TODO: change isLocal to _isLocal !!
 	isRedirect = (code == 301 || code == 302 || code == 303 || code == 307 || code == 308);
 };
 
@@ -56,31 +48,65 @@ Type::Type(const Type &cpy) {
 
 Type &Type::operator=(const Type &cpy) {
 	switch (type) {
-		case STR:       delete str;      break ;
-		case ADDR:      delete addr;     break ;
-		case ERRPG:     delete errPage;  break ;
-		case REDIR:     delete redirect; break ;
-		case SERV_NAME: delete servName; break ;
+	case STR:
+		delete str;
+		break;
+	case ADDR:
+		delete addr;
+		break;
+	case ERRPG:
+		delete errPage;
+		break;
+	case REDIR:
+		delete redirect;
+		break;
+	case SERV_NAME:
+		delete servName;
+		break;
 	}
 	type = cpy.type;
 	switch (type) {
-		case BOOL:      ok = cpy.ok;                              break ;
-		case INT:       value = cpy.value;                        break ;
-		case STR:       str = new string(*cpy.str);               break ;
-		case ADDR:      addr = new Address(*cpy.addr);            break ;
-		case ERRPG:     errPage = new ErrorPage(*cpy.errPage);    break ;
-		case REDIR:     redirect = new Redirect(*cpy.redirect);   break ;
-		case SERV_NAME: servName = new ServerName(*cpy.servName); break ;
+	case BOOL:
+		ok = cpy.ok;
+		break;
+	case INT:
+		value = cpy.value;
+		break;
+	case STR:
+		str = new string(*cpy.str);
+		break;
+	case ADDR:
+		addr = new Address(*cpy.addr);
+		break;
+	case ERRPG:
+		errPage = new ErrorPage(*cpy.errPage);
+		break;
+	case REDIR:
+		redirect = new Redirect(*cpy.redirect);
+		break;
+	case SERV_NAME:
+		servName = new ServerName(*cpy.servName);
+		break;
 	}
 	return *this;
 }
 
 Type::~Type() {
 	switch (type) {
-		case STR:       delete str;      break ;
-		case ADDR:      delete addr;     break ;
-		case ERRPG:     delete errPage;  break ;
-		case REDIR:     delete redirect; break ;
-		case SERV_NAME: delete servName; break ;
+	case STR:
+		delete str;
+		break;
+	case ADDR:
+		delete addr;
+		break;
+	case ERRPG:
+		delete errPage;
+		break;
+	case REDIR:
+		delete redirect;
+		break;
+	case SERV_NAME:
+		delete servName;
+		break;
 	}
 }

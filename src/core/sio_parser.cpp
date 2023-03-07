@@ -445,7 +445,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 		
 		else if (key.substr(0, 10) == "error_page") {
 			typ.type = ERRPG;
-			typ.errPage = new ErrorPage(val[0], val[1][0] == '/'? val[1]: (*tree)["root"][0] + "/" + val[1]);
+			typ.errPage = new ErrorPage(val[0], val[1][0] == '/' ? val[1] : joinPath((*tree)["root"][0], val[1]));
 		}
 		
 		else if (key == "return") {

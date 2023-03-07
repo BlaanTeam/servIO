@@ -34,7 +34,9 @@ void CGI::init() {
 	metaVariables["DOCUMENT_ROOT"] = *_location->directives()["root"].str;
 	metaVariables["QUERY_STRING"] = _req->getQuery();
 	metaVariables["REQUEST_METHOD"] = httpMethods[(int)log2((int)_req->getMethod())];
-	metaVariables["REQUEST_URI"] = _req->getPath();  // TODO: join it with query !
+	metaVariables["REQUEST_URI"] = _req->getPath();
+	if (!_req->getQuery().empty())
+		metaVariables["REQUEST_URI"] += "?" + _req->getQuery();
 	metaVariables["SCRIPT_FILENAME"] = _scriptFileName;
 	metaVariables["SCRIPT_NAME"] = _scriptName;
 	metaVariables["PATH_INFO"] = _pathInfo;

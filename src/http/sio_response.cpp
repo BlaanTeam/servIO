@@ -88,15 +88,13 @@ void Response::addHeader(const string &name, const string &value) {
 	_headers[name] = value;
 	setState(RES_HEADER);
 }
-
-// TODO: return a boolean to check if the response end
 void Response::send(const sockfd &fd) {
 	if (_state & (RES_INIT | RES_HEADER)) {
-		if (_type & LENGTHED_RES && _stream)
+		if (_type & LENGTHED_RES)
 			setupLengthedBody();
-		else if (_type & CHUNKED_RES)  // TODO: check if _stream isn't null!!
+		else if (_type & CHUNKED_RES)
 			setupChunkedBody();
-		else if (_type & RANGED_RES)  // TODO: check if _stream isn't null!!
+		else if (_type & RANGED_RES)
 			setupRangedBody();
 		else if (_type & CGI_RES)
 			if (!setupCGIBody())
@@ -111,7 +109,7 @@ void Response::send(const sockfd &fd) {
 	// if ((_statusCode / 100) == 1 || _statusCode == 204 || _statusCode == 301)
 	// 	return setState(RES_DONE);
 
-	if (_state & RES_BODY)  // && _stream) { ! TODO: check _stream
+	if (_state & RES_BODY)
 		switch (_type) {
 		case LENGTHED_RES:
 			sendLengthedBody(fd);

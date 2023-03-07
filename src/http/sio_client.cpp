@@ -139,15 +139,11 @@ bool Client::handleRequest(stringstream &stream) {
 			setTime(getmstime());
 	}
 
-	// TODO: add this in a function !
-	if (_res.match(RES_BODY))
-		_pfd->events |= POLLOUT;
-	else if (_res.match(RES_DONE | RES_INIT))
-		_pfd->events &= ~POLLOUT;
+	togglePollOut();
 
 	if (_res.keepAlive() || !_res.match(RES_DONE))
 		return false;
-	return true; 
+	return true;
 }
 
 void Client::handleResponse(const sockfd &fd) {
@@ -158,11 +154,7 @@ void Client::handleResponse(const sockfd &fd) {
 		_res.send(fd);
 	}
 
-	// TODO: add this in a function !
-	if (_res.match(RES_BODY))
-		_pfd->events |= POLLOUT;
-	else if (_res.match(RES_DONE | RES_INIT))
-		_pfd->events &= ~POLLOUT;
+	togglePollOut();
 	reset();
 }
 
@@ -180,6 +172,13 @@ void Client::reset(void) {
 		_req.reset();
 		_res.reset();
 	}
+}
+
+void Client::togglePollOut(void) {
+	if (_res.match(RES_BODY))
+		_pfd->events |= POLLOUT;
+	else if (_res.match(RES_DONE | RES_INIT))
+		_pfd->events &= ~POLLOUT;
 }
 
 ClientMap::ClientMap() {

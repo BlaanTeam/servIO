@@ -44,6 +44,8 @@ class Client {
 	bool isInternalServerError();
 
 	void reset(void);
+	
+	void togglePollOut(void);
 };
 
 class ClientMap : public map<sockfd, Client> {

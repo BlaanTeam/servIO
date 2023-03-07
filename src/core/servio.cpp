@@ -17,16 +17,22 @@ static void initListeningSockets(const set<Address> &addrs, vector<Socket> &sock
 	while (it != addrs.end()) {
 		Socket socket;
 
-		if (!socket.isGood())
+		if (!socket.isGood()) {
 			perror("socket");
+			exit(1);
+		}
 
 		socket.bind(*it);
-		if (!socket.isGood())
+		if (!socket.isGood()) {
 			perror("bind");
+			exit(1);
+		}
 
 		socket.listen();
-		if (!socket.isGood())
+		if (!socket.isGood()) {
 			perror("listen");
+			exit(1);
+		}
 
 		pfds.add(socket.getSockFd(), POLLIN);
 		sockets.push_back(socket);

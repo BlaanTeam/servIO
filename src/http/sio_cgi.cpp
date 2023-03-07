@@ -58,3 +58,26 @@ void CGI::setenv() {
 		it++;
 	}
 }
+
+pid_t CGI::spawn(int *fds, const int &fileno) {
+	pipe(fds);
+	int pid = fork();
+	if (!pid) {
+		lseek(fileno, 0, SEEK_SET);
+
+		dup2(fileno, STDIN_FILENO);
+		close(fds[0]);
+		close(fileno);
+
+		dup2(fds[1], STDOUT_FILENO);
+		close(fds[1]);
+
+		init();
+		setenv();
+		execvp(_scriptFileName.c_str(), (char *[]){NULL});
+		perror("execvp");
+		exit(1);
+	}
+	close(fds[1]);
+	return pid;
+}

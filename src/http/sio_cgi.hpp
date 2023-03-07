@@ -31,6 +31,8 @@ class CGI {
 
 	void init();
 	void setenv();
+
+	pid_t spawn(int *fds, const int &fileno);
 };
 
 #endif

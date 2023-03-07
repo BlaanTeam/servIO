@@ -37,14 +37,13 @@ bool Client::handleRequest(stringstream &stream) {
 
 	string host = _req.getHeaders()["Host"];
 	trim(host);
-	VirtualServer *virtualServer = config.match(Address(_connection.first), "_");
+	VirtualServer *virtualServer = config.match(Address(_connection.first), host);
 
 	_ctx = virtualServer;
 
 	if (!_req.valid()) {
 		_res.setupErrorResponse(_req.getStatusCode(), virtualServer, true);
 		goto sendResponse;
-
 	} else if (_req.isTooLarge(virtualServer->directives()["client_max_body_size"].value)) {
 		_res.setupErrorResponse(REQUEST_ENTITY_TOO_LARGE, virtualServer, true);
 		goto sendResponse;
@@ -57,9 +56,7 @@ bool Client::handleRequest(stringstream &stream) {
 			if (virtualServer->isRedirectable()) {
 				_res.setupRedirectResponse(virtualServer->getRedir(), virtualServer);
 				goto sendResponse;
-			}
-
-			if (!location) {  //! the location does not inherit the `return`
+			} else if (!location) {
 				_res.setupErrorResponse(NOT_FOUND, virtualServer, true);
 				goto sendResponse;
 			} else if (location->isRedirectable()) {
@@ -70,36 +67,18 @@ bool Client::handleRequest(stringstream &stream) {
 				goto sendResponse;
 			}
 
-			// TODO: check if the location configured as CGI or UPLOAD
 			size_t locationLength = location->location().length();
 			size_t pathLength = _req.getPath().length();
 
 			if (location->isCGI() && pathLength > locationLength) {  // ! INFO: why this condition !
 				CGI cgi(".py", location, &_req, &_res);
 				if (cgi.valid()) {
-					cgi.init();
-					pipe(_fds);
-					_pid = fork();
-					if (!_pid) {
-						int fd = _req.getFileno();
-						lseek(fd, 0, SEEK_SET);
-
-						dup2(fd, STDIN_FILENO);
-						dup2(_fds[1], STDOUT_FILENO);
-
-						close(fd);
-						close(_fds[0]);
-						close(_fds[1]);
-						cgi.setenv();
-						execvp(cgi._scriptFileName.c_str(), (char *[]){NULL});
-						perror("execvp");
-						exit(1);
-					}
-					close(_fds[1]);
+					_pid = cgi.spawn(_fds, _req.getFileno());
 					_res.setupCGIResponse(_fds[0]);
 					goto sendResponse;
 				}
 			}
+			// TODO: check if the location configured  UPLOAD
 
 			struct stat fileStat;
 			bzero(&fileStat, sizeof fileStat);
@@ -129,14 +108,10 @@ bool Client::handleRequest(stringstream &stream) {
 		}
 	sendResponse:
 		_res.send(_connection.first);
-		if (isInternalServerError()) {  // TODO: refactor this code!
-			_res.setupErrorResponse(INTERNAL_SERVER_ERROR, _ctx, true);
-			_res.send(_connection.first);
-			return false;
-		}
 
-		if (!_res.match(RES_DONE))
-			setTime(getmstime());
+		if (waitForCgi()) return false;
+
+		if (!_res.match(RES_DONE)) setTime(getmstime());
 	}
 
 	togglePollOut();
@@ -146,12 +121,7 @@ bool Client::handleRequest(stringstream &stream) {
 
 void Client::handleResponse(const sockfd &fd) {
 	_res.send(fd);
-	// ! maybe this will be useless
-	if (isInternalServerError()) {  // TODO: refactor this code!
-		_res.setupErrorResponse(INTERNAL_SERVER_ERROR, _ctx, true);
-		_res.send(fd);
-	}
-
+	waitForCgi();
 	togglePollOut();
 	reset();
 }
@@ -166,6 +136,15 @@ bool Client::isInternalServerError() {
 
 bool Client::isPurgeable(void) const {
 	return !(_res.keepAlive() || !_res.match(RES_DONE));
+}
+
+bool Client::waitForCgi() {
+	if (isInternalServerError()) {
+		_res.setupErrorResponse(INTERNAL_SERVER_ERROR, _ctx, true);
+		_res.send(_connection.first);
+		return true;
+	}
+	return false;
 }
 
 void Client::reset(void) {

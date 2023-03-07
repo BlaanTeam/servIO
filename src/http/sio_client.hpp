@@ -45,8 +45,10 @@ class Client {
 
 	bool isPurgeable() const;
 
+	bool waitForCgi();
+
 	void reset(void);
-	
+
 	void togglePollOut(void);
 };
 

@@ -168,7 +168,7 @@ class MainContext<Type> {
 		return _directives.find("return") != _directives.end();
 	}
 	bool isCGI() {
-		return true;  // TODO: change it later !
+		return _directives.find("cgi_assign") != _directives.end();
 	}
 
 	Redirect *getRedir() {

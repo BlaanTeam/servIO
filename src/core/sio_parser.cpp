@@ -233,6 +233,14 @@ Parser::Directive *Parser::parse_location_dir() {
 		return dir;
 	}
 
+	if (directiveName == "cgi_assign") {
+		if (dir->second.size() != 1) {
+			_serr = "cgi_assign directive: invalid arguments!";
+			goto failed;
+		}
+		return dir;
+	}
+
 	if (parse_http_dir(dir)) {
 		return dir;
 	}
@@ -484,7 +492,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 			typ.servName = new ServerName(val);
 		}
 		
-		else {  // index, root
+		else {  // index, root, cgi
 			typ.type = STR;
 			typ.str = new string(val[0]);
 		}

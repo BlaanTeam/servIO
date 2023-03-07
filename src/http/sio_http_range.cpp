@@ -2,8 +2,6 @@
 
 #include <math.h>
 
-#include <iostream>  // TODO: remove it
-
 Range::Range() {
 	_valid = false;
 }

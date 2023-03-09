@@ -89,6 +89,10 @@ Parser::Directive *Parser::parse_http_dir(Parser::Directive *_dir) {
 			_serr = dir->first + " directive: invalid arguments!";
 			goto failed;
 		}
+		if (dir->first == "index" && !dir->second.front().empty()) {
+			_serr = "index directive: invlid arguments!";
+			goto failed;
+		}
 		return dir;
 	}
 
@@ -101,7 +105,7 @@ Parser::Directive *Parser::parse_http_dir(Parser::Directive *_dir) {
 	}
 
 	if (dir->first == "client_max_body_size") {
-		if (dir->second.size() != 1) {
+		if (dir->second.size() != 1 || dir->second.front().empty()) {
 			_serr = "client_max_body_size directive: invalid arguments!";
 			goto failed;
 		}
@@ -147,7 +151,7 @@ Parser::Directive *Parser::parse_http_dir(Parser::Directive *_dir) {
 		return dir;
 	}
 
-	_serr = "http context: " + dir->first + ": invalid directive!";
+	_serr = "http context: \"" + dir->first + "\": invalid directive!";
 
 failed:
 	return delete dir, nullptr;
@@ -202,7 +206,7 @@ Parser::Directive *Parser::parse_server_dir() {
 	}
 
 	if (_serr.substr(0, 4) == "http") {
-		_serr = "server context: " + directiveName + ": invalid directive!";
+		_serr = "server context: \"" + directiveName + "\": invalid directive!";
 	}
 
 	return nullptr;
@@ -246,7 +250,7 @@ Parser::Directive *Parser::parse_location_dir() {
 	}
 
 	if (_serr.substr(0, 4) == "http") {
-		_serr = "location context: " + directiveName + ": invalid directive!";
+		_serr = "location context: \"" + directiveName + "\": invalid directive!";
 	}
 
 	return nullptr;

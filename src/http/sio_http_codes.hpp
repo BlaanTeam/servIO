@@ -13,6 +13,8 @@
 #include <sstream>
 #include <string>
 
+#include "utility/sio_helpers.hpp"
+
 using namespace std;
 
 #define CONTINUE 100

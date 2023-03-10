@@ -87,7 +87,7 @@ iostream *buildDirectoryListing(const string &path, const string &title) {
 			continue;
 
 		struct stat info;
-		stat((path + "/" + entry->d_name).c_str(), &info);
+		stat((joinPath(path, joinPath("/", entry->d_name))).c_str(), &info);
 
 		string d_name(entry->d_name);
 		d_name += S_ISDIR(info.st_mode) ? "/" : "";

@@ -64,7 +64,7 @@ class Response {
 
 	void send(const sockfd &fd);
 
-	void setupErrorResponse(const int &statusCode, MainContext<Type> *ctx, bool isBuiltIn);
+	void setupErrorResponse(const int &statusCode, MainContext<Type> *ctx, bool isBuiltIn = true);
 	void setupRedirectResponse(Redirect *redir, MainContext<Type> *ctx);
 	void setupDirectoryListing(const string &path, const string &title);
 	void setupNormalResponse(const string &path, iostream *file);

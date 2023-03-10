@@ -42,10 +42,10 @@ bool Client::handleRequest(stringstream &stream) {
 	_ctx = virtualServer;
 
 	if (!_req.valid()) {
-		_res.setupErrorResponse(_req.getStatusCode(), virtualServer, true);
+		_res.setupErrorResponse(_req.getStatusCode(), virtualServer);
 		goto sendResponse;
 	} else if (_req.isTooLarge(virtualServer->directives()["client_max_body_size"].value)) {
-		_res.setupErrorResponse(REQUEST_ENTITY_TOO_LARGE, virtualServer, true);
+		_res.setupErrorResponse(REQUEST_ENTITY_TOO_LARGE, virtualServer);
 		goto sendResponse;
 	} else if (_req.match(REQ_BODY | REQ_DONE)) {
 		if (_res.match(RES_INIT | RES_HEADER)) {
@@ -57,13 +57,13 @@ bool Client::handleRequest(stringstream &stream) {
 				_res.setupRedirectResponse(virtualServer->getRedir(), virtualServer);
 				goto sendResponse;
 			} else if (!location) {
-				_res.setupErrorResponse(NOT_FOUND, virtualServer, true);
+				_res.setupErrorResponse(NOT_FOUND, virtualServer);
 				goto sendResponse;
 			} else if (location->isRedirectable()) {
 				_res.setupRedirectResponse(location->getRedir(), location);
 				goto sendResponse;
 			} else if (!location->isAllowedMethod(_req.getMethod())) {
-				_res.setupErrorResponse(METHOD_NOT_ALLOWED, location, true);
+				_res.setupErrorResponse(METHOD_NOT_ALLOWED, location);
 				goto sendResponse;
 			}
 
@@ -83,11 +83,11 @@ bool Client::handleRequest(stringstream &stream) {
 			struct stat fileStat;
 			bzero(&fileStat, sizeof fileStat);
 			if (!location->found(path, fileStat)) {
-				_res.setupErrorResponse(NOT_FOUND, location, true);
+				_res.setupErrorResponse(NOT_FOUND, location);
 			} else if (S_ISDIR(fileStat.st_mode)) {
 				// ? INFO : redirect in case uri without `/` in the ending
 				if (pathLength > 1 && _req.getPath()[pathLength - 1] != '/') {
-					Redirect redir(MOVED_PERMANENTLY, joinPath(_req.getPath(), "/"), true);
+					Redirect redir(MOVED_PERMANENTLY, joinPath(_req.getPath(), "/"));
 					_res.setupRedirectResponse(&redir, location);
 					goto sendResponse;
 				}
@@ -98,12 +98,12 @@ bool Client::handleRequest(stringstream &stream) {
 				else if (location->isAutoIndexable())
 					_res.setupDirectoryListing(path, _req.getPath());
 				else
-					_res.setupErrorResponse(FORBIDDEN, location, true);
+					_res.setupErrorResponse(FORBIDDEN, location);
 			} else {
 				if (!access(path.c_str(), F_OK | R_OK))
 					_res.setupNormalResponse(path, new fstream(path, ios::in));
 				else
-					_res.setupErrorResponse(FORBIDDEN, location, true);
+					_res.setupErrorResponse(FORBIDDEN, location);
 			}
 		}
 	sendResponse:

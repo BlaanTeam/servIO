@@ -9,6 +9,7 @@
 
 #include "./sio_http_codes.hpp"
 #include "./sio_request_body.hpp"
+#include "http/sio_http_range.hpp"
 #include "utility/sio_helpers.hpp"
 #include "utility/sio_utils.hpp"
 
@@ -60,11 +61,12 @@ class Request {
 	HttpMethod                               getMethod(void) const;
 	map<string, string, StringICaseCompare> &getHeaders(void) const;
 	bool                                     match(const int &state) const;
+	Range                                    getRange();
 
 	void reset(void);
 
 	bool valid() const;
-	bool isTooLarge(const int &clientMaxSize) ;
+	bool isTooLarge(const int &clientMaxSize);
 };
 
 #endif

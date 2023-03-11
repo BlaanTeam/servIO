@@ -175,6 +175,13 @@ bool Request::isTooLarge(const int &clientMaxSize) {
 bool Request::match(const int &state) const {
 	return _state & state;
 }
+Range Request::getRange() {
+	headerIter it = _headers.find("Range");
+	if (it == _headers.end())
+		return Range();
+	trim(it->second);
+	return Range(it->second);
+}
 
 void Request::reset(void) {
 	_state = REQ_INIT;

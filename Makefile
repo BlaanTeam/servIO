@@ -67,6 +67,8 @@ HEADERS = $(addprefix core/, $(CORE_HEADER))\
 	$(addprefix  utility/, $(UTILITY_HEADER))\
 	$(addprefix http/, $(HTTP_HEADER))
 
+HEADERS := $(HEADERS:%=src/%)
+
 OBJS = $(SRCS:%.cpp=%.o)
 
 INCLUDES = core http utility
@@ -78,10 +80,9 @@ INCLUDES := -I src/\
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CC) -o $(NAME) $^ -fsanitize=address
+	$(CC) -o $(NAME) $^ #-fsanitize=address
 
-# !TOADD: depend on HEADERS macro
-%.o: %.cpp
+%.o: %.cpp $(HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:

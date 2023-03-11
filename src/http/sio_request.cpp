@@ -10,8 +10,6 @@ Request::Request(const Request &copy) {
 	*this = copy;
 }
 
-// TODO: add Request destructor to close _bodyFile
-
 Request &Request::operator=(const Request &rhs) {
 	(void)rhs;
 	return *this;

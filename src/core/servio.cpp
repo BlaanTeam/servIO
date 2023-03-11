@@ -115,5 +115,4 @@ void servio_init(const int &ac, char *const *av) {
 
 void handleSignals(void) {
 	signal(SIGPIPE, SIG_IGN);
-	// signal(SIGCHLD, SIG_IGN); // TODO: TBD
 }

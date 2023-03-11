@@ -15,7 +15,7 @@ bool ErrorPage::exists() const {
 	return !access(page.c_str(), F_OK | R_OK);
 }
 
-Redirect::Redirect(int code, string path, bool isLocal) : code(code), path(path), isLocal(isLocal) {  //! TODO: change isLocal to _isLocal !!
+Redirect::Redirect(int code, string path, bool isLocal) : code(code), path(path), isLocal(isLocal) {
 	isRedirect = (code == 301 || code == 302 || code == 303 || code == 307 || code == 308);
 };
 

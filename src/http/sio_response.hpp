@@ -23,7 +23,7 @@
 #include "utility/sio_socket.hpp"
 #include "utility/sio_utils.hpp"
 
-#define TIMEOUT 15000  // TODO: change it to be reasonable
+#define TIMEOUT 15000
 #define CHUNK_SIZE 1024
 
 using namespace std;

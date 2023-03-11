@@ -1,13 +1,14 @@
 #include "sio_lexer.hpp"
 
-const char *TokenNames[7] = {
+const char *TokenNames[8] = {
     "WORD",
     "OPEN CURLY BRACE",
     "CLOSING CURLY BRACE",
     "SEMICOLON",
     "DOUBLE QOUTE",
     "SINGLE QOUTE",
-    "END OF FILE"};
+    "END OF FILE",
+    "UNKNOWN TOKEN"};
 
 string name(int type) {
 	if (type > (1 << 7))
@@ -82,6 +83,11 @@ bool Lexer::tokenizer(ifstream &file) {
 			push_back(Token(SEMICOLON, string(1, chr), line));
 			break;
 		default:
+			if (!::isprint(chr)) {
+				push_back(Token(_UNKNOWN, string(1, chr), line));
+				push_back(Token(_EOF, "End Of File", line));
+				return true;
+			}
 			string word;
 			while (!strchr("{};\"", chr) && !isspace(chr) && !file.eof()) {
 				if (chr == '\\')
@@ -99,6 +105,6 @@ bool Lexer::tokenizer(ifstream &file) {
 	// reset seek of the file to the beginning !
 	file.clear();
 	file.seekg(0);
-	
+
 	return true;
 }

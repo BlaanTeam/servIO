@@ -10,7 +10,7 @@
 
 using namespace std;
 
-extern const char *TokenNames[7];
+extern const char *TokenNames[8];
 
 enum TokenType {
 	WORD = 1 << 1,
@@ -19,7 +19,8 @@ enum TokenType {
 	SEMICOLON = 1 << 4,
 	DQOUTE = 1 << 5,
 	SQOUTE = 1 << 6,
-	_EOF = 1 << 7
+	_EOF = 1 << 7,
+	_UNKNOWN = 1 << 8,
 };
 
 string name(int type);

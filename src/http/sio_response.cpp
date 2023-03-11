@@ -181,8 +181,9 @@ void Response::setupDirectoryListing(const string &path, const string &title) {
 }
 
 void Response::setupNormalResponse(const string &path, iostream *file) {
+	if (!file || !file->good())
+		return;
 	_type = LENGTHED_RES;
-	// TODO: check if the file is openned !
 	setStatusCode(200);
 	setConnectionStatus(true);
 	init();

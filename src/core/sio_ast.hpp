@@ -171,6 +171,10 @@ class MainContext<Type> {
 		return _directives.find("cgi_assign") != _directives.end();
 	}
 
+	bool isUpload() {
+		return _directives.find("upload_store") != _directives.end();
+	}
+
 	Redirect *getRedir() {
 		return _directives["return"].redirect;
 	}

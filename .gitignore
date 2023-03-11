@@ -40,3 +40,7 @@ servio
 
 # ignore prefixed files with ign_*
 ign_*
+
+
+# ignore the html folder
+html/*

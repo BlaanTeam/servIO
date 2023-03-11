@@ -84,6 +84,7 @@ bool Client::handleRequest(stringstream &stream) {
 			}
 			// TODO: check if the location configured  UPLOAD
 
+			_res.extractRange(_req);
 			struct stat fileStat;
 			bzero(&fileStat, sizeof fileStat);
 			if (!location->found(path, fileStat)) {

@@ -250,23 +250,17 @@ void Response::sendChunkedBody(const sockfd &fd) {
 void Response::setupRangedBody() {
 }
 
-void  Response::noLastRange(const sockfd &fd,RangeSpecifier &range) {
-			char buff[(1 << 10)];
-			if (_lengthState == INIT_LENGTH) {
-				_stream->seekg(range.rangeStart);
-				_length = _stream->end - range.rangeStart;
-				_lengthState = ONGOING_LENGTH;
-			}
-			if (_length > (1 << 10)) {
-				_stream->read(buff, (1 << 10));
-				::send(fd, buff, _stream->gcount(), 0);
-				_length -= _stream->gcount();
-			} else {
-				_stream->read(buff, _length);
-				::send(fd, buff, _stream->gcount(), 0);
-				_length -= _stream->gcount();
-				_lengthState = DONE_LENGTH;
-			}
+void Response::noLastRange(const sockfd &fd, RangeSpecifier &range) {
+	char buff[(1 << 10)];
+	if (_lengthState == INIT_LENGTH) {
+		_stream->seekg(range.rangeStart);
+		_length = _stream->end - range.rangeStart;
+		_lengthState = ONGOING_LENGTH;
+	}
+	if (_length > (1 << 10)) 
+		sendMigaRange(fd, range);
+	else
+		sendLessThanMigaRange(fd, range);
 }
 
 void Response::noFirstRange(const sockfd &fd, RangeSpecifier &range) {
@@ -276,35 +270,40 @@ void Response::noFirstRange(const sockfd &fd, RangeSpecifier &range) {
 		_length = range.rangeEnd;
 		_lengthState = ONGOING_LENGTH;
 	}
-	if (_length > (1 << 10)) {
-		_stream->read(buff, (1 << 10));
-		::send(fd, buff, _stream->gcount(), 0);
-		_length -= _stream->gcount();
-	} else {
-		_stream->read(buff, _length);
-		::send(fd, buff, _stream->gcount(), 0);
-		_length -= _stream->gcount();
-		_lengthState = DONE_LENGTH;
-	}
+	if (_length > (1 << 10))
+		sendMigaRange(fd, range);
+	else
+		sendLessThanMigaRange(fd, range);
 }
 
-void	Response::normalRange(const sockfd &fd, RangeSpecifier &range) {
+void Response::sendMigaRange(const sockfd &fd, RangeSpecifier &range) {
+	char buff[(1 << 10)];
+
+	_stream->read(buff, (1 << 10));
+	::send(fd, buff, _stream->gcount(), 0);
+	_length -= _stream->gcount();
+}
+
+void Response::sendLessThanMigaRange(const sockfd &fd, RangeSpecifier &range) {
+	char buff[_length];
+
+	_stream->read(buff, _length);
+	::send(fd, buff, _stream->gcount(), 0);
+	_length -= _stream->gcount();
+	_lengthState = DONE_LENGTH;
+}
+
+void Response::normalRange(const sockfd &fd, RangeSpecifier &range) {
 	char buff[(1 << 10)];
 	if (_lengthState == INIT_LENGTH) {
 		_stream->seekg(range.rangeStart);
 		_length = range.rangeEnd - range.rangeStart;
 		_lengthState = ONGOING_LENGTH;
 	}
-	if (_length > (1 << 10)) {
-		_stream->read(buff, (1 << 10));
-		::send(fd, buff, _stream->gcount(), 0);
-		_length -= _stream->gcount();
-	} else {
-		_stream->read(buff, _length);
-		::send(fd, buff, _stream->gcount(), 0);
-		_length -= _stream->gcount();
-		_lengthState = DONE_LENGTH;
-	}
+	if (_length > (1 << 10))
+		sendMigaRange(fd, range);
+	else
+		sendLessThanMigaRange(fd, range);
 }
 
 void Response::sendRangedBody(const sockfd &fd) {

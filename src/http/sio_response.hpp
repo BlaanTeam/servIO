@@ -92,6 +92,8 @@ class Response {
 	void noLastRange(const sockfd &fd, RangeSpecifier &range);
 	void noFirstRange(const sockfd &fd, RangeSpecifier &range);
 	void normalRange(const sockfd &fd, RangeSpecifier &range);
+	void sendMigaRange(const sockfd &fd, RangeSpecifier &range);
+	void sendLessThanMigaRange(const sockfd &fd, RangeSpecifier &range);
 };
 
 #endif

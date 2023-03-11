@@ -19,6 +19,7 @@
 #include "./sio_http_codes.hpp"
 #include "./sio_mime_types.hpp"
 #include "./sio_request.hpp"
+#include "http/sio_http_range.hpp"
 #include "utility/sio_helpers.hpp"
 #include "utility/sio_socket.hpp"
 #include "utility/sio_utils.hpp"
@@ -37,6 +38,8 @@ class Response {
 
 	iostream *_stream;
 	int       _fd;
+
+	Range _range;
 
 	map<string, string, StringICaseCompare> _headers;
 	bool                                    _keepAlive;
@@ -58,6 +61,7 @@ class Response {
 	void setStream(iostream *stream);
 	void addHeader(const string &name, const string &value);
 
+	void extractRange(Request &req);
 	void setConnectionStatus(bool keepAlive = true);
 
 	bool keepAlive(void) const;

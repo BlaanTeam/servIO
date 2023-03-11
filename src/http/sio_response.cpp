@@ -183,7 +183,6 @@ void Response::setupDirectoryListing(const string &path, const string &title) {
 void Response::setupNormalResponse(const string &path, iostream *file) {
 	if (!file || !file->good())
 		return;
-	_type = LENGTHED_RES;
 	setStatusCode(200);
 	setConnectionStatus(true);
 	init();
@@ -335,4 +334,11 @@ void Response::sendCGIBody(const sockfd &fd) {
 		setState(RES_DONE);
 	else
 		::send(fd, buff, nbyte, 0);
+}
+
+void Response::extractRange(Request &req) {
+	_type = LENGTHED_RES;
+	_range = req.getRange();
+	if (_range.valid())
+		_type = RANGED_RES;
 }

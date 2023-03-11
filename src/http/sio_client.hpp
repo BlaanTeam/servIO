@@ -29,6 +29,7 @@ class Client {
    public:
 	Client();
 	Client(const pair<sockfd, Address> &connection);
+	~Client();
 
 	// Setters
 	void setTime(const long long &time);

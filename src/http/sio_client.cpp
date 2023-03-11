@@ -13,6 +13,10 @@ Client::Client(const pair<sockfd, Address> &connection) {
 	_connection = connection;
 }
 
+Client::~Client() {
+	close(_fds[0]);
+}
+
 // Setters
 
 void Client::setTime(const long long &time) {
@@ -149,7 +153,7 @@ bool Client::waitForCgi() {
 
 void Client::reset(void) {
 	if (_req.match(REQ_DONE) && _res.match(RES_DONE)) {
-		close(_fds[0]);  // TODO: close it in the destructor also !
+		close(_fds[0]);
 		_req.reset();
 		_res.reset();
 	}

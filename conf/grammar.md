@@ -17,13 +17,16 @@
                  | "allowed_methods" {("GET" | "POST" | "DELETE")}+
                  | "client_max_body_size" <SIZE>
                  | "autoindex" ("on" | "off")
-                 | "index" <WORD>
+                 | "index" <WORD>+
                  | "error_page" <CODE> <WORD>
 
 <server-directive> = <http-directive>
                    | "listen" <WORD>
                    | "server_name" <WORD>
+                   | "return" <INT> [<WORD>]
 
 <location-directive> = <http-directive>
                      | "return" <INT> [<WORD>]
+                     | "cgi_assign" <WORD>
+                     | "upload_store <WORD>
 ```

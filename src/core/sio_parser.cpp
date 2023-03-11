@@ -89,7 +89,7 @@ Parser::Directive *Parser::parse_http_dir(Parser::Directive *_dir) {
 			_serr = dir->first + " directive: invalid arguments!";
 			goto failed;
 		}
-		if (dir->first == "index" && !dir->second.front().empty()) {
+		if (dir->first == "index" && dir->second.front().empty()) {
 			_serr = "index directive: invlid arguments!";
 			goto failed;
 		}

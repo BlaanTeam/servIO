@@ -237,9 +237,9 @@ Parser::Directive *Parser::parse_location_dir() {
 		return dir;
 	}
 
-	if (directiveName == "cgi_assign") {
+	if (directiveName == "cgi_assign" || directiveName == "upload_store") {
 		if (dir->second.size() != 1) {
-			_serr = "cgi_assign directive: invalid arguments!";
+			_serr = dir->first + " directive: invalid arguments!";
 			goto failed;
 		}
 		return dir;

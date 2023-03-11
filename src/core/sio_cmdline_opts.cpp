@@ -97,7 +97,7 @@ unknown:
 			_test_configuration(config);
 		if (flags & CONF_DUMP_OPT)
 			_dump_configuration(config);
-		return false;
+		return (flags == CONF_PATH_OPT);
 	}
 	return true;
 }

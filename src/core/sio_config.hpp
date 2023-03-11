@@ -40,6 +40,8 @@ class Config {
 	string             getPath(void) const;
 	bool               good(void) const;
 	VirtualServer     *match(const Address &addr, const string &host);
+
+	~Config();
 };
 
 extern Config config;

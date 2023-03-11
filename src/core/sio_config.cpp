@@ -64,3 +64,8 @@ VirtualServer *Config::match(const Address &addr, const string &host) {
 
 	return servers[0];
 }
+
+Config::~Config() {
+	_file_stream.close();
+	delete _asTree;
+}

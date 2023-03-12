@@ -49,8 +49,8 @@ struct ServerName : public vector<string> {
 	bool find(const string &name);
 };
 
-struct CgiExtention : public vector<string> {
-	CgiExtention(const vector<string> &vec);
+struct CgiExtension : public vector<string> {
+	CgiExtension(const vector<string> &vec);
 	bool match(const string &name);
 };
 
@@ -64,7 +64,7 @@ struct Type {
 		ErrorPage    *errPage;
 		Redirect     *redirect;
 		ServerName   *servName;
-		CgiExtention *cgiExt;
+		CgiExtension *cgiExt;
 	};
 	Type();
 	Type(int type);

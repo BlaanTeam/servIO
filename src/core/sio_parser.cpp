@@ -384,7 +384,7 @@ static void updateRootDirective(string &value) {
 }
 
 static bool inheritable(const string &dirName) {
-	return !(dirName == "return" || dirName == "cgi_assign" || dirName == "upload_store"); 
+	return !(dirName == "return" || dirName == "cgi_assign" || dirName == "upload_store");
 }
 
 bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
@@ -445,38 +445,44 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 		if (key == "allowed_methods") {
 			typ.type = INT;
 			typ.value = 0;
-			
+
 			for (size_t i = 0; i < val.size(); i++) {
-				if (val[i] == "GET")       typ.value |= GET;
-				else if (val[i] == "POST") typ.value |= POST;
-				else /*DELETE*/            typ.value |= DELETE;
+				if (val[i] == "GET")
+					typ.value |= GET;
+				else if (val[i] == "POST")
+					typ.value |= POST;
+				else /*DELETE*/
+					typ.value |= DELETE;
 			}
 		}
-		
+
 		else if (key == "client_max_body_size") {
 			typ.type = INT;
 			typ.value = stol(val[0]);
 
-			if (val[0].back() == 'k')      typ.value *= (1LL << 10);
-			else if (val[0].back() == 'm') typ.value *= (1LL << 20);
-			else if (val[0].back() == 'g') typ.value *= (1LL << 30);
+			if (val[0].back() == 'k')
+				typ.value *= (1LL << 10);
+			else if (val[0].back() == 'm')
+				typ.value *= (1LL << 20);
+			else if (val[0].back() == 'g')
+				typ.value *= (1LL << 30);
 		}
-		
+
 		else if (key == "autoindex") {
 			typ.type = BOOL;
 			typ.ok = (val[0] == "on");
 		}
-		
+
 		else if (key.substr(0, 10) == "error_page") {
 			typ.type = ERRPG;
 			typ.errPage = new ErrorPage(val[0], val[1][0] == '/' ? val[1] : joinPath((*tree)["root"][0], val[1]));
 		}
-		
+
 		else if (key == "return") {
 			typ.type = REDIR;
 			typ.redirect = new Redirect(stoi(val[0]), val.size() == 2 ? val[1] : "");
 		}
-		
+
 		else if (key == "listen") {
 			typ.type = ADDR;
 			const string &addr = val[0];
@@ -490,7 +496,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 
 			if (idx == -1 || addr[idx] == ':') {
 				if (idx + 1 != (int)addr.size()) port = stoi(addr.substr(idx + 1));
-				if (--idx >= 0)                  host = addr.substr(0, idx + 1);
+				if (--idx >= 0) host = addr.substr(0, idx + 1);
 			} else {
 				host = addr;
 			}
@@ -502,7 +508,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 				return _serr = "invalid adress: " + addr, make_pair(false, ret);
 			}
 		}
-		
+
 		else if (key == "server_name") {
 			typ.type = SERV_NAME;
 			typ.servName = new ServerName(val);
@@ -510,9 +516,9 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 
 		else if (key == "cgi_assign") {
 			typ.type = CGI_EXT;
-			typ.cgiExt = new CgiExtention(val);
+			typ.cgiExt = new CgiExtension(val);
 		}
-		
+
 		else {  // index, root, upload_store
 			typ.type = STR;
 			typ.str = new string(val[0]);

@@ -80,7 +80,7 @@ INCLUDES := -I src/\
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CC) -o $(NAME) $^ #-fsanitize=address
+	$(CC) -o $(NAME) $^ -fsanitize=address
 
 %.o: %.cpp $(HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@

@@ -34,6 +34,17 @@ bool ServerName::find(const string &name) {
 	return ::find(begin(), end(), name) != end();
 }
 
+CgiExtention::CgiExtention(const vector<string> &vec): vector<string>(vec) {}
+
+bool CgiExtention::match(const string &name) {
+	for (iterator it = begin(); it != end(); ++it) {
+		if (name.size() > it->size() && equal(name.end() - it->size(), name.end(), it->begin())) {
+			return true;
+		}
+	}
+	return false;
+}
+
 Type::Type() { bzero(this, sizeof(Type)); }
 
 Type::Type(int type) {

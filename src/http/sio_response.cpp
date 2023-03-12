@@ -54,7 +54,7 @@ void Response::init(const string &contentType) {
 void Response::prepare(void) {
 	_ss << HTTP_VERSION << " " << to_string(_statusCode) << " " << httpStatusCodes[_statusCode] << CRLF;
 
-	map<string, string, StringICaseCompare>::iterator it = _headers.begin();
+	Header::iterator it = _headers.begin();
 
 	while (it != _headers.end()) {
 		_ss << it->first << ": " << it->second << CRLF;

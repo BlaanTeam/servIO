@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 
+#include "./sio_header.hpp"
 #include "utility/sio_helpers.hpp"
 #include "utility/sio_utils.hpp"
 
@@ -46,7 +47,7 @@ class Body {
 	Body(const Body &copy);
 	Body &operator=(const Body &rhs);
 	~Body();
-	void chooseState(map<string, string, StringICaseCompare> &headers);
+	void chooseState(Header &headers);
 	void setState(const int &state);
 	void consumeBody(istream &stream, Request *req);
 

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 
+#include "./sio_header.hpp"
 #include "./sio_http_codes.hpp"
 #include "./sio_request_body.hpp"
 #include "http/sio_http_range.hpp"
@@ -33,11 +34,11 @@ class Request {
 	string     _query;
 	string     _line;
 
-	map<string, string, StringICaseCompare> _headers;
-	Body                                    _body;
+	Header _headers;
+	Body   _body;
 
    public:
-	typedef map<string, string, StringICaseCompare>::iterator headerIter;
+	typedef Header::iterator headerIter;
 
    private:
 	void parseFirstLine(string &line);
@@ -53,15 +54,15 @@ class Request {
 	void     consumeStream(stringstream &stream);
 
 	// Getters
-	string                                   getPath(void) const;
-	string                                   getQuery(void) const;
-	short                                    getState(void) const;
-	int                                      getStatusCode() const;
-	int                                      getFileno() const;
-	HttpMethod                               getMethod(void) const;
-	map<string, string, StringICaseCompare> &getHeaders(void) const;
-	bool                                     match(const int &state) const;
-	Range                                    getRange();
+	string     getPath(void) const;
+	string     getQuery(void) const;
+	short      getState(void) const;
+	int        getStatusCode() const;
+	int        getFileno() const;
+	HttpMethod getMethod(void) const;
+	bool       match(const int &state) const;
+	Header    &getHeaders(void);
+	Range      getRange();
 
 	void reset(void);
 

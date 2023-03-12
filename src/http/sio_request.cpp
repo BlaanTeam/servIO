@@ -154,8 +154,8 @@ HttpMethod Request::getMethod(void) const {
 	return _method;
 }
 
-map<string, string, StringICaseCompare> &Request::getHeaders(void) const {
-	return (map<string, string, StringICaseCompare> &)_headers;
+Header &Request::getHeaders(void) {
+	return _headers;
 }
 
 bool Request::valid() const {

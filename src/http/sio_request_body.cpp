@@ -23,8 +23,8 @@ void Body::setState(const int &state) {
 	_bodyState = state;
 }
 
-void Body::chooseState(map<string, string, StringICaseCompare> &headers) {
-	map<string, string, StringICaseCompare>::iterator it = headers.find("Transfer-Encoding");
+void Body::chooseState(Header &headers) {
+	Header::iterator it = headers.find("Transfer-Encoding");
 	if (it != headers.end()) {
 		stringstream ss(it->second);
 		string       part;

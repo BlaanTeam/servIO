@@ -24,6 +24,7 @@
 #include "./sio_http_range.hpp"
 #include "./sio_mime_types.hpp"
 #include "./sio_request.hpp"
+#include "./sio_header.hpp"
 #include "http/sio_http_range.hpp"
 #include "utility/sio_helpers.hpp"
 #include "utility/sio_socket.hpp"
@@ -48,8 +49,8 @@ class Response {
 
 	Range _range;
 
-	map<string, string, StringICaseCompare> _headers;
-	bool                                    _keepAlive;
+	Header _headers;
+	bool   _keepAlive;
 
    public:
 	Response();

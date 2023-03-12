@@ -34,7 +34,7 @@ bool ServerName::find(const string &name) {
 	return ::find(begin(), end(), name) != end();
 }
 
-CgiExtension::CgiExtension(const vector<string> &vec) : vector<string>(vec) {}
+CgiExtension::CgiExtension(const vector<string> &vec): vector<string>(vec) {}
 
 bool CgiExtension::match(const string &name) {
 	for (iterator it = begin(); it != end(); ++it) {
@@ -59,74 +59,34 @@ Type::Type(const Type &cpy) {
 
 Type &Type::operator=(const Type &cpy) {
 	switch (type) {
-	case STR:
-		delete str;
-		break;
-	case ADDR:
-		delete addr;
-		break;
-	case ERRPG:
-		delete errPage;
-		break;
-	case REDIR:
-		delete redirect;
-		break;
-	case CGI_EXT:
-		delete cgiExt;
-		break;
-	case SERV_NAME:
-		delete servName;
-		break;
+		case STR: delete str; break;
+		case ADDR: delete addr; break;
+		case ERRPG: delete errPage; break;
+		case REDIR: delete redirect; break;
+		case CGI_EXT: delete cgiExt; break;
+		case SERV_NAME: delete servName; break;
 	}
 	type = cpy.type;
 	switch (type) {
-	case BOOL:
-		ok = cpy.ok;
-		break;
-	case INT:
-		value = cpy.value;
-		break;
-	case STR:
-		str = new string(*cpy.str);
-		break;
-	case ADDR:
-		addr = new Address(*cpy.addr);
-		break;
-	case ERRPG:
-		errPage = new ErrorPage(*cpy.errPage);
-		break;
-	case REDIR:
-		redirect = new Redirect(*cpy.redirect);
-		break;
-	case CGI_EXT:
-		cgiExt = new CgiExtension(*cpy.cgiExt);
-		break;
-	case SERV_NAME:
-		servName = new ServerName(*cpy.servName);
-		break;
+		case BOOL: ok = cpy.ok; break;
+		case INT: value = cpy.value; break;
+		case STR: str = new string(*cpy.str); break;
+		case ADDR: addr = new Address(*cpy.addr); break;
+		case ERRPG: errPage = new ErrorPage(*cpy.errPage); break;
+		case REDIR: redirect = new Redirect(*cpy.redirect); break;
+		case CGI_EXT: cgiExt = new CgiExtension(*cpy.cgiExt); break;
+		case SERV_NAME: servName = new ServerName(*cpy.servName); break;
 	}
 	return *this;
 }
 
 Type::~Type() {
 	switch (type) {
-	case STR:
-		delete str;
-		break;
-	case ADDR:
-		delete addr;
-		break;
-	case ERRPG:
-		delete errPage;
-		break;
-	case REDIR:
-		delete redirect;
-		break;
-	case CGI_EXT:
-		delete cgiExt;
-		break;
-	case SERV_NAME:
-		delete servName;
-		break;
+		case STR: delete str; break;
+		case ADDR: delete addr; break;
+		case ERRPG: delete errPage; break;
+		case REDIR: delete redirect; break;
+		case CGI_EXT: delete cgiExt; break;
+		case SERV_NAME: delete servName; break;
 	}
 }

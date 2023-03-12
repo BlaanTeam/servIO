@@ -24,9 +24,9 @@ void Body::setState(const int &state) {
 }
 
 void Body::chooseState(Header &headers) {
-	Header::iterator it = headers.find("Transfer-Encoding");
-	if (it != headers.end()) {
-		stringstream ss(it->second);
+	string value = headers.get("Transfer-Encoding");
+	if (!value.empty()) {
+		stringstream ss(value);
 		string       part;
 
 		while (getline(ss, part, ',')) {
@@ -36,10 +36,10 @@ void Body::chooseState(Header &headers) {
 				break;
 			}
 		}
-	} else if ((it = headers.find("Content-Length")) != headers.end() && _bodyState != CHUNKED_BODY) {
-		trim(it->second);
-		if (it->second.length() > 0 && it->second[0] >= '1' && it->second[0] <= '9' && every(it->second, ::isdigit))
-			_contentLength = atoi(it->second.c_str()), setState(LENGTHED_BODY);
+	} else if (!(value = headers.get("Content-Length")).empty() && _bodyState != CHUNKED_BODY) {
+		trim(value);
+		if (value.length() > 0 && value[0] >= '1' && value[0] <= '9' && every(value, ::isdigit))
+			_contentLength = atoi(value.c_str()), setState(LENGTHED_BODY);
 	} else
 		setState(NORMAL_BODY);
 }

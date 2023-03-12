@@ -163,24 +163,22 @@ bool Request::valid() const {
 }
 
 bool Request::isTooLarge(const int &clientMaxSize) {
-	headerIter it = _headers.find("Content-Length");
-	if (it == _headers.end())
+	string value = _headers.get("Content-Length");
+	if (value.empty())
 		return false;
-	trim(it->second);
-	if (!every(it->second, ::isdigit))
+	if (!every(value, ::isdigit))
 		return false;
-	return atoll(it->second.c_str()) > clientMaxSize;
+	return atoll(value.c_str()) > clientMaxSize;
 }
 
 bool Request::match(const int &state) const {
 	return _state & state;
 }
 Range Request::getRange() {
-	headerIter it = _headers.find("Range");
-	if (it == _headers.end())
+	string value = _headers.get("Range");
+	if (value.empty())
 		return Range();
-	trim(it->second);
-	return Range(it->second);
+	return Range(value);
 }
 
 void Request::reset(void) {

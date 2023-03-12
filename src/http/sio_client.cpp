@@ -75,7 +75,7 @@ bool Client::handleRequest(stringstream &stream) {
 			size_t pathLength = _req.getPath().length();
 
 			if (location->isCGI() && pathLength > locationLength) {  // ! INFO: why this condition !
-				CGI cgi(".py", location, &_req, &_res);
+				CGI cgi(location, &_req, &_res);
 				if (cgi.valid()) {
 					_pid = cgi.spawn(_fds, _req.getFileno());
 					_res.setupCGIResponse(_fds[0]);

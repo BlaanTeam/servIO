@@ -25,7 +25,7 @@ class CGI {
 
    public:
 	string _scriptFileName;
-	CGI(const string &ext, LocationContext<Type> *location, Request *req, Response *res);
+	CGI(LocationContext<Type> *location, Request *req, Response *res);
 
 	bool valid() const;
 

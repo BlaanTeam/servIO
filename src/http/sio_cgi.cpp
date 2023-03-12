@@ -1,6 +1,6 @@
 #include "sio_cgi.hpp"
 
-CGI::CGI(const string &ext, LocationContext<Type> *location, Request *req, Response *res) : _isCGI(false) {
+CGI::CGI(LocationContext<Type> *location, Request *req, Response *res) : _isCGI(false) {
 	_location = location;
 	_req = req;
 	_res = res;
@@ -17,9 +17,9 @@ CGI::CGI(const string &ext, LocationContext<Type> *location, Request *req, Respo
 	struct stat fileStat;
 	bzero(&fileStat, sizeof fileStat);
 
-	size_t scriptLen = tmp.length();
-	bool   isEqual = equal(tmp.begin() + scriptLen - ext.length(), tmp.end(), ext.begin());
-	if (scriptLen > ext.length() && isEqual && location->found(_scriptFileName, fileStat)) {
+	CgiExtension *cgiExt = location->getCGIExtensions();
+
+	if (cgiExt->match(tmp) && location->found(_scriptFileName, fileStat)) {
 		if (!access(_scriptFileName.c_str(), X_OK))
 			_isCGI = true;
 	}

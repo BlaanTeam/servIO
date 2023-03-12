@@ -1,6 +1,22 @@
 #include "sio_http_range.hpp"
 
-#include <math.h>
+size_t RangeSpecifier::getContentLength(iostream *stream) {
+	long long contentLength = rangeEnd - rangeStart + 1;
+	if (type == NOL)
+		contentLength = getFileSize(stream) - rangeStart;
+	else if (type & NOF)
+		contentLength = min(getFileSize(stream), (size_t)rangeEnd);
+	return contentLength < 0 ? 0 : contentLength;
+}
+
+void RangeSpecifier::setupSeek(iostream *stream) {
+	if (type == NOL)
+		stream->seekg(rangeStart);
+	else if (type == NOF)
+		stream->seekg(getFileSize(stream) - rangeEnd);
+	else
+		stream->seekg(rangeStart);
+}
 
 Range::Range() {
 	_valid = false;

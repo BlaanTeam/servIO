@@ -1,6 +1,7 @@
 #ifndef __HTTP_RANGE_H__
 #define __HTTP_RANGE_H__
 
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,9 @@ struct RangeSpecifier {
 	int      rangeStart;
 	int      rangeEnd;
 	UnitType type;
+
+	size_t getContentLength(iostream *stream);
+	void   setupSeek(iostream *stream);
 };
 
 class Range {
@@ -33,7 +37,7 @@ class Range {
 	Range(const string &value);
 
 	// Getters
-	bool valid(void) const;
+	bool                   valid(void) const;
 	vector<RangeSpecifier> getRangeSpecifiers(void) const;
 };
 

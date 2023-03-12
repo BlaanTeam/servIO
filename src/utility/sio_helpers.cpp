@@ -77,3 +77,12 @@ string joinPath(const string &parentDir, const string &childDir) {
 		return parentDir.substr(0, parentDir.length() - 1) + childDir;
 	return path + childDir;
 }
+
+size_t getFileSize(iostream *stream) {
+	size_t currSeek = stream->tellg();
+	stream->seekg(0, ios::end);
+
+	size_t count = stream->tellg();
+	stream->seekg(currSeek);
+	return count;
+}

@@ -25,4 +25,7 @@ class StringICaseCompare : binary_function<string, string, bool> {
 };
 
 string joinPath(const string &parentDir, const string &childDir);
+
+size_t getFileSize(iostream *stream);
+
 #endif

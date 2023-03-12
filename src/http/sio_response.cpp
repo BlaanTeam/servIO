@@ -240,6 +240,8 @@ void Response::reset(void) {
 	_ss.str("");
 	_ss.clear();
 
+	_lengthState = INIT_LENGTH;
+
 	delete _stream;
 	_stream = nullptr;
 
@@ -299,14 +301,26 @@ void Response::setupRangedBody() {
 	RangeSpecifier range = _range.getRangeSpecifiers()[0];
 
 	addHeader("Content-Length", to_string(range.getContentLength(_stream)));
-	// addHeader("Content-Range", "bytes " + );
+	setStatusCode(PARTIAL_CONTENT);
+
+	size_t fileSize = getFileSize(_stream);
+	if (range.type == NOL)
+		range.rangeEnd = fileSize <= 0 ? 0 : fileSize - 1;
+	else if (range.type == NOF) {
+		range.rangeStart = range.rangeStart > fileSize ? 0 : fileSize - range.rangeEnd;
+		range.rangeEnd = fileSize <= 0 ? 0 : fileSize - 1;
+	}
+
+	char buff[(1 << 10)];
+	sprintf(buff, "bytes %ld-%ld/%ld", range.rangeStart, range.rangeEnd, fileSize);
+	addHeader("Content-Range", buff);
 }
 
 void Response::sendRangedBody(const sockfd &fd) {
 	// We don't support multiple ranges
 	RangeSpecifier range = _range.getRangeSpecifiers()[0];
 
-	range.rangeEnd = min((size_t)range.rangeEnd, getFileSize(_stream));
+	range.rangeEnd = min(range.rangeEnd, getFileSize(_stream));
 
 	if (_lengthState == INIT_LENGTH) {
 		range.setupSeek(_stream);

@@ -52,11 +52,13 @@ HTTP_HEADER = sio_request.hpp\
 UTILITY_SRC = sio_socket.cpp\
 	sio_helpers.cpp\
 	sio_utils.cpp\
+	sio_logger.cpp\
 
 # utility headers
 UTILITY_HEADER = sio_socket.hpp\
 	sio_helpers.hpp\
 	sio_utils.hpp\
+	sio_logger.hpp\
 
 SRCS = sio_main.cpp\
 	$(addprefix http/,$(HTTP_SRC))\

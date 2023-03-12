@@ -22,11 +22,11 @@
 
 <server-directive> = <http-directive>
                    | "listen" <WORD>
-                   | "server_name" <WORD>
+                   | "server_name" {<WORD>}+ 
                    | "return" <INT> [<WORD>]
 
 <location-directive> = <http-directive>
                      | "return" <INT> [<WORD>]
-                     | "cgi_assign" <WORD>
+                     | "cgi_assign" {<WORD>}+
                      | "upload_store <WORD>
 ```

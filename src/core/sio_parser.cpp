@@ -383,6 +383,10 @@ static void updateRootDirective(string &value) {
 		value = PREFIX_FOLDER "/" + value;
 }
 
+static bool inheritable(const string &dirName) {
+	return !(dirName == "return" || dirName == "cgi_assign" || dirName == "upload_store"); 
+}
+
 bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	if (!tree)
 		return false;
@@ -397,7 +401,7 @@ bool Parser::updateDirectives(MainContext<> *tree, MainContext<> *parent) {
 	if (parent) {
 		map<string, vector<string> > &directives = parent->directives();
 		for (MainContext<>::dirIter dir = directives.begin(); dir != directives.end(); dir++) {
-			if (dir->first != "return" && tree->directives().find(dir->first) == tree->directives().end()) {
+			if (inheritable(dir->first) && tree->directives().find(dir->first) == tree->directives().end()) {
 				tree->directives().insert(*dir);
 			}
 		}

@@ -174,13 +174,13 @@ Parser::Directive *Parser::parse_server_dir() {
 	}
 
 	if (directiveName == "server_name") {
-		if (dir->second.size() > 512) {  // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_max_size
-			_serr = "server_name: too many arguments!";
+		if (dir->second.empty() || dir->second.size() > 512) {  // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_max_size
+			_serr = "server_name: invalid arguments!";
 			goto failed;
 		}
 		for (size_t i = 0; i < dir->second.size(); i++) {
 			if (dir->second[i].size() > 64) {  // http://nginx.org/en/docs/http/ngx_http_core_module.html#server_names_hash_bucket_size
-				_serr = "server_name: invlid argument!";
+				_serr = "server_name: \"" + dir->second[i] + "\": invlid argument!";
 				goto failed;
 			}
 		}

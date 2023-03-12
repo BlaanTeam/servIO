@@ -507,8 +507,13 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 			typ.type = SERV_NAME;
 			typ.servName = new ServerName(val);
 		}
+
+		else if (key == "cgi_assign") {
+			typ.type = CGI_EXT;
+			typ.cgiExt = new CgiExtention(val);
+		}
 		
-		else {  // index, root, cgi
+		else {  // index, root, upload_store
 			typ.type = STR;
 			typ.str = new string(val[0]);
 		}

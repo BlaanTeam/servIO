@@ -16,8 +16,8 @@ enum UnitType {
 };
 
 struct RangeSpecifier {
-	int      rangeStart;
-	int      rangeEnd;
+	size_t   rangeStart;
+	size_t   rangeEnd;
 	UnitType type;
 
 	size_t getContentLength(iostream *stream);

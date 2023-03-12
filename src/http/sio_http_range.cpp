@@ -2,10 +2,12 @@
 
 size_t RangeSpecifier::getContentLength(iostream *stream) {
 	long long contentLength = rangeEnd - rangeStart + 1;
+
+	size_t fileSize = getFileSize(stream);
 	if (type == NOL)
-		contentLength = getFileSize(stream) - rangeStart;
+		contentLength = fileSize - rangeStart;
 	else if (type & NOF)
-		contentLength = min(getFileSize(stream), (size_t)rangeEnd);
+		contentLength = min(fileSize, rangeEnd);
 	return contentLength < 0 ? 0 : contentLength;
 }
 
@@ -47,7 +49,7 @@ invalid:
 	_valid = false;
 }
 
-static int parseUnit(const string &value, int &unit) {
+static int parseUnit(const string &value, size_t &unit) {
 	if (!every(value, ::isdigit))
 		return -1;
 	unit = value.length() ? stod(value) : -1;

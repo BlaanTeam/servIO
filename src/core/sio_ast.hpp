@@ -28,7 +28,8 @@ enum TypeList {
 	ADDR = 1 << 3,
 	ERRPG = 1 << 4,
 	REDIR = 1 << 5,
-	SERV_NAME = 2 << 6,
+	SERV_NAME = 1 << 6,
+	CGI_EXT = 1 << 7,
 };
 
 struct ErrorPage {
@@ -48,16 +49,22 @@ struct ServerName : public vector<string> {
 	bool find(const string &name);
 };
 
+struct CgiExtention : public vector<string> {
+	CgiExtention(const vector<string> &vec);
+	bool match(const string &name);
+};
+
 struct Type {
 	int type;
 	union {
-		long long   value;
-		bool        ok;
-		string     *str;
-		Address    *addr;
-		ErrorPage  *errPage;
-		Redirect   *redirect;
-		ServerName *servName;
+		long long     value;
+		bool          ok;
+		string       *str;
+		Address      *addr;
+		ErrorPage    *errPage;
+		Redirect     *redirect;
+		ServerName   *servName;
+		CgiExtention *cgiExt;
 	};
 	Type();
 	Type(int type);

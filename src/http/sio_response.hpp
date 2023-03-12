@@ -20,11 +20,11 @@
 #include <sstream>
 #include <string>
 
+#include "./sio_header.hpp"
 #include "./sio_http_codes.hpp"
 #include "./sio_http_range.hpp"
 #include "./sio_mime_types.hpp"
 #include "./sio_request.hpp"
-#include "./sio_header.hpp"
 #include "http/sio_http_range.hpp"
 #include "utility/sio_helpers.hpp"
 #include "utility/sio_socket.hpp"
@@ -38,11 +38,13 @@ using namespace std;
 class Response {
 	stringstream _ss;
 
-	short _statusCode;
-	short _type;
-	short _state;
-	int   _length;
-	short _lengthState;
+	bool   _isCustomStatusCode;
+	short  _statusCode;
+	string _statusStringCode;
+	short  _type;
+	short  _state;
+	int    _length;
+	short  _lengthState;
 
 	iostream *_stream;
 	int       _fd;

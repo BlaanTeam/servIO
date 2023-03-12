@@ -5,6 +5,7 @@ Response::Response() {
 	_lengthState = INIT_LENGTH;
 	_stream = nullptr;
 	_type = LENGTHED_RES;
+	_isCustomStatusCode = false;
 	setState(RES_INIT);
 	init();
 }
@@ -14,6 +15,7 @@ Response::Response(const short &statusCode, const string &contentType, bool keep
 	_keepAlive = keepAlive;
 	_stream = nullptr;
 	_type = LENGTHED_RES;
+	_isCustomStatusCode = false;
 	setState(RES_INIT);
 	init(contentType);
 }
@@ -30,6 +32,7 @@ Response &Response::operator=(const Response &rhs) {
 		_state = rhs._state;
 		_type = rhs._type;
 		_headers = rhs._headers;
+		_isCustomStatusCode = rhs._isCustomStatusCode;
 	}
 	return *this;
 }
@@ -52,7 +55,9 @@ void Response::init(const string &contentType) {
 }
 
 void Response::prepare(void) {
-	_ss << HTTP_VERSION << " " << to_string(_statusCode) << " " << httpStatusCodes[_statusCode] << CRLF;
+	if (!_isCustomStatusCode)
+		_statusStringCode = httpStatusCodes[_statusCode];
+	_ss << HTTP_VERSION << " " << to_string(_statusCode) << " " << _statusStringCode << CRLF;
 
 	Header::iterator it = _headers.begin();
 
@@ -244,6 +249,8 @@ void Response::reset(void) {
 
 	delete _stream;
 	_stream = nullptr;
+	_isCustomStatusCode = false;
+	_statusStringCode = "";
 
 	_keepAlive = true;
 	_type = LENGTHED_RES;
@@ -372,9 +379,18 @@ bool Response::setupCGIBody() {
 	if (nbyte <= 0 && !got)
 		return false;
 	changeState(RES_HEADER);  // reset the state to header!
-	string contentType = _headers["Content-Type"];
+	string contentType = _headers.get("Content-Type");
 	if (contentType.empty())
 		contentType = mimeTypes[""];
+
+	string status = _headers.get("Status");
+	if (!status.empty()) {
+		char buff[(1 << 10)];
+		sscanf(status.c_str(), "%hd %[^\n]1000s", &_statusCode, buff);
+		_isCustomStatusCode = true;
+		_statusStringCode = buff;
+		// ? INFO: we can remove Status from headers cuz it useless !! 
+	}
 	addHeader("Content-Type", contentType);
 	init(contentType);
 	return true;

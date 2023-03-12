@@ -3,13 +3,15 @@
 
 #include <map>
 #include <string>
+
 #include "utility/sio_helpers.hpp"
 
 using namespace std;
 
 class Header : public map<string, string, StringICaseCompare> {
    public:
-	bool found(const string &key) const;
+	bool   found(const string& key) const;
+	string get(const string& key);
 };
 
 #endif

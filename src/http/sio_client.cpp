@@ -39,9 +39,7 @@ bool Client::handleRequest(stringstream &stream) {
 	reset();
 	_req.consumeStream(stream);
 
-	string host = _req.getHeaders()["Host"];
-	trim(host);
-	VirtualServer *virtualServer = config.match(Address(_connection.first), host);
+	VirtualServer *virtualServer = config.match(Address(_connection.first), _req.getHeaders().get("Host"));
 
 	_ctx = virtualServer;
 

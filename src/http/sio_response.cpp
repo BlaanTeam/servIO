@@ -2,6 +2,7 @@
 
 Response::Response() {
 	_keepAlive = true;
+	_lengthState = INIT_LENGTH;
 	_stream = nullptr;
 	_type = LENGTHED_RES;
 	setState(RES_INIT);
@@ -47,6 +48,7 @@ void Response::init(const string &contentType) {
 	else
 		_headers.erase("Keep-Alive");
 	addHeader("Content-Type", contentType);
+	addHeader("Accept-Ranges", "bytes");
 }
 
 void Response::prepare(void) {
@@ -294,10 +296,47 @@ void Response::sendChunkedBody(const sockfd &fd) {
 }
 
 void Response::setupRangedBody() {
+	RangeSpecifier range = _range.getRangeSpecifiers()[0];
+
+	addHeader("Content-Length", to_string(range.getContentLength(_stream)));
+	// addHeader("Content-Range", "bytes " + );
 }
 
 void Response::sendRangedBody(const sockfd &fd) {
-	(void)fd;
+	// We don't support multiple ranges
+	RangeSpecifier range = _range.getRangeSpecifiers()[0];
+
+	range.rangeEnd = min((size_t)range.rangeEnd, getFileSize(_stream));
+
+	if (_lengthState == INIT_LENGTH) {
+		range.setupSeek(_stream);
+		_length = range.getContentLength(_stream);
+		_lengthState = ONGOING_LENGTH;
+	}
+	if (_length > (1 << 10))
+		sendKiloByte(fd);
+	else
+		sendLessThanKiloByte(fd);
+
+	if (_lengthState & DONE_LENGTH)
+		_state = RES_DONE;
+}
+
+void Response::sendKiloByte(const sockfd &fd) {
+	char buff[(1 << 10)];
+
+	_stream->read(buff, (1 << 10));
+	::send(fd, buff, _stream->gcount(), 0);
+	_length -= _stream->gcount();
+}
+
+void Response::sendLessThanKiloByte(const sockfd &fd) {
+	char buff[(1 << 10)];
+
+	_stream->read(buff, _length);
+	::send(fd, buff, _stream->gcount(), 0);
+	_length -= _stream->gcount();
+	_lengthState = DONE_LENGTH;
 }
 
 bool Response::setupCGIBody() {

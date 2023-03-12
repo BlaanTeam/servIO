@@ -11,12 +11,17 @@
 #define RANGED_RES (1 << 2)
 #define CGI_RES (1 << 3)
 
+#define INIT_LENGTH (1 << 0)
+#define ONGOING_LENGTH (1 << 1)
+#define DONE_LENGTH (1 << 2)
+
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
 
 #include "./sio_http_codes.hpp"
+#include "./sio_http_range.hpp"
 #include "./sio_mime_types.hpp"
 #include "./sio_request.hpp"
 #include "http/sio_http_range.hpp"
@@ -35,6 +40,8 @@ class Response {
 	short _statusCode;
 	short _type;
 	short _state;
+	int   _length;
+	short _lengthState;
 
 	iostream *_stream;
 	int       _fd;
@@ -93,6 +100,9 @@ class Response {
 
 	void sendCGIBody(const sockfd &fd);
 	bool setupCGIBody();
+
+	void sendKiloByte(const sockfd &fd);
+	void sendLessThanKiloByte(const sockfd &fd);
 };
 
 #endif

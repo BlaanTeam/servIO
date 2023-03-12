@@ -72,7 +72,7 @@ bool Client::handleRequest(stringstream &stream) {
 			size_t locationLength = location->location().length();
 			size_t pathLength = _req.getPath().length();
 
-			if (location->isCGI() && pathLength > locationLength) {  // ! INFO: why this condition !
+			if (location->isCGI() && pathLength > locationLength) {  // ! GOTO : 1zx0
 				CGI cgi(location, &_req, &_res);
 				if (cgi.valid()) {
 					_pid = cgi.spawn(_fds, _req.getFileno());

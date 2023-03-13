@@ -71,7 +71,7 @@ void Request::parseHeaders(string &line) {
 	if (value.length() < n + 1 || (tmp != LF && tmp != CRLF))
 		goto invalid;
 	value = value.substr(0, value.length() - n);
-	_headers[key] = value;
+	_headers.add(key, value);
 	return;
 invalid:
 	changeState(REQ_INVALID);

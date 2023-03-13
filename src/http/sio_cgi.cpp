@@ -4,7 +4,7 @@ CGI::CGI(LocationContext<Type> *location, Request *req, Response *res) : _isCGI(
 	_location = location;
 	_req = req;
 	_res = res;
-	stringstream ss(req->getPath().substr(location->location().length() + 1)); // ! GOT ME : 1zx0
+	stringstream ss(req->getPath().substr(location->location().length() + 1));  // ! GOT ME : 1zx0
 	string       tmp;
 	string       scriptFileName;
 
@@ -30,16 +30,14 @@ bool CGI::valid() const {
 }
 
 void CGI::init() {
-	metaVariables["GATEWAY_INTERFACE"] = "CGI/1.1";
-	metaVariables["DOCUMENT_ROOT"] = *_location->directives()["root"].str;
-	metaVariables["QUERY_STRING"] = _req->getQuery();
-	metaVariables["REQUEST_METHOD"] = httpMethods[(int)log2((int)_req->getMethod())];
-	metaVariables["REQUEST_URI"] = _req->getPath();
-	if (!_req->getQuery().empty())
-		metaVariables["REQUEST_URI"] += "?" + _req->getQuery();
-	metaVariables["SCRIPT_FILENAME"] = _scriptFileName;
-	metaVariables["SCRIPT_NAME"] = _scriptName;
-	metaVariables["PATH_INFO"] = _pathInfo;
+	metaVariables.add("GATEWAY_INTERFACE", "CGI/1.1");
+	metaVariables.add("DOCUMENT_ROOT", *_location->directives()["root"].str);
+	metaVariables.add("QUERY_STRING", _req->getQuery());
+	metaVariables.add("REQUEST_METHOD", httpMethods[(int)log2((int)_req->getMethod())]);
+	metaVariables.add("REQUEST_URI", _req->getPath() + (!_req->getQuery().empty() ? "?": "") + _req->getQuery());
+	metaVariables.add("SCRIPT_FILENAME", _scriptFileName);
+	metaVariables.add("SCRIPT_NAME", _scriptName);
+	metaVariables.add("PATH_INFO", _pathInfo);
 
 	// TODO: add needed variables !
 
@@ -52,9 +50,11 @@ void CGI::init() {
 }
 
 void CGI::setenv() {
-	map<string, string>::iterator it = metaVariables.begin();
+	Header::iterator it = metaVariables.begin();
 	while (it != metaVariables.end()) {
-		::setenv(it->first.c_str(), it->second.c_str(), 1);
+		for (set<string>::iterator it_ = it->second.begin(); it_ != it->second.end(); it_++)
+			::setenv(it->first.c_str(), it_->c_str(), 1);
+
 		it++;
 	}
 }

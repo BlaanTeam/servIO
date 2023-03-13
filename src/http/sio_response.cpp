@@ -7,17 +7,15 @@ Response::Response() {
 	_type = LENGTHED_RES;
 	_isCustomStatusCode = false;
 	setState(RES_INIT);
-	init();
 }
 
-Response::Response(const short &statusCode, const string &contentType, bool keepAlive) {
+Response::Response(const short &statusCode, bool keepAlive) {
 	_statusCode = statusCode;
 	_keepAlive = keepAlive;
 	_stream = nullptr;
 	_type = LENGTHED_RES;
 	_isCustomStatusCode = false;
 	setState(RES_INIT);
-	init(contentType);
 }
 
 Response::Response(const Response &copy) {
@@ -41,7 +39,7 @@ Response::~Response() {
 	delete _stream;
 }
 
-void Response::init(const string &contentType) {
+void Response::init() {
 	// !INFO: for security reason we should hide this header in some cases !
 	addHeader("Server", NAME "/" VERSION);
 	addHeader("Date", getUTCDate());
@@ -50,7 +48,6 @@ void Response::init(const string &contentType) {
 		addHeader("Keep-Alive", "timeout=" + (to_string((int)(TIMEOUT / 1e3))));
 	else
 		_headers.erase("Keep-Alive");
-	addHeader("Content-Type", contentType);
 	addHeader("Accept-Ranges", "bytes");
 }
 
@@ -62,7 +59,9 @@ void Response::prepare(void) {
 	Header::iterator it = _headers.begin();
 
 	while (it != _headers.end()) {
-		_ss << it->first << ": " << it->second << CRLF;
+		for (set<string>::iterator it_ = it->second.begin(); it_ != it->second.end(); it_++)
+			_ss << it->first << ": " << *it_ << CRLF;
+
 		it++;
 	}
 }
@@ -92,7 +91,8 @@ bool Response::keepAlive(void) const {
 void Response::addHeader(const string &name, const string &value) {
 	if (_state & (RES_DONE | RES_BODY))
 		return;
-	_headers[name] = value;
+	// _headers[name] = value;
+	_headers.add(name, value);
 	setState(RES_HEADER);
 }
 void Response::send(const sockfd &fd) {
@@ -215,7 +215,7 @@ void Response::parseHeaders(stringstream &ss) {
 	if (value.length() < n + 1 || (tmp != LF && tmp != CRLF))
 		goto invalid;
 	value = value.substr(0, value.length() - n);
-	_headers[key] = value;
+	_headers.add(key, value);
 	return;
 invalid:
 	changeState(REQ_INVALID);
@@ -389,10 +389,11 @@ bool Response::setupCGIBody() {
 		sscanf(status.c_str(), "%hd %[^\n]1000s", &_statusCode, buff);
 		_isCustomStatusCode = true;
 		_statusStringCode = buff;
-		// ? INFO: we can remove Status from headers cuz it useless !! 
+		// ? INFO: we can remove Status from headers cuz it useless !!
 	}
 	addHeader("Content-Type", contentType);
-	init(contentType);
+	cerr << "Content-Type -> " << contentType << endl;
+	init();
 	return true;
 }
 

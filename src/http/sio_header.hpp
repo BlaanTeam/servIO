@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class Header : public map<string, set<string, StringICaseCompare>, StringICaseCompare> {
+class Header : public map<string, set<string>, StringICaseCompare> {
    public:
 	bool   found(const string& key) const;
 	string get(const string& key);

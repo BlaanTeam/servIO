@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <queue>
 #include <sstream>
 #include <string>
 
@@ -37,6 +38,8 @@ class Request {
 	Header _headers;
 	Body   _body;
 
+	queue<stringstream *> _streams;
+
    public:
 	typedef Header::iterator headerIter;
 
@@ -50,8 +53,11 @@ class Request {
    public:
 	Request();
 	Request(const Request &copy);
-	Request &operator=(const Request &rhs);
-	void     consumeStream(stringstream &stream);
+	~Request();
+	Request      &operator=(const Request &rhs);
+	void          consumeStream(stringstream &stream);
+	stringstream *getAvailableStream(void);
+	void          addStream(stringstream *stream);  // TODO: free all streams
 
 	// Getters
 	string     getPath(void) const;

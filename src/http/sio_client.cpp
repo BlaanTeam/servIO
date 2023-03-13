@@ -35,9 +35,12 @@ bool Client::timedOut(void) const {
 	return getmstime() - _time > TIMEOUT;
 }
 
-bool Client::handleRequest(stringstream &stream) {
+bool Client::handleRequest(stringstream *stream) {
 	reset();
-	_req.consumeStream(stream);
+	_req.addStream(stream);
+	stringstream *availableStream = _req.getAvailableStream();
+	if (availableStream)
+		_req.consumeStream(*availableStream);
 
 	VirtualServer *virtualServer = config.match(Address(_connection.first), _req.getHeaders().get("Host"));
 

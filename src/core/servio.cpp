@@ -87,8 +87,8 @@ void servio_init(const int &ac, char *const *av) {
 			} else if (it->revents & POLLIN) {
 				int nbyte = recv(it->fd, stream, (1 << 0xA), 0);
 				if (nbyte != -1) {
-					stringstream ss;
-					ss.write(stream, nbyte);
+					stringstream *ss = new stringstream();
+					ss->write(stream, nbyte);
 					clients[it->fd].setTime(getmstime());
 					clients[it->fd].setPollFd(it->fd, tmp);
 					if (clients[it->fd].handleRequest(ss))  //! need more tests !!!

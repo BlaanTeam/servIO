@@ -10,6 +10,13 @@ Request::Request(const Request &copy) {
 	*this = copy;
 }
 
+Request::~Request() {
+	while (!_streams.empty()) {
+		delete _streams.front();
+		_streams.pop();
+	}
+}
+
 Request &Request::operator=(const Request &rhs) {
 	(void)rhs;
 	return *this;
@@ -126,6 +133,19 @@ void Request::consumeStream(stringstream &stream) {
 			tmp += chr;
 	}
 	_line = tmp;
+}
+
+void Request::addStream(stringstream *stream) {
+	_streams.push(stream);
+}
+
+stringstream *Request::getAvailableStream(void) {
+	if (_streams.size() && _streams.front()->eof()) {
+		delete _streams.front();
+		_streams.pop();
+	}
+
+	return _streams.size() ? _streams.front() : nullptr;
 }
 
 // Getters

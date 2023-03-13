@@ -380,7 +380,7 @@ failed:
 
 static void updateRootDirective(string &value) {
 	if (value.length() > 0 && value[0] != '/')
-		value = PREFIX_FOLDER "/" + value;
+		value = joinPath(PREFIX_FOLDER, value);
 }
 
 static bool inheritable(const string &dirName) {
@@ -475,7 +475,7 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 
 		else if (key.substr(0, 10) == "error_page") {
 			typ.type = ERRPG;
-			typ.errPage = new ErrorPage(val[0], val[1][0] == '/' ? val[1] : joinPath((*tree)["root"][0], val[1]));
+			typ.errPage = new ErrorPage(val[0], !val[1].empty() && val[1][0] == '/' ? val[1] : joinPath((*tree)["root"][0], val[1]));
 		}
 
 		else if (key == "return") {
@@ -519,7 +519,12 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 			typ.cgiExt = new CgiExtension(val);
 		}
 
-		else {  // index, root, upload_store
+		else if (key == "upload_store") {
+			typ.type = STR;
+			typ.str = new string(!val[0].empty() && val[0][0] == '/'? val[0]: joinPath(PREFIX_FOLDER, val[0]));
+		}
+
+		else {  // index, root
 			typ.type = STR;
 			typ.str = new string(val[0]);
 		}

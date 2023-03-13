@@ -161,8 +161,10 @@ void Client::reset(void) {
 void Client::togglePollOut(void) {
 	if (_res.match(RES_BODY))
 		_pfd->events |= POLLOUT;
-	else if (_res.match(RES_DONE | RES_INIT))
+	else if (_res.match(RES_DONE | RES_INIT)) {
+		(_res.match(RES_DONE)) && close(_fds[0]);
 		_pfd->events &= ~POLLOUT;
+	}
 }
 
 ClientMap::ClientMap() {

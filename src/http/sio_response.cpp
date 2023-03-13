@@ -392,7 +392,6 @@ bool Response::setupCGIBody() {
 		// ? INFO: we can remove Status from headers cuz it useless !!
 	}
 	addHeader("Content-Type", contentType);
-	cerr << "Content-Type -> " << contentType << endl;
 	init();
 	return true;
 }

@@ -56,12 +56,12 @@ class Response {
 
    public:
 	Response();
-	Response(const short &statusCode, const string &contentType = DEFAULT_MIME_TYPE, bool keepAlive = true);
+	Response(const short &statusCode, bool keepAlive = true);
 	Response(const Response &copy);
 	Response &operator=(const Response &rhs);
 	~Response();
 
-	void init(const string &contentType = DEFAULT_MIME_TYPE);
+	void init();
 	void prepare(void);
 
 	// Setters

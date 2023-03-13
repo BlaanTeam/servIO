@@ -114,7 +114,6 @@ invalid:
 }
 
 void Body::parseLengthedBody(istream &stream) {
-	cerr << "Request With Content-Length: " << _contentLength << endl;
 	char buff[1024] = {0};
 	stream.read(buff, _contentLength - _content);
 	_content += stream.gcount();
@@ -125,7 +124,6 @@ void Body::parseLengthedBody(istream &stream) {
 
 void Body::parseNormalBody(istream &stream) {
 	char buff[1024] = {0};
-	cerr << "Request Without Content-Length !" << endl;
 	stream.read(buff, 1024);
 	_content += stream.gcount();
 	fwrite(buff, 1, stream.gcount(), _bodyFile);
@@ -134,7 +132,6 @@ void Body::parseNormalBody(istream &stream) {
 void Body::consumeBody(istream &stream, Request *req) {
 	if (_bodyState & BODY_INIT) {
 		chooseState(req->getHeaders());
-		cout << "Body State: " << _bodyState << endl;
 	}
 	if (_bodyState & BODY_READ) {
 		switch (_bodyState) {

@@ -6,8 +6,9 @@
 #include <string>
 
 #include "core/sio_ast.hpp"
-#include "sio_request.hpp"
-#include "sio_response.hpp"
+#include "./sio_request.hpp"
+#include "./sio_response.hpp"
+#include "./sio_header.hpp"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ class CGI {
 	string _scriptName;
 	string _pathInfo;
 
-	map<string, string> metaVariables;
+	Header metaVariables;
 
 	Request               *_req;
 	Response              *_res;

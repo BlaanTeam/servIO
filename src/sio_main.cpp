@@ -1,6 +1,10 @@
 #include "servio.hpp"
 
 int main(int ac, char *const *av) {
-	handleSignals();
-	servio_init(ac, av);
+	try {
+		handleSignals();
+		servio_init(ac, av);
+	} catch (...) {
+		cerr << "servio: " << strerror(errno) << endl;
+	}
 }

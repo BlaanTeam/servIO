@@ -53,7 +53,7 @@ bool Client::handleRequest(stringstream *stream) {
 		_res.setupErrorResponse(REQUEST_ENTITY_TOO_LARGE, virtualServer);
 		goto sendResponse;
 	} else if (_req.match(REQ_BODY | REQ_DONE)) {
-		if (_res.match(RES_INIT | RES_HEADER)) {
+		if (_res.match(RES_INIT)) {
 			Location *location = virtualServer->match(_req.getPath());
 			string    path = _req.getPath();
 
@@ -83,7 +83,13 @@ bool Client::handleRequest(stringstream *stream) {
 					goto sendResponse;
 				}
 			}
-			// TODO: check if the location configured  UPLOAD
+			if (location->isUpload() && _req.getMethod() != POST) {
+				_res.setupErrorResponse(METHOD_NOT_ALLOWED, location);
+				goto sendResponse;
+			} else if (location->isUpload()) {
+				_res.setupUploadResponse(location, &_req);
+				goto sendResponse;
+			}
 
 			_res.extractRange(_req);
 			struct stat fileStat;
@@ -162,9 +168,9 @@ void Client::reset(void) {
 }
 
 void Client::togglePollOut(void) {
-	if (_res.match(RES_BODY))
+	if (_res.match(RES_BODY))  // TODO: check if RES_DONE & location configured as upload !
 		_pfd->events |= POLLOUT;
-	else if (_res.match(RES_DONE | RES_INIT)) {
+	if (_res.match(RES_DONE | RES_INIT)) {
 		(_res.match(RES_DONE)) && close(_fds[0]);
 		_pfd->events &= ~POLLOUT;
 	}

@@ -103,10 +103,13 @@ void Response::send(const sockfd &fd) {
 			setupChunkedBody();
 		else if (_type & RANGED_RES)
 			setupRangedBody();
-		else if (_type & CGI_RES)
+		else if (_type & CGI_RES) {
 			if (!setupCGIBody())
 				return;
-
+		} else if (_type & UPLOAD_RES) {
+			if (!setupUploadBody())  // ? this function will return true in case of the REQ_DONE
+				return;
+		}
 		prepare();
 		::send(fd, _ss.str().c_str(), _ss.str().size(), 0);
 		::send(fd, CRLF, 2, 0);
@@ -129,6 +132,9 @@ void Response::send(const sockfd &fd) {
 			break;
 		case CGI_RES:
 			sendCGIBody(fd);
+			break;
+		case UPLOAD_RES:
+			sendUploadBody(fd);
 			break;
 		}
 }
@@ -256,7 +262,6 @@ void Response::reset(void) {
 	_type = LENGTHED_RES;
 
 	setState(RES_INIT);
-	init();
 }
 
 // private functions
@@ -410,4 +415,36 @@ void Response::extractRange(Request &req) {
 	_range = req.getRange();
 	if (_range.valid())
 		_type = RANGED_RES;
+}
+
+void Response::setupUploadResponse(LocationContext<Type> *location, Request *req) {
+	_type = UPLOAD_RES;
+	_location = location;
+	_req = req;
+	setStatusCode(CREATED);
+	setConnectionStatus(true);
+	changeState(RES_HEADER);
+}
+
+bool Response::setupUploadBody() {
+	if (!_req->match(REQ_DONE))
+		return false;
+
+	// TODO: move files from tmp to upload store!
+
+	_stream = new stringstream;
+	_stream->write("<h1>Upload Done</h1>", 20);
+	addHeader("Content-Length", to_string(20));
+
+	return true;
+}
+
+void Response::sendUploadBody(const sockfd &fd) {
+	if (!_stream)
+		return;
+	char buff[(1 << 10)];
+
+	_stream->read(buff, (1 << 10));
+	::send(fd, buff, _stream->gcount(), 0);
+	setState(_stream->eof() ? RES_DONE : _state);
 }

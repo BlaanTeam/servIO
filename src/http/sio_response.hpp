@@ -10,6 +10,7 @@
 #define CHUNKED_RES (1 << 1)
 #define RANGED_RES (1 << 2)
 #define CGI_RES (1 << 3)
+#define UPLOAD_RES (1 << 4)
 
 #define INIT_LENGTH (1 << 0)
 #define ONGOING_LENGTH (1 << 1)
@@ -25,6 +26,7 @@
 #include "./sio_http_range.hpp"
 #include "./sio_mime_types.hpp"
 #include "./sio_request.hpp"
+#include "core/sio_ast.hpp"
 #include "http/sio_http_range.hpp"
 #include "utility/sio_helpers.hpp"
 #include "utility/sio_socket.hpp"
@@ -50,6 +52,9 @@ class Response {
 	int       _fd;
 
 	Range _range;
+
+	LocationContext<Type> *_location;
+	Request               *_req;
 
 	Header _headers;
 	bool   _keepAlive;
@@ -83,6 +88,7 @@ class Response {
 	void setupDirectoryListing(const string &path, const string &title);
 	void setupNormalResponse(const string &path, iostream *file);
 	void setupCGIResponse(const int &fd);
+	void setupUploadResponse(LocationContext<Type> *location, Request *req);
 
 	bool match(const int &state) const;
 
@@ -106,6 +112,9 @@ class Response {
 
 	void sendKiloByte(const sockfd &fd);
 	void sendLessThanKiloByte(const sockfd &fd);
+
+	void sendUploadBody(const sockfd &fd);
+	bool setupUploadBody();
 };
 
 #endif

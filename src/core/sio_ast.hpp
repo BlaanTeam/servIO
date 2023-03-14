@@ -189,7 +189,11 @@ class MainContext<Type> {
 	CgiExtension *getCGIExtensions() {
 		return _directives["cgi_assign"].cgiExt;
 	}
-	
+
+	string getUploadStore() {
+		return *_directives["upload_store"].str;
+	}
+
 	ErrorPage *getErrorPage(const int &errorCode) {
 		for (dirIter it = _directives.begin(); it != _directives.end(); it++)
 			if (it->second.type & ERRPG && it->second.errPage->match(errorCode))

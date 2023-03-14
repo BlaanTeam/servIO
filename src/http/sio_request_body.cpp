@@ -8,6 +8,9 @@ Body::Body() {
 	_chunkedLength = 0;
 	_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
 	_bodyFile = fopen(_filename.c_str(), "w+");  // TODO: check if the file is well opened !
+
+	_multipartState = MULTIPART_INIT_BOUNDARY;
+	_fileIndex = 0;
 }
 
 Body::Body(const Body &copy) {
@@ -24,7 +27,13 @@ void Body::setState(const int &state) {
 }
 
 void Body::chooseState(Header &headers) {
-	string value = headers.get("Transfer-Encoding");
+	string value = headers.get("Content-Type");
+
+	_boundary = Boundary(value);
+	if (_boundary.valid())
+		return setState(MULTIPARTED_BODY);
+
+	value = headers.get("Transfer-Encoding");
 	if (!value.empty()) {
 		stringstream ss(value);
 		string       part;
@@ -149,6 +158,9 @@ void Body::consumeBody(istream &stream, Request *req) {
 		case LENGTHED_BODY:
 			parseLengthedBody(stream);
 			break;
+		case MULTIPARTED_BODY:
+			parseMultipartBody(stream);
+			break;
 		default:
 			parseNormalBody(stream);
 			break;
@@ -167,4 +179,109 @@ short Body::getState() const {
 
 Body::~Body() {
 	fclose(_bodyFile);  // TODO: TBD !!
+}
+
+void Body::parseHeaders(stringstream &ss) {
+	string key;
+	string value;
+
+	if (ss.str() == CRLF || ss.str() == LF) {
+		cerr << "Body !!!!" << endl;
+		_multipartState = MULTIPART_BODY_INIT;
+		return;
+	}
+	getline(ss, key, ':');
+	getline(ss, value, '\0');
+	size_t n = 1;
+	if (value.length() > 1 && value.substr(value.length() - 2) == CRLF)
+		n = 2;
+	if (!value.length())
+		return;
+	string tmp = value.substr(value.length() - n);
+	if (value.length() < n + 1 || (tmp != LF && tmp != CRLF))
+		return;
+	value = value.substr(0, value.length() - n);
+	_bodyFiles[_fileIndex].addHeader(key, value);
+}
+
+void Body::parseMultipartBody(istream &stream) {
+	FILE *file;
+	char  chr;
+	while (!stream.eof()) {
+		if (_multipartState & MULTIPART_INIT) {
+			switch (_multipartState) {
+			case MULTIPART_INIT_BOUNDARY:
+				(_boundary.consumeBoundary(stream, _lost)) && (_multipartState = MULTIPART_INIT_CRLF);
+				_lost.clear();
+				_lost.str();
+				break;
+
+			case MULTIPART_INIT_CRLF:
+				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_HEADER);
+				break;
+			}
+		} else if (_multipartState & MULTIPART_HEADER) {
+			cerr << "HEADER" << endl;
+
+			stream.get(chr);
+			_line += chr;
+			if (_line.find(CRLF) != string::npos || _line.find(LF) != string::npos) {
+				stringstream ss(_line);
+				parseHeaders(ss);
+				if (_multipartState & MULTIPART_BODY)
+					break;
+				_line = "";
+			}
+		} else if (_multipartState & MULTIPART_BODY) {
+			char chr;
+			switch (_multipartState) {
+			case MULTIPART_BODY_INIT:
+				file = fopen(("/tmp/file_" + to_string(_fileIndex)).c_str(), "w+");
+
+				_bodyFiles[_fileIndex].addFile(file);
+				_multipartState = MULTIPART_BODY_READ;
+				break;
+			case MULTIPART_BODY_D:
+				stream.get(chr);
+				if (chr == '-') {
+					_multipartState = MULTIPART_BODY_DD;
+					break;
+				}
+				_bodyFiles[_fileIndex].write("-");
+				_bodyFiles[_fileIndex].write(string(1, chr));
+				_multipartState = MULTIPART_BODY_READ;
+				break;
+			case MULTIPART_BODY_DD:
+				_multipartState = MULTIPART_BODY_BOUNDARY;
+				break;
+			case MULTIPART_BODY_BOUNDARY:
+				// TODO check if there is --
+				int ret;
+				if ((ret = _boundary.consumeBoundary(stream, _lost))) {
+					if (ret == -1) {
+						_bodyFiles[_fileIndex].write("--");
+						_bodyFiles[_fileIndex].write(_lost);
+						_lost.clear();
+						_lost.str("");
+						_multipartState = MULTIPART_BODY_READ;
+						break;
+					} else if (ret == 1)
+						_multipartState = MULTIPART_BODY_CRLF;
+				}
+				break;
+			case MULTIPART_BODY_CRLF:
+				cerr << "CRLF" << endl;
+				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_HEADER);
+				break;
+			case MULTIPART_BODY_READ:
+				stream.get(chr);
+				if (chr == '-')
+					_multipartState = MULTIPART_BODY_D;
+				else {
+					_bodyFiles[_fileIndex].write(string(1, chr));
+				}
+				break;
+			}
+		}
+	}
 }

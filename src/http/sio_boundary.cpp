@@ -43,12 +43,13 @@ bool Boundary::valid() const {
 	return _valid;
 }
 
-int Boundary::consumeBoundary(istream &stream) {
+int Boundary::consumeBoundary(istream &stream, stringstream &ss) {
 	static size_t idx = 0;
 
 	char chr;
 	while (!stream.eof() && idx < _value.length()) {
 		stream.get(chr);
+		ss << chr;
 		if (_value[idx] != chr && !stream.eof())
 			return idx = 0, -1;
 		if (!stream.eof())

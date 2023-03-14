@@ -19,7 +19,7 @@ class Boundary {
 	Boundary();
 	Boundary(const string &value);
 
-	int consumeBoundary(istream &stream);
+	int consumeBoundary(istream &stream, stringstream &ss);
 	int consumeCRLF(istream &stream);
 
 	bool valid() const;

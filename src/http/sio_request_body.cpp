@@ -161,6 +161,10 @@ int Body::getFileno() const {
 	return _bodyFile ? fileno(_bodyFile) : -1;
 }
 
+short Body::getState() const {
+	return _bodyState;
+}
+
 Body::~Body() {
 	fclose(_bodyFile);  // TODO: TBD !!
 }

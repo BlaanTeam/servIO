@@ -52,6 +52,7 @@ class Body {
 	void consumeBody(istream &stream, Request *req);
 
 	int getFileno() const;
+	short getState() const;
 };
 
 #include "./sio_request.hpp"

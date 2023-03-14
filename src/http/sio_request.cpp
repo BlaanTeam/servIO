@@ -86,6 +86,8 @@ invalid:
 
 void Request::parseBody(stringstream &stream) {
 	_body.consumeBody(stream, this);
+	if (_body.getState() & BODY_DONE)
+		changeState(REQ_DONE);
 }
 
 void Request::changeState(const int &state) {

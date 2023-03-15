@@ -504,7 +504,6 @@ pair<bool, MainContext<Type> *> Parser::transfer(MainContext<> *tree) {
 			typ.addr = new Address(host, port);
 
 			if (!typ.addr->good()) {
-				cerr << host << ' ' << port << '\n';
 				return _serr = "invalid adress: " + addr, make_pair(false, ret);
 			}
 		}

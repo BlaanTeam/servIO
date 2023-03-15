@@ -81,7 +81,7 @@ void servio_init(const int &ac, char *const *av) {
 			const int idx = isInSockets(it->fd, sockets);
 			if (idx != -1 && it->revents & POLLIN) {
 				pair<int, Address> newConnection = sockets[idx].accept();
-				cerr << "New Connection From " << newConnection.second << endl;
+				// cerr << "New Connection From " << newConnection.second << endl;
 				tmp.add(newConnection.first, POLLIN);
 				clients[newConnection.first] = Client(newConnection);
 			} else if (it->revents & POLLIN) {
@@ -91,19 +91,19 @@ void servio_init(const int &ac, char *const *av) {
 					ss->write(stream, nbyte);
 					clients[it->fd].setTime(getmstime());
 					clients[it->fd].setPollFd(it->fd, tmp);
-					if (clients[it->fd].handleRequest(ss))  //! need more tests !!!
+					if (clients[it->fd].handleRequest(ss))
 						goto purgeConnection;
 				} else if (!nbyte)
 					goto purgeConnection;
 			}
 			if (it->revents & POLLOUT) {
-				cerr << "POLLOUT" << endl;
+				// cerr << "POLLOUT" << endl;
 				clients[it->fd].setPollFd(it->fd, tmp);
 				clients[it->fd].handleResponse(it->fd);
 			}
 			if (it->revents & POLLHUP) {
 			purgeConnection:
-				cerr << "Client Disconnected !" << endl;
+				// cerr << "Client Disconnected !" << endl;
 				clients.purgeConnection(it->fd);
 			}
 			it++;

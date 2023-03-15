@@ -92,7 +92,6 @@ void Body::chooseState(Header &headers) {
 }
 
 void Body::parseChunkedBody(istream &stream) {
-	cerr << "Chunked Request !" << endl;
 	string tmp = "";
 	size_t size = 0;
 	char   buff[1024] = {0};

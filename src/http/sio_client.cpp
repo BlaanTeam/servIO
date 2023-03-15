@@ -49,9 +49,6 @@ bool Client::handleRequest(stringstream *stream) {
 	if (!_req.valid()) {
 		_res.setupErrorResponse(_req.getStatusCode(), virtualServer);
 		goto sendResponse;
-	} else if (_req.isTooLarge(virtualServer->directives()["client_max_body_size"].value)) {
-		_res.setupErrorResponse(REQUEST_ENTITY_TOO_LARGE, virtualServer);
-		goto sendResponse;
 	} else if (_req.match(REQ_BODY | REQ_DONE)) {
 		if (_res.match(RES_INIT)) {
 			Location *location = virtualServer->match(_req.getPath());
@@ -63,6 +60,9 @@ bool Client::handleRequest(stringstream *stream) {
 				goto sendResponse;
 			} else if (!location) {
 				_res.setupErrorResponse(NOT_FOUND, virtualServer);
+				goto sendResponse;
+			} else if (_req.isTooLarge(location->directives()["client_max_body_size"].value)) {
+				_res.setupErrorResponse(REQUEST_ENTITY_TOO_LARGE, virtualServer);
 				goto sendResponse;
 			} else if (location->isRedirectable()) {
 				_res.setupRedirectResponse(location->getRedir(), location);

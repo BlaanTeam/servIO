@@ -1,5 +1,24 @@
 #include "sio_request_body.hpp"
 
+BodyFile::BodyFile() {}
+BodyFile::~BodyFile() {
+	(_file) && (fclose(_file));
+}
+
+void BodyFile::addFile(FILE *file) {
+	_file = file;
+}
+void BodyFile::addHeader(const string &key, const string &value) {
+	_headers.add(key, value);
+}
+void BodyFile::write(stringstream &ss) {
+	fwrite(ss.str().c_str(), 1, ss.str().size(), _file);
+	fflush(_file);
+}
+FILE *BodyFile::getFile() {
+	return _file;
+}
+
 Body::Body() {
 	_bodyState = BODY_INIT;
 	_readingState = START_BODY;

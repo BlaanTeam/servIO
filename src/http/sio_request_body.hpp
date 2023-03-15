@@ -52,30 +52,15 @@ class BodyFile {
 
    public:
 	Header _headers;
-	BodyFile() {}
+	BodyFile();
+	~BodyFile();
 
-	void addFile(FILE *file) {
-		_file = file;
-	}
-	FILE *getFile() {
-		return _file;
-	}
-	void write(stringstream &ss) {
-		char chr;
-		ss.get(chr);
-		while (!ss.eof()) {
-			fwrite(&chr, 1, 1, _file);
-			ss.get(chr);
-		}
-		fflush(_file);
-	}
-	void write(const string &buff) {
-		fwrite(buff.c_str(), 1, buff.size(), _file);
-		fflush(_file);
-	}
-	void addHeader(const string &key, const string &value) {
-		_headers.add(key, value);
-	}
+	void  addFile(FILE *file);
+	void  addHeader(const string &key, const string &value);
+	void  write(stringstream &ss);
+	
+	FILE *getFile();
+	
 };
 
 class Body {

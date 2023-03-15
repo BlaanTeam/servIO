@@ -367,5 +367,6 @@ void Body::reset() {
 	_lost.clear();
 	_lost.str("");
 	_fileIndex = 0;
+	// TODO: close all files before resetting !
 	_bodyFiles.clear();
 }

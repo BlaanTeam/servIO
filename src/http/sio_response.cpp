@@ -224,7 +224,7 @@ void Response::parseHeaders(stringstream &ss) {
 	_headers.add(key, value);
 	return;
 invalid:
-	changeState(REQ_INVALID); // TODO: mal hadii !
+	changeState(REQ_INVALID);  // TODO: mal hadii !
 }
 
 void Response::changeState(const int &state) {
@@ -430,11 +430,33 @@ bool Response::setupUploadBody() {
 	if (!_req->match(REQ_DONE))
 		return false;
 
-	// TODO: move files from tmp to upload store!
+	// TODO: check if REQ_FAILED !! and return internal error
 
+	map<int, BodyFile> &bodyFiles = _req->getBodyFiles();
+	map<string, bool>   fileStatus;
+
+
+	{
+		map<int, BodyFile>::iterator it = bodyFiles.begin();
+		while (it != bodyFiles.end()) {
+			string oldPath = it->second.getFilename();
+			string newPath = joinPath(_location->getUploadStore(), oldPath); // TODO: extract filename from Content-Disposition !
+			bool   failed = false;
+			if (!rename(oldPath.c_str(), newPath.c_str()))
+				failed = true;
+			fileStatus[oldPath] = failed;
+			it++;
+		}
+	}
 	_stream = new stringstream;
-	_stream->write("<h1>Upload Done</h1>", 20);
-	addHeader("Content-Length", to_string(20));
+	_stream->write("<h1>Upload Succeffuly</h1>", 20);
+	map<string, bool>::iterator it = fileStatus.begin();
+	while (it != fileStatus.end()) {
+		(*_stream) << "<br/><span>" << it->first << " -- " << (it->second ? "Uploaded" : "Not Uploaded !") << "</span>" << endl;
+		it++;
+	}
+
+	addHeader("Content-Length", to_string(getFileSize(_stream)));
 
 	return true;
 }

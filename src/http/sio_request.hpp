@@ -57,7 +57,7 @@ class Request {
 	Request      &operator=(const Request &rhs);
 	void          consumeStream(stringstream &stream);
 	stringstream *getAvailableStream(void);
-	void          addStream(stringstream *stream);  // TODO: free all streams
+	void          addStream(stringstream *stream);
 
 	// Getters
 	string     getPath(void) const;

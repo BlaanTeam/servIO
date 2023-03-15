@@ -69,7 +69,6 @@ class HttpStatusCode : public map<short, string> {
 
 extern HttpStatusCode httpStatusCodes;
 
-// TODO : change name of the current file
 
 extern int httpMethodCount;
 

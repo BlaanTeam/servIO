@@ -38,8 +38,7 @@ void CGI::init() {
 	metaVariables.add("SCRIPT_FILENAME", _scriptFileName);
 	metaVariables.add("SCRIPT_NAME", _scriptName);
 	metaVariables.add("PATH_INFO", _pathInfo);
-
-	// TODO: add needed variables !
+	
 
 	Request::headerIter it = _req->getHeaders().begin();
 

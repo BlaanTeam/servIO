@@ -219,12 +219,10 @@ void Response::parseHeaders(stringstream &ss) {
 		return;
 	string tmp = value.substr(value.length() - n);
 	if (value.length() < n + 1 || (tmp != LF && tmp != CRLF))
-		goto invalid;
+		return ;
 	value = value.substr(0, value.length() - n);
 	_headers.add(key, value);
 	return;
-invalid:
-	changeState(REQ_INVALID);  // TODO: mal hadii !
 }
 
 void Response::changeState(const int &state) {
@@ -430,7 +428,7 @@ bool Response::setupUploadBody() {
 	if (!_req->match(REQ_DONE))
 		return false;
 
-	// TODO: check if REQ_FAILED !! and return internal error
+	// INFO: we can return interanl error in case of error(lazy)!
 
 	map<int, BodyFile> &bodyFiles = _req->getBodyFiles();
 	map<string, bool>   fileStatus;

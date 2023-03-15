@@ -1,6 +1,5 @@
 #include "sio_boundary.hpp"
 
-#include <iostream>  // TODO: remove
 #include <sstream>
 
 Boundary::Boundary() {

@@ -168,7 +168,7 @@ void Client::reset(void) {
 }
 
 void Client::togglePollOut(void) {
-	if (_res.match(RES_BODY))  // TODO: check if RES_DONE & location configured as upload !
+	if (_res.match(RES_BODY))
 		_pfd->events |= POLLOUT;
 	if (_res.match(RES_DONE | RES_INIT)) {
 		(_res.match(RES_DONE)) && close(_fds[0]);

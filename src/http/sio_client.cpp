@@ -83,10 +83,7 @@ bool Client::handleRequest(stringstream *stream) {
 					goto sendResponse;
 				}
 			}
-			if (location->isUpload() && _req.getMethod() != POST) {
-				_res.setupErrorResponse(METHOD_NOT_ALLOWED, location);
-				goto sendResponse;
-			} else if (location->isUpload()) {
+			if (location->isUpload() && _req.getMethod() == POST) {
 				_res.setupUploadResponse(location, &_req);
 				goto sendResponse;
 			}
@@ -99,7 +96,7 @@ bool Client::handleRequest(stringstream *stream) {
 			} else if (S_ISDIR(fileStat.st_mode)) {
 				// ? INFO : redirect in case uri without `/` in the ending
 				if (pathLength > 1 && _req.getPath()[pathLength - 1] != '/') {
-					Redirect redir(MOVED_PERMANENTLY, joinPath(_req.getPath(), "/"));
+					Redirect redir(MOVED_PERMANENTLY, joinPath(_req.getPath(), "/"), true);
 					_res.setupRedirectResponse(&redir, location);
 					goto sendResponse;
 				}

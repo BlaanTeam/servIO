@@ -247,7 +247,7 @@ void Body::parseMultipartBody(istream &stream) {
 	char   chr;
 	size_t currSeek;
 
-	while (!stream.eof() && _multipartState != MULTIPART_DONE && _contentLength >= 0) {
+	while (!stream.eof() && _multipartState != MULTIPART_DONE) {
 		if (_multipartState & MULTIPART_INIT) {
 			switch (_multipartState) {
 			case MULTIPART_INIT_BOUNDARY:
@@ -363,7 +363,6 @@ void Body::parseMultipartBody(istream &stream) {
 			}
 		}
 	}
-	cerr << _contentLength << endl;
 }
 
 void Body::reset() {
@@ -386,6 +385,7 @@ void Body::reset() {
 	while (it != _bodyFiles.end()) {
 		if (it->second.getFile())
 			fclose(it->second.getFile());
+		it++;
 	}
 	_bodyFiles.clear();
 }

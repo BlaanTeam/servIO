@@ -219,7 +219,7 @@ void Response::parseHeaders(stringstream &ss) {
 		return;
 	string tmp = value.substr(value.length() - n);
 	if (value.length() < n + 1 || (tmp != LF && tmp != CRLF))
-		return ;
+		return;
 	value = value.substr(0, value.length() - n);
 	_headers.add(key, value);
 	return;
@@ -433,18 +433,19 @@ bool Response::setupUploadBody() {
 	map<int, BodyFile> &bodyFiles = _req->getBodyFiles();
 	map<string, bool>   fileStatus;
 
+	string filename;
 	{
 		map<int, BodyFile>::iterator it = bodyFiles.begin();
 		while (it != bodyFiles.end()) {
 			string oldPath = it->second.getFilename();
-			string filename = it->second.extractFilename();
+			filename = it->second.extractFilename();
 			if (filename.empty())
 				filename = oldPath;
 			string newPath = joinPath(_location->getUploadStore(), filename);
 			bool   failed = false;
 			if (!rename(oldPath.c_str(), newPath.c_str()))
 				failed = true;
-			fileStatus[oldPath] = failed;
+			fileStatus[filename] = failed;
 			it++;
 		}
 	}

@@ -61,7 +61,8 @@ class BodyFile {
 	
 	FILE *getFile();
 	string getFilename() const;
-	
+
+	string  extractFilename();	
 };
 
 class Body {

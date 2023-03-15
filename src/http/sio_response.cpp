@@ -435,12 +435,14 @@ bool Response::setupUploadBody() {
 	map<int, BodyFile> &bodyFiles = _req->getBodyFiles();
 	map<string, bool>   fileStatus;
 
-
 	{
 		map<int, BodyFile>::iterator it = bodyFiles.begin();
 		while (it != bodyFiles.end()) {
 			string oldPath = it->second.getFilename();
-			string newPath = joinPath(_location->getUploadStore(), oldPath); // TODO: extract filename from Content-Disposition !
+			string filename = it->second.extractFilename();
+			if (filename.empty())
+				filename = oldPath;
+			string newPath = joinPath(_location->getUploadStore(), filename);
 			bool   failed = false;
 			if (!rename(oldPath.c_str(), newPath.c_str()))
 				failed = true;

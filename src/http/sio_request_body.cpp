@@ -21,6 +21,21 @@ void BodyFile::write(stringstream &ss) {
 FILE *BodyFile::getFile() {
 	return _file;
 }
+
+
+string  BodyFile::extractFilename()
+{
+	string value = _headers.get("Content-Disposition");
+	if (value.empty())
+		return value;
+	size_t idx = value.find("filename=");
+	if (idx == string::npos)
+		return "";
+	value = value.substr(idx + 9);
+	trim(value, " \"");
+	return value; 
+}	
+
 string BodyFile::getFilename() const {
 	return _filename;
 }

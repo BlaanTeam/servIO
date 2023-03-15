@@ -35,10 +35,12 @@ using namespace std;
 #define MULTIPART_BODY_BOUNDARY (1 << 4)
 #define MULTIPART_BODY_CRLF (1 << 5)
 #define MULTIPART_BODY_READ (1 << 6)
-#define MULTIPART_BODY_D (1 << 7)
-#define MULTIPART_BODY_DD (1 << 8)
-#define MULTIPART_BODY (MULTIPART_BODY_INIT | MULTIPART_BODY_BOUNDARY | MULTIPART_BODY_CRLF | MULTIPART_BODY_READ | MULTIPART_BODY_D | MULTIPART_BODY_DD)
-#define MULTIPART_DONE (1 << 9)
+#define MULTIPART_BODY_LR (1 << 7)
+#define MULTIPART_BODY_LF (1 << 8)
+#define MULTIPART_BODY_D (1 << 9)
+#define MULTIPART_BODY_DD (1 << 10)
+#define MULTIPART_BODY (MULTIPART_BODY_INIT | MULTIPART_BODY_BOUNDARY | MULTIPART_BODY_CRLF | MULTIPART_BODY_READ | MULTIPART_BODY_D | MULTIPART_BODY_DD | MULTIPART_BODY_LR | MULTIPART_BODY_LF)
+#define MULTIPART_DONE (1 << 11)
 
 class Request;
 #include <stdio.h>
@@ -60,9 +62,10 @@ class BodyFile {
 	}
 	void write(stringstream &ss) {
 		char chr;
+		ss.get(chr);
 		while (!ss.eof()) {
-			ss.get(chr);
 			fwrite(&chr, 1, 1, _file);
+			ss.get(chr);
 		}
 		fflush(_file);
 	}

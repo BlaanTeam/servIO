@@ -241,59 +241,93 @@ void Body::parseMultipartBody(istream &stream) {
 				_bodyFiles[_fileIndex].addFile(file);
 				_multipartState = MULTIPART_BODY_READ;
 				break;
-			case MULTIPART_BODY_D: {
-				stream.get(chr);
+			case MULTIPART_BODY_D:
+				stream.get(chr);  // TODO check if c == X and !stream.eof()
 				if (chr == '-') {
 					_multipartState = MULTIPART_BODY_DD;
+					(!stream.eof()) && (_lost << chr);
 					break;
 				}
-				if (!stream.eof()) {
-					_bodyFiles[_fileIndex].write("-");
-					_bodyFiles[_fileIndex].write(string(1, chr));
-				}
+				(!stream.eof()) && (_lost << chr);
+				_bodyFiles[_fileIndex].write(_lost);
+				_lost.clear();
+				_lost.str("");
 				_multipartState = MULTIPART_BODY_READ;
 				break;
-			}
 			case MULTIPART_BODY_DD:
 				_multipartState = MULTIPART_BODY_BOUNDARY;
 				break;
 			case MULTIPART_BODY_BOUNDARY:
 				// TODO check if there is --
-				{
-					int ret;
-					if ((ret = _boundary.consumeBoundary(stream, _lost))) {
-						if (ret == 1) {
-							stream.get(chr);
-							if (chr == '-') {
-								_multipartState = MULTIPART_DONE;
-								_bodyState |= BODY_DONE;
-								return;
-							}
-							int seek = stream.tellg();
-							stream.seekg(seek - 1);
-							_multipartState = MULTIPART_BODY_CRLF;
+				int ret;
+				if ((ret = _boundary.consumeBoundary(stream, _lost))) {
+					if (ret == 1) {
+						stream.get(chr);
+						if (chr == '-') {
+							_multipartState = MULTIPART_DONE;
+							_bodyState |= BODY_DONE;
+							return;
 						}
-						if (ret == -1) {
-							_bodyFiles[_fileIndex].write("--");
-							_bodyFiles[_fileIndex].write(_lost);
-							_lost.clear();
-							_lost.str("");
-							_multipartState = MULTIPART_BODY_READ;
-							break;
-						}
+						_lost.clear();
+						_lost.str("");
+						int seek = stream.tellg();
+						stream.seekg(seek - 1);
+						_multipartState = MULTIPART_BODY_CRLF;
 					}
-					break;
+					if (ret == -1) {
+						_bodyFiles[_fileIndex].write(_lost);
+						_lost.clear();
+						_lost.str("");
+						_multipartState = MULTIPART_BODY_READ;
+						break;
+					}
 				}
+				break;
 			case MULTIPART_BODY_CRLF:
 				cerr << "CRLF" << endl;
-				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_HEADER);
+				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_HEADER);  // TODO: check return value
 				if (_multipartState & MULTIPART_HEADER)
 					_fileIndex++;
 				break;
+
+			case MULTIPART_BODY_LR:
+				stream.get(chr);
+				if (chr == '\n') {
+					_multipartState = MULTIPART_BODY_LF;
+					(!stream.eof()) && (_lost << chr);
+					break;
+				}
+				(!stream.eof()) && (_lost << chr);
+				_bodyFiles[_fileIndex].write(_lost);
+				_lost.clear();
+				_lost.str("");
+				break;
+			case MULTIPART_BODY_LF:
+				stream.get(chr);
+				if (chr == '-') {
+					_multipartState = MULTIPART_BODY_D;
+					(!stream.eof()) && (_lost << chr);
+					break;
+				}
+				(!stream.eof()) && (_lost << chr);
+				_bodyFiles[_fileIndex].write(_lost);
+				_lost.clear();
+				_lost.str("");
+				break;
+
 			case MULTIPART_BODY_READ:
 				stream.get(chr);
-				if (chr == '-')
+				if (chr == '\r') {
+					_multipartState = MULTIPART_BODY_LR;
+					(!stream.eof()) && (_lost << chr);
+					break;
+				}
+				if (chr == '-') {
 					_multipartState = MULTIPART_BODY_D;
+					(!stream.eof()) && (_lost << chr);
+
+				}
+
 				else {
 					if (!stream.eof()) {
 						_bodyFiles[_fileIndex].write(string(1, chr));

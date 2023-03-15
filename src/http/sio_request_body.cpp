@@ -71,7 +71,7 @@ void Body::chooseState(Header &headers) {
 		if (value.length() > 0 && value[0] >= '1' && value[0] <= '9' && every(value, ::isdigit))
 			_contentLength = atoi(value.c_str()), setState(LENGTHED_BODY);
 	} else
-		setState(NORMAL_BODY);
+		setState(BODY_DONE);
 }
 
 void Body::parseChunkedBody(istream &stream) {
@@ -152,17 +152,11 @@ void Body::parseLengthedBody(istream &stream) {
 		_bodyState |= BODY_DONE;
 }
 
-void Body::parseNormalBody(istream &stream) {
-	char buff[1024] = {0};
-	stream.read(buff, 1024);
-	_content += stream.gcount();
-	fwrite(buff, 1, stream.gcount(), _bodyFile);
-}
-
 void Body::consumeBody(istream &stream, Request *req) {
 	if (_bodyState & BODY_INIT) {
 		chooseState(req->getHeaders());
 	}
+
 	if (_bodyState & BODY_READ) {
 		switch (_bodyState) {
 		case CHUNKED_BODY:
@@ -181,9 +175,6 @@ void Body::consumeBody(istream &stream, Request *req) {
 			break;
 		case MULTIPARTED_BODY:
 			parseMultipartBody(stream);
-			break;
-		default:
-			parseNormalBody(stream);
 			break;
 		}
 		fflush(_bodyFile);

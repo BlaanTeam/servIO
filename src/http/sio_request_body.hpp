@@ -15,12 +15,11 @@ using namespace std;
 
 #define BODY_INIT (1 << 0)
 #define BODY_OPEN (1 << 1)
-#define NORMAL_BODY (1 << 2)
-#define CHUNKED_BODY (1 << 3)
-#define LENGTHED_BODY (1 << 4)
-#define MULTIPARTED_BODY (1 << 5)
-#define BODY_READ (CHUNKED_BODY | NORMAL_BODY | LENGTHED_BODY | MULTIPARTED_BODY)
-#define BODY_DONE (1 << 6)
+#define CHUNKED_BODY (1 << 2)
+#define LENGTHED_BODY (1 << 3)
+#define MULTIPARTED_BODY (1 << 4)
+#define BODY_READ (CHUNKED_BODY | LENGTHED_BODY | MULTIPARTED_BODY)
+#define BODY_DONE (1 << 5)
 
 #define START_BODY (1 << 0)
 #define ONGION_BODY (1 << 1)
@@ -82,7 +81,6 @@ class Body {
    private:
 	void parseChunkedBody(istream &stream);
 	void parseLengthedBody(istream &stream);
-	void parseNormalBody(istream &stream);
 	void parseMultipartBody(istream &stream);
 
 	map<int, BodyFile> _bodyFiles;

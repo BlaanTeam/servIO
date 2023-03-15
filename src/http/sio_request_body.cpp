@@ -212,12 +212,14 @@ void Body::parseMultipartBody(istream &stream) {
 	FILE *file;
 	char  chr;
 
+	size_t currSeek;
+
 	while (!stream.eof() && _multipartState != MULTIPART_DONE) {
 		if (_multipartState & MULTIPART_INIT) {
 			switch (_multipartState) {
 			case MULTIPART_INIT_BOUNDARY:
-				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_INIT_CRLF); // TODO: check ret value
-				(_boundary.consumeBoundary(stream, _lost)) && (_multipartState = MULTIPART_INIT_CRLF); // TODO: check ret value
+				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_INIT_CRLF);             // TODO: check ret value
+				(_boundary.consumeBoundary(stream, _lost)) && (_multipartState = MULTIPART_INIT_CRLF);  // TODO: check ret value
 				_lost.clear();
 				_lost.str("");
 				break;
@@ -245,7 +247,7 @@ void Body::parseMultipartBody(istream &stream) {
 				_multipartState = MULTIPART_BODY_READ;
 				break;
 			case MULTIPART_BODY_D:
-				stream.get(chr);  // TODO check if c == X and !stream.eof()
+				stream.get(chr);
 				if (match('-', chr, stream)) {
 					_multipartState = MULTIPART_BODY_DD;
 					(!stream.eof()) && (_lost << chr);
@@ -273,8 +275,8 @@ void Body::parseMultipartBody(istream &stream) {
 						}
 						_lost.clear();
 						_lost.str("");
-						int seek = stream.tellg();
-						stream.seekg(seek - 1);
+						currSeek = stream.tellg();
+						stream.seekg(currSeek - 1);
 						_multipartState = MULTIPART_BODY_CRLF;
 					}
 					if (ret == -1) {
@@ -287,7 +289,6 @@ void Body::parseMultipartBody(istream &stream) {
 				}
 				break;
 			case MULTIPART_BODY_CRLF:
-				cerr << "CRLF" << endl;
 				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_HEADER);  // TODO: check return value
 				if (_multipartState & MULTIPART_HEADER)
 					_fileIndex++;
@@ -304,6 +305,7 @@ void Body::parseMultipartBody(istream &stream) {
 				_bodyFiles[_fileIndex].write(_lost);
 				_lost.clear();
 				_lost.str("");
+				_multipartState = MULTIPART_BODY_READ;
 				break;
 			case MULTIPART_BODY_LF:
 				stream.get(chr);
@@ -312,10 +314,14 @@ void Body::parseMultipartBody(istream &stream) {
 					(!stream.eof()) && (_lost << chr);
 					break;
 				}
-				(!stream.eof()) && (_lost << chr);
 				_bodyFiles[_fileIndex].write(_lost);
 				_lost.clear();
 				_lost.str("");
+
+				currSeek = stream.tellg();
+				stream.seekg(currSeek - 1);
+
+				_multipartState = MULTIPART_BODY_READ;
 				break;
 
 			case MULTIPART_BODY_READ:

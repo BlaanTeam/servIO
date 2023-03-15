@@ -182,6 +182,10 @@ void Body::consumeBody(istream &stream, Request *req) {
 	}
 }
 
+map<int, BodyFile> &Body::getBodyFiles() {
+	return _bodyFiles;
+}
+
 int Body::getFileno() const {
 	return _bodyFile ? fileno(_bodyFile) : -1;
 }

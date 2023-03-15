@@ -179,7 +179,9 @@ HttpMethod Request::getMethod(void) const {
 Header &Request::getHeaders(void) {
 	return _headers;
 }
-
+map<int, BodyFile> &Request::getBodyFiles() {
+	return _body.getBodyFiles();
+}
 bool Request::valid() const {
 	return (_state & ~REQ_INVALID);
 }
@@ -212,6 +214,6 @@ void Request::reset(void) {
 	_query = "";
 
 	// clear the headers
-	_headers.clear();	
+	_headers.clear();
 	_body.reset();
 }

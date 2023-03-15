@@ -68,6 +68,7 @@ class Request {
 	HttpMethod getMethod(void) const;
 	bool       match(const int &state) const;
 	Header    &getHeaders(void);
+	map<int, BodyFile> &getBodyFiles();
 	Range      getRange();
 
 	void reset(void);

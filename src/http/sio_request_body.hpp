@@ -98,6 +98,8 @@ class Body {
 	void setState(const int &state);
 	void consumeBody(istream &stream, Request *req);
 
+	map<int, BodyFile> &getBodyFiles();
+
 	int   getFileno() const;
 	short getState() const;
 	void reset();

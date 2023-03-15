@@ -48,13 +48,14 @@ class Request;
 
 class BodyFile {
 	FILE *_file;
+	string _filename;
 
    public:
 	Header _headers;
 	BodyFile();
 	~BodyFile();
 
-	void  addFile(FILE *file);
+	void  addFile(FILE *file, const string &filename);
 	void  addHeader(const string &key, const string &value);
 	void  write(stringstream &ss);
 	

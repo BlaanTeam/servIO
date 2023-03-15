@@ -5,8 +5,9 @@ BodyFile::~BodyFile() {
 	(_file) && (fclose(_file));
 }
 
-void BodyFile::addFile(FILE *file) {
+void BodyFile::addFile(FILE *file, const string &filename) {
 	_file = file;
+	_filename = filename;
 }
 void BodyFile::addHeader(const string &key, const string &value) {
 	_headers.add(key, value);
@@ -220,12 +221,13 @@ static bool match(const char &chr, const char &chr_, istream &stream) {
 }
 
 void Body::parseMultipartBody(istream &stream) {
-	FILE *file;
-	char  chr;
+	FILE  *file;
+	string filename;
 
+	char   chr;
 	size_t currSeek;
 
-	while (!stream.eof() && _multipartState != MULTIPART_DONE) {
+	while (!stream.eof() && _multipartState != MULTIPART_DONE) {  // TODO: ADD MULTIPART BODY FAIL ! don't forget to use it in isPurgeable function
 		if (_multipartState & MULTIPART_INIT) {
 			switch (_multipartState) {
 			case MULTIPART_INIT_BOUNDARY:
@@ -252,8 +254,9 @@ void Body::parseMultipartBody(istream &stream) {
 		} else if (_multipartState & MULTIPART_BODY) {
 			switch (_multipartState) {
 			case MULTIPART_BODY_INIT:
-				file = fopen(("/tmp/file_" + to_string(_fileIndex)).c_str(), "w+");
-				_bodyFiles[_fileIndex].addFile(file);
+				filename = "/tmp/.servio_" + to_string(getmstime()) + "_upload.io";
+				file = fopen(filename.c_str(), "w+");  // TODO: check if the file not opened !
+				_bodyFiles[_fileIndex].addFile(file, filename);
 				_multipartState = MULTIPART_BODY_READ;
 				break;
 			case MULTIPART_BODY_D:

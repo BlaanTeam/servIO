@@ -55,6 +55,9 @@ class BodyFile {
 	void addFile(FILE *file) {
 		_file = file;
 	}
+	FILE *getFile() {
+		return _file;
+	}
 	void write(stringstream &ss) {
 		char chr;
 		while (!ss.eof()) {

@@ -207,13 +207,15 @@ void Body::parseHeaders(stringstream &ss) {
 void Body::parseMultipartBody(istream &stream) {
 	FILE *file;
 	char  chr;
-	while (!stream.eof()) {
+
+	while (!stream.eof() && _multipartState != MULTIPART_DONE) {
 		if (_multipartState & MULTIPART_INIT) {
 			switch (_multipartState) {
 			case MULTIPART_INIT_BOUNDARY:
+				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_INIT_CRLF);
 				(_boundary.consumeBoundary(stream, _lost)) && (_multipartState = MULTIPART_INIT_CRLF);
 				_lost.clear();
-				_lost.str();
+				_lost.str("");
 				break;
 
 			case MULTIPART_INIT_CRLF:
@@ -221,64 +223,81 @@ void Body::parseMultipartBody(istream &stream) {
 				break;
 			}
 		} else if (_multipartState & MULTIPART_HEADER) {
-			cerr << "HEADER" << endl;
-
 			stream.get(chr);
 			_line += chr;
 			if (_line.find(CRLF) != string::npos || _line.find(LF) != string::npos) {
+				cout << "HEADER: " << _line << endl;
 				stringstream ss(_line);
 				parseHeaders(ss);
+				_line = "";
 				if (_multipartState & MULTIPART_BODY)
 					break;
-				_line = "";
 			}
 		} else if (_multipartState & MULTIPART_BODY) {
 			char chr;
 			switch (_multipartState) {
 			case MULTIPART_BODY_INIT:
 				file = fopen(("/tmp/file_" + to_string(_fileIndex)).c_str(), "w+");
-
 				_bodyFiles[_fileIndex].addFile(file);
 				_multipartState = MULTIPART_BODY_READ;
 				break;
-			case MULTIPART_BODY_D:
+			case MULTIPART_BODY_D: {
 				stream.get(chr);
 				if (chr == '-') {
 					_multipartState = MULTIPART_BODY_DD;
 					break;
 				}
-				_bodyFiles[_fileIndex].write("-");
-				_bodyFiles[_fileIndex].write(string(1, chr));
+				if (!stream.eof()) {
+					_bodyFiles[_fileIndex].write("-");
+					_bodyFiles[_fileIndex].write(string(1, chr));
+				}
 				_multipartState = MULTIPART_BODY_READ;
 				break;
+			}
 			case MULTIPART_BODY_DD:
 				_multipartState = MULTIPART_BODY_BOUNDARY;
 				break;
 			case MULTIPART_BODY_BOUNDARY:
 				// TODO check if there is --
-				int ret;
-				if ((ret = _boundary.consumeBoundary(stream, _lost))) {
-					if (ret == -1) {
-						_bodyFiles[_fileIndex].write("--");
-						_bodyFiles[_fileIndex].write(_lost);
-						_lost.clear();
-						_lost.str("");
-						_multipartState = MULTIPART_BODY_READ;
-						break;
-					} else if (ret == 1)
-						_multipartState = MULTIPART_BODY_CRLF;
+				{
+					int ret;
+					if ((ret = _boundary.consumeBoundary(stream, _lost))) {
+						if (ret == 1) {
+							stream.get(chr);
+							if (chr == '-') {
+								_multipartState = MULTIPART_DONE;
+								_bodyState |= BODY_DONE;
+								return;
+							}
+							int seek = stream.tellg();
+							stream.seekg(seek - 1);
+							_multipartState = MULTIPART_BODY_CRLF;
+						}
+						if (ret == -1) {
+							_bodyFiles[_fileIndex].write("--");
+							_bodyFiles[_fileIndex].write(_lost);
+							_lost.clear();
+							_lost.str("");
+							_multipartState = MULTIPART_BODY_READ;
+							break;
+						}
+					}
+					break;
 				}
-				break;
 			case MULTIPART_BODY_CRLF:
 				cerr << "CRLF" << endl;
 				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_HEADER);
+				if (_multipartState & MULTIPART_HEADER)
+					_fileIndex++;
 				break;
 			case MULTIPART_BODY_READ:
 				stream.get(chr);
 				if (chr == '-')
 					_multipartState = MULTIPART_BODY_D;
 				else {
-					_bodyFiles[_fileIndex].write(string(1, chr));
+					if (!stream.eof()) {
+						_bodyFiles[_fileIndex].write(string(1, chr));
+					}
 				}
 				break;
 			}

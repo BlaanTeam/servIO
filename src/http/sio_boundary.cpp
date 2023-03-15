@@ -56,8 +56,7 @@ int Boundary::consumeBoundary(istream &stream, stringstream &ss) {
 			idx++;
 	}
 	if (idx == _value.length())
-		return idx = 0, 1;
-
+		return ss.clear(), ss.str(""), idx = 0, 1;
 	return 0;
 }
 

@@ -309,7 +309,7 @@ MainContext<> *Parser::parse_server() {
 		goto failed;
 
 	(*ret)["listen"].push_back("0.0.0.0:8080");
-	(*ret)["server_name"].push_back("_");
+	(*ret)["server_name"];
 
 	while (current().type() & ~CCURLY) {
 		if (current().value() == "location") {

@@ -13,6 +13,8 @@ void BodyFile::addHeader(const string &key, const string &value) {
 }
 void BodyFile::write(stringstream &ss) {
 	fwrite(ss.str().c_str(), 1, ss.str().size(), _file);
+	ss.clear();
+	ss.str("");
 	fflush(_file);
 }
 FILE *BodyFile::getFile() {
@@ -205,7 +207,6 @@ void Body::parseHeaders(stringstream &ss) {
 	string value;
 
 	if (ss.str() == CRLF || ss.str() == LF) {
-		cerr << "Body !!!!" << endl;
 		_multipartState = MULTIPART_BODY_INIT;
 		return;
 	}
@@ -251,7 +252,6 @@ void Body::parseMultipartBody(istream &stream) {
 			stream.get(chr);
 			_line += chr;
 			if (_line.find(CRLF) != string::npos || _line.find(LF) != string::npos) {
-				cout << "HEADER: " << _line << endl;
 				stringstream ss(_line);
 				parseHeaders(ss);
 				_line = "";
@@ -274,15 +274,12 @@ void Body::parseMultipartBody(istream &stream) {
 				}
 				(!stream.eof()) && (_lost << chr);
 				_bodyFiles[_fileIndex].write(_lost);
-				_lost.clear();
-				_lost.str("");
 				_multipartState = MULTIPART_BODY_READ;
 				break;
 			case MULTIPART_BODY_DD:
 				_multipartState = MULTIPART_BODY_BOUNDARY;
 				break;
 			case MULTIPART_BODY_BOUNDARY:
-				// TODO check if there is --
 				int ret;
 				if ((ret = _boundary.consumeBoundary(stream, _lost))) {
 					if (ret == 1) {
@@ -300,8 +297,6 @@ void Body::parseMultipartBody(istream &stream) {
 					}
 					if (ret == -1) {
 						_bodyFiles[_fileIndex].write(_lost);
-						_lost.clear();
-						_lost.str("");
 						_multipartState = MULTIPART_BODY_READ;
 						break;
 					}
@@ -322,8 +317,6 @@ void Body::parseMultipartBody(istream &stream) {
 				}
 				(!stream.eof()) && (_lost << chr);
 				_bodyFiles[_fileIndex].write(_lost);
-				_lost.clear();
-				_lost.str("");
 				_multipartState = MULTIPART_BODY_READ;
 				break;
 			case MULTIPART_BODY_LF:
@@ -334,15 +327,12 @@ void Body::parseMultipartBody(istream &stream) {
 					break;
 				}
 				_bodyFiles[_fileIndex].write(_lost);
-				_lost.clear();
-				_lost.str("");
 
 				currSeek = stream.tellg();
 				stream.seekg(currSeek - 1);
 
 				_multipartState = MULTIPART_BODY_READ;
 				break;
-
 			case MULTIPART_BODY_READ:
 				stream.get(chr);
 				if (match('\r', chr, stream)) {
@@ -356,8 +346,6 @@ void Body::parseMultipartBody(istream &stream) {
 				}
 				(!stream.eof()) && (_lost << chr);
 				_bodyFiles[_fileIndex].write(_lost);
-				_lost.clear();
-				_lost.str("");
 				break;
 			}
 		}

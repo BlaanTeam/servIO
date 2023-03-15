@@ -52,29 +52,29 @@ void Body::setState(const int &state) {
 }
 
 void Body::chooseState(Header &headers) {
-	string value = headers.get("Content-Type");
-
-	_boundary = Boundary(value);
-	if (_boundary.valid())
-		return setState(MULTIPARTED_BODY);
-
-	value = headers.get("Transfer-Encoding");
+	string value = headers.get("Transfer-Encoding");
 	if (!value.empty()) {
 		stringstream ss(value);
 		string       part;
 
 		while (getline(ss, part, ',')) {
 			trim(part);
-			if (iequalString(part, "Chunked")) {
-				setState(CHUNKED_BODY);
-				break;
-			}
+			if (iequalString(part, "Chunked"))
+				return setState(CHUNKED_BODY);
 		}
-	} else if (!(value = headers.get("Content-Length")).empty() && _bodyState != CHUNKED_BODY) {
+	}
+	if (!(value = headers.get("Content-Length")).empty()) {
 		trim(value);
 		if (value.length() > 0 && value[0] >= '1' && value[0] <= '9' && every(value, ::isdigit))
-			_contentLength = atoi(value.c_str()), setState(LENGTHED_BODY);
-	} else
+			_contentLength = atoi(value.c_str());
+	}
+	value = headers.get("Content-Type");
+	_boundary = Boundary(value);
+	if (_boundary.valid())
+		return setState(MULTIPARTED_BODY);
+	else if (_contentLength > 0)
+		setState(LENGTHED_BODY);
+	else
 		setState(BODY_DONE);
 }
 
@@ -234,7 +234,7 @@ void Body::parseMultipartBody(istream &stream) {
 	char   chr;
 	size_t currSeek;
 
-	while (!stream.eof() && _multipartState != MULTIPART_DONE) {  // TODO: ADD MULTIPART BODY FAIL ! don't forget to use it in isPurgeable function
+	while (!stream.eof() && _multipartState != MULTIPART_DONE && _contentLength >= 0) {  // TODO: ADD MULTIPART BODY FAIL ! don't forget to use it in isPurgeable function
 		if (_multipartState & MULTIPART_INIT) {
 			switch (_multipartState) {
 			case MULTIPART_INIT_BOUNDARY:
@@ -351,6 +351,7 @@ void Body::parseMultipartBody(istream &stream) {
 			}
 		}
 	}
+	cerr << _contentLength << endl;
 }
 
 void Body::reset() {

@@ -60,6 +60,7 @@ class BodyFile {
 	void  write(stringstream &ss);
 	
 	FILE *getFile();
+	string getFilename() const;
 	
 };
 

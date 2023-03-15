@@ -21,6 +21,9 @@ void BodyFile::write(stringstream &ss) {
 FILE *BodyFile::getFile() {
 	return _file;
 }
+string BodyFile::getFilename() const {
+	return _filename;
+}
 
 Body::Body() {
 	_bodyState = BODY_INIT;

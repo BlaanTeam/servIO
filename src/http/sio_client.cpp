@@ -147,7 +147,7 @@ bool Client::isInternalServerError() {
 }
 
 bool Client::isPurgeable(void) const {
-	return !(_res.keepAlive() || !_res.match(RES_DONE));
+	return !(_res.keepAlive() || (!_res.match(RES_DONE) && !_req.match(REQ_DONE)));
 }
 
 bool Client::waitForCgi() {

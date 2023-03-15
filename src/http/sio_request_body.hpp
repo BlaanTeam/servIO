@@ -101,6 +101,7 @@ class Body {
 
 	int   getFileno() const;
 	short getState() const;
+	void reset();
 };
 
 #include "./sio_request.hpp"

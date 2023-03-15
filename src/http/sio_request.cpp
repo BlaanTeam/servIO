@@ -212,7 +212,6 @@ void Request::reset(void) {
 	_query = "";
 
 	// clear the headers
-	_headers.clear();
-	// TODO: ask anass about body resetting !
-	// _body.reset();
+	_headers.clear();	
+	_body.reset();
 }

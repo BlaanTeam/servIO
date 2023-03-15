@@ -351,3 +351,21 @@ void Body::parseMultipartBody(istream &stream) {
 		}
 	}
 }
+
+void Body::reset() {
+	_bodyState = BODY_INIT;
+	_readingState = START_BODY;
+	_content = 0;
+	_contentLength = 0;
+	_chunkedLength = 0;
+	_filename = "";
+	(_bodyFile) && (fclose(_bodyFile));
+	_bodyFile = NULL;
+
+	_multipartState = MULTIPART_INIT_BOUNDARY;
+	_line = "";
+	_lost.clear();
+	_lost.str("");
+	_fileIndex = 0;
+	_bodyFiles.clear();
+}

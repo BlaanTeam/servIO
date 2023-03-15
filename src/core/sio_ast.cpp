@@ -23,8 +23,12 @@ void Redirect::prepare(MainContext<Type> *ctx) {
 	if (isRedirect) {
 		ServerName *serverName = ctx->directives()["server_name"].servName;
 
+		Address *addr = ctx->directives()["listen"].addr;
+		string host = addr->getHost() + ':' + to_string(addr->getPort());
+		if (!serverName->empty())
+			host = (*serverName)[0];
 		if (path.length() > 0 && path[0] == '/' && !isLocal)
-			path = joinPath((*serverName)[0], path);
+			path = joinPath(host, path);
 	}
 }
 

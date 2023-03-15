@@ -92,11 +92,9 @@ void servio_init(const int &ac, char *const *av) {
 					clients[it->fd].setTime(getmstime());
 					clients[it->fd].setPollFd(it->fd, tmp);
 					if (clients[it->fd].handleRequest(ss))  //! need more tests !!!
-					{
-						clients.purgeConnection(it->fd);
-						continue;
-					}
-				}
+						goto purgeConnection;
+				} else if (!nbyte)
+					goto purgeConnection;
 			}
 			if (it->revents & POLLOUT) {
 				cerr << "POLLOUT" << endl;
@@ -104,6 +102,7 @@ void servio_init(const int &ac, char *const *av) {
 				clients[it->fd].handleResponse(it->fd);
 			}
 			if (it->revents & POLLHUP) {
+			purgeConnection:
 				cerr << "Client Disconnected !" << endl;
 				clients.purgeConnection(it->fd);
 			}

@@ -22,9 +22,7 @@ FILE *BodyFile::getFile() {
 	return _file;
 }
 
-
-string  BodyFile::extractFilename()
-{
+string BodyFile::extractFilename() {
 	string value = _headers.get("Content-Disposition");
 	if (value.empty())
 		return value;
@@ -33,8 +31,8 @@ string  BodyFile::extractFilename()
 		return "";
 	value = value.substr(idx + 9);
 	trim(value, " \"");
-	return value; 
-}	
+	return value;
+}
 
 string BodyFile::getFilename() const {
 	return _filename;
@@ -213,7 +211,7 @@ short Body::getState() const {
 }
 
 Body::~Body() {
-	fclose(_bodyFile);  // TODO: TBD !!
+	fclose(_bodyFile);
 }
 
 void Body::parseHeaders(stringstream &ss) {
@@ -249,13 +247,12 @@ void Body::parseMultipartBody(istream &stream) {
 	char   chr;
 	size_t currSeek;
 
-	while (!stream.eof() && _multipartState != MULTIPART_DONE && _contentLength >= 0) {  // TODO: ADD MULTIPART BODY FAIL ! don't forget to use it in isPurgeable function
+	while (!stream.eof() && _multipartState != MULTIPART_DONE && _contentLength >= 0) {
 		if (_multipartState & MULTIPART_INIT) {
 			switch (_multipartState) {
 			case MULTIPART_INIT_BOUNDARY:
-				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_INIT_CRLF);             // TODO: check ret value
-				(_boundary.consumeBoundary(stream, _lost)) && (_multipartState = MULTIPART_INIT_CRLF);  // TODO: check ret value
-				_lost.clear();
+				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_INIT_CRLF);
+				(_boundary.consumeBoundary(stream, _lost)) && (_multipartState = MULTIPART_INIT_CRLF);
 				_lost.str("");
 				break;
 
@@ -319,7 +316,7 @@ void Body::parseMultipartBody(istream &stream) {
 				}
 				break;
 			case MULTIPART_BODY_CRLF:
-				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_HEADER);  // TODO: check return value
+				(_boundary.consumeCRLF(stream)) && (_multipartState = MULTIPART_HEADER);
 				if (_multipartState & MULTIPART_HEADER)
 					_fileIndex++;
 				break;
@@ -384,6 +381,11 @@ void Body::reset() {
 	_lost.clear();
 	_lost.str("");
 	_fileIndex = 0;
-	// TODO: close all files before resetting !
+
+	map<int, BodyFile>::iterator it = _bodyFiles.begin();
+	while (it != _bodyFiles.end()) {
+		if (it->second.getFile())
+			fclose(it->second.getFile());
+	}
 	_bodyFiles.clear();
 }

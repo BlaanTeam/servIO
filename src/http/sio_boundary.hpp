@@ -19,8 +19,8 @@ class Boundary {
 	Boundary();
 	Boundary(const string &value);
 
-	int consumeBoundary(istream &stream, stringstream &ss);
-	int consumeCRLF(istream &stream);
+	int consumeBoundary(stringstream &stream, stringstream &ss);
+	int consumeCRLF(stringstream &stream);
 
 	bool valid() const;
 	bool operator==(const string &value);

@@ -42,7 +42,7 @@ bool Boundary::valid() const {
 	return _valid;
 }
 
-int Boundary::consumeBoundary(istream &stream, stringstream &ss) {
+int Boundary::consumeBoundary(stringstream &stream, stringstream &ss) {
 	static size_t idx = 0;
 
 	char chr;
@@ -61,7 +61,7 @@ int Boundary::consumeBoundary(istream &stream, stringstream &ss) {
 
 #define CRLF "\r\n"
 
-int Boundary::consumeCRLF(istream &stream) {
+int Boundary::consumeCRLF(stringstream &stream) {
 	static size_t idx = 0;
 
 	char chr;

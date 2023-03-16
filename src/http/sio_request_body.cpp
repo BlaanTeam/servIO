@@ -44,9 +44,8 @@ Body::Body() {
 	_content = 0;
 	_contentLength = 0;
 	_chunkedLength = 0;
-	_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
-	_bodyFile = fopen(_filename.c_str(), "w+");  // TODO: check if the file is well opened !
-
+	_bodyFile = nullptr;
+	_filename = "";
 	_multipartState = MULTIPART_INIT_BOUNDARY;
 	_fileIndex = 0;
 }
@@ -91,7 +90,7 @@ void Body::chooseState(Header &headers) {
 		setState(BODY_DONE);
 }
 
-void Body::parseChunkedBody(istream &stream) {
+void Body::parseChunkedBody(stringstream &stream) {
 	string tmp = "";
 	size_t size = 0;
 	char   buff[1024] = {0};
@@ -159,7 +158,7 @@ invalid:
 	_readingState = BODY_ERROR;
 }
 
-void Body::parseLengthedBody(istream &stream) {
+void Body::parseLengthedBody(stringstream &stream) {
 	char buff[1024] = {0};
 	stream.read(buff, _contentLength - _content);
 	_content += stream.gcount();
@@ -168,9 +167,12 @@ void Body::parseLengthedBody(istream &stream) {
 		_bodyState |= BODY_DONE;
 }
 
-void Body::consumeBody(istream &stream, Request *req) {
+void Body::consumeBody(stringstream &stream, Request *req) {
 	if (_bodyState & BODY_INIT) {
 		chooseState(req->getHeaders());
+		_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
+		_bodyFile = fopen(_filename.c_str(), "w+");  // TODO: check if the file is well opened !
+		cerr << "Openning file!" << endl;
 	}
 
 	if (_bodyState & BODY_READ) {
@@ -210,7 +212,8 @@ short Body::getState() const {
 }
 
 Body::~Body() {
-	fclose(_bodyFile);
+	if (_bodyFile)
+		fclose(_bodyFile);
 }
 
 void Body::parseHeaders(stringstream &ss) {
@@ -235,11 +238,11 @@ void Body::parseHeaders(stringstream &ss) {
 	_bodyFiles[_fileIndex].addHeader(key, value);
 }
 
-static bool match(const char &chr, const char &chr_, istream &stream) {
+static bool match(const char &chr, const char &chr_, stringstream &stream) {
 	return chr == chr_ && !stream.eof();
 }
 
-void Body::parseMultipartBody(istream &stream) {
+void Body::parseMultipartBody(stringstream &stream) {
 	FILE  *file;
 	string filename;
 

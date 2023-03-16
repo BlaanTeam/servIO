@@ -82,9 +82,9 @@ class Body {
 	stringstream _lost;
 
    private:
-	void parseChunkedBody(istream &stream);
-	void parseLengthedBody(istream &stream);
-	void parseMultipartBody(istream &stream);
+	void parseChunkedBody(stringstream &stream);
+	void parseLengthedBody(stringstream &stream);
+	void parseMultipartBody(stringstream &stream);
 
 	map<int, BodyFile> _bodyFiles;
 	int                _fileIndex;
@@ -98,7 +98,7 @@ class Body {
 	~Body();
 	void chooseState(Header &headers);
 	void setState(const int &state);
-	void consumeBody(istream &stream, Request *req);
+	void consumeBody(stringstream &stream, Request *req);
 
 	map<int, BodyFile> &getBodyFiles();
 

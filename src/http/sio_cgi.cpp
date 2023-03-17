@@ -34,11 +34,10 @@ void CGI::init() {
 	metaVariables.add("DOCUMENT_ROOT", *_location->directives()["root"].str);
 	metaVariables.add("QUERY_STRING", _req->getQuery());
 	metaVariables.add("REQUEST_METHOD", httpMethods[(int)log2((int)_req->getMethod())]);
-	metaVariables.add("REQUEST_URI", _req->getPath() + (!_req->getQuery().empty() ? "?": "") + _req->getQuery());
+	metaVariables.add("REQUEST_URI", _req->getPath() + (!_req->getQuery().empty() ? "?" : "") + _req->getQuery());
 	metaVariables.add("SCRIPT_FILENAME", _scriptFileName);
 	metaVariables.add("SCRIPT_NAME", _scriptName);
 	metaVariables.add("PATH_INFO", _pathInfo);
-	
 
 	Request::headerIter it = _req->getHeaders().begin();
 

@@ -104,7 +104,7 @@ void Response::send(const sockfd &fd) {
 		else if (_type & RANGED_RES)
 			setupRangedBody();
 		else if (_type & CGI_RES) {
-			if (!setupCGIBody())
+			if (!_req->match(REQ_DONE) || !setupCGIBody())
 				return;
 		} else if (_type & UPLOAD_RES) {
 			if (!setupUploadBody())  // ? this function will return true in case of the REQ_DONE
@@ -229,9 +229,10 @@ void Response::changeState(const int &state) {
 	_state = state;
 }
 
-void Response::setupCGIResponse(const int &fd) {
+void Response::setupCGIResponse(const int &fd, Request *req) {
 	_type = CGI_RES;
 	_fd = fd;
+	_req = req;
 
 	setStatusCode(OK);
 	setConnectionStatus(true);
@@ -402,9 +403,10 @@ bool Response::setupCGIBody() {
 void Response::sendCGIBody(const sockfd &fd) {
 	char buff[(1 << 10)];
 	int  nbyte = read(_fd, buff, (1 << 10));
-	if (nbyte <= 0)
+	if (nbyte <= 0) { // TODO: check content-length also
 		setState(RES_DONE);
-	else
+		close(_fd);
+	} else
 		::send(fd, buff, nbyte, 0);
 }
 

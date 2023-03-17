@@ -87,7 +87,7 @@ class Response {
 	void setupRedirectResponse(Redirect *redir, MainContext<Type> *ctx);
 	void setupDirectoryListing(const string &path, const string &title);
 	void setupNormalResponse(const string &path, iostream *file);
-	void setupCGIResponse(const int &fd);
+	void setupCGIResponse(const int &fd, Request *req);
 	void setupUploadResponse(LocationContext<Type> *location, Request *req);
 
 	bool match(const int &state) const;

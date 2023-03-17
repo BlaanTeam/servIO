@@ -106,8 +106,8 @@ void Request::consumeStream(stringstream &stream) {
 	while (!stream.eof()) {
 		if (_state & REQ_BODY) {
 			// TODO: which case we will seek back ???
-			// int seek = stream.tellg();
-			// stream.seekg(seek - 1);
+			int seek = stream.tellg();
+			stream.seekg(seek - 1);
 			parseBody(stream);
 		}
 
@@ -136,7 +136,10 @@ void Request::consumeStream(stringstream &stream) {
 			tmp += chr;
 	}
 	if (_body.getState() & BODY_DONE)
+	{
+		cerr << "Change State " << endl;
 		changeState(REQ_DONE);
+	}
 	_line = tmp;
 }
 

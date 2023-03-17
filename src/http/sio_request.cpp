@@ -98,17 +98,26 @@ void Request::consumeStream(stringstream &stream) {
 	char chr;
 	bool empty = false;
 
+	bool n = 0;
+
 	string tmp(_line);
 
-	stream.get(chr);
+	(!stream.get(chr).eof()) && (n += 1);
+
 	tmp += strchr(CRLF, chr) && _state & REQ_INIT ? "" : string(1, chr);
 
 	while (!stream.eof()) {
 		if (_state & REQ_BODY) {
-			// TODO: which case we will seek back ???
-			int seek = stream.tellg();
-			stream.seekg(seek - 1);
+			if (n == 1) {
+				int seek = stream.tellg();
+				stream.seekg(seek - 1);
+			}
+
 			parseBody(stream);
+			if (_body.getState() & BODY_DONE) {
+				changeState(REQ_DONE);
+				break;
+			}
 		}
 
 		if (_state & REQ_INIT && !strchr(CRLF, chr)) {
@@ -116,7 +125,7 @@ void Request::consumeStream(stringstream &stream) {
 			changeState(REQ_LINE);
 		}
 		if (_state & REQ_INIT && strchr(CRLF, chr)) {
-			stream.get(chr);
+			(!stream.get(chr).eof()) && (n += 1);
 			empty = true;
 			continue;
 		}
@@ -131,14 +140,9 @@ void Request::consumeStream(stringstream &stream) {
 			}
 			tmp = "";
 		}
-		stream.get(chr);
+		(!stream.get(chr).eof()) && (n += 1);
 		if (!stream.eof())
 			tmp += chr;
-	}
-	if (_body.getState() & BODY_DONE)
-	{
-		cerr << "Change State " << endl;
-		changeState(REQ_DONE);
 	}
 	_line = tmp;
 }

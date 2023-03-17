@@ -73,6 +73,8 @@ class Request {
 
 	void reset(void);
 
+	void closeBodyFile(void);
+
 	bool valid() const;
 	bool isTooLarge(const int &clientMaxSize);
 };

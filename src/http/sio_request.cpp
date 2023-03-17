@@ -65,6 +65,8 @@ void Request::parseHeaders(string &line) {
 	string       value;
 
 	if (line == CRLF || line == LF) {
+		_body.chooseState(_headers);
+		_body.openFile();
 		return changeState(_method & (GET | TRACE | OPTIONS | HEAD) ? REQ_DONE : REQ_BODY);
 	}
 	getline(ss, key, ':');
@@ -85,9 +87,7 @@ invalid:
 }
 
 void Request::parseBody(stringstream &stream) {
-	_body.consumeBody(stream, this);
-	if (_body.getState() & BODY_DONE)
-		changeState(REQ_DONE);
+	_body.consumeBody(stream);
 }
 
 void Request::changeState(const int &state) {
@@ -105,8 +105,9 @@ void Request::consumeStream(stringstream &stream) {
 
 	while (!stream.eof()) {
 		if (_state & REQ_BODY) {
-			int seek = stream.tellg();
-			stream.seekg(seek - 1);
+			// TODO: which case we will seek back ???
+			// int seek = stream.tellg();
+			// stream.seekg(seek - 1);
 			parseBody(stream);
 		}
 
@@ -134,6 +135,8 @@ void Request::consumeStream(stringstream &stream) {
 		if (!stream.eof())
 			tmp += chr;
 	}
+	if (_body.getState() & BODY_DONE)
+		changeState(REQ_DONE);
 	_line = tmp;
 }
 
@@ -216,4 +219,8 @@ void Request::reset(void) {
 	// clear the headers
 	_headers.clear();
 	_body.reset();
+}
+
+void Request::closeBodyFile() {
+	if (match(REQ_DONE)) _body.closeFile();
 }

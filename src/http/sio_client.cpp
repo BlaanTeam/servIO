@@ -79,7 +79,7 @@ bool Client::handleRequest(stringstream *stream) {
 				CGI cgi(location, &_req, &_res);
 				if (cgi.valid()) {
 					_pid = cgi.spawn(_fds, _req.getFileno());
-					_res.setupCGIResponse(_fds[0]);
+					_res.setupCGIResponse(_fds[0], &_req);
 					goto sendResponse;
 				}
 			}
@@ -116,6 +116,7 @@ bool Client::handleRequest(stringstream *stream) {
 			}
 		}
 	sendResponse:
+		_req.closeBodyFile();
 		_res.send(_connection.first);
 
 		if (waitForCgi()) return false;

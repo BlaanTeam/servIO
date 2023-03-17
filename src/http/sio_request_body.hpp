@@ -47,7 +47,7 @@ class Request;
 #include "./sio_header.hpp"
 
 class BodyFile {
-	FILE *_file;
+	FILE  *_file;
 	string _filename;
 
    public:
@@ -55,14 +55,14 @@ class BodyFile {
 	BodyFile();
 	~BodyFile();
 
-	void  addFile(FILE *file, const string &filename);
-	void  addHeader(const string &key, const string &value);
-	void  write(stringstream &ss);
-	
-	FILE *getFile();
+	void addFile(FILE *file, const string &filename);
+	void addHeader(const string &key, const string &value);
+	void write(stringstream &ss);
+
+	FILE  *getFile();
 	string getFilename() const;
 
-	string  extractFilename();	
+	string extractFilename();
 };
 
 class Body {
@@ -98,12 +98,15 @@ class Body {
 	~Body();
 	void chooseState(Header &headers);
 	void setState(const int &state);
-	void consumeBody(stringstream &stream, Request *req);
+	void consumeBody(stringstream &stream);
 
 	map<int, BodyFile> &getBodyFiles();
 
 	int   getFileno() const;
 	short getState() const;
+
+	void openFile();
+	void closeFile();
 	void reset();
 };
 

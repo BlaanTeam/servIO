@@ -72,7 +72,7 @@ void Body::chooseState(Header &headers) {
 		while (getline(ss, part, ',')) {
 			trim(part);
 			if (iequalString(part, "Chunked"))
-				return setState(CHUNKED_BODY);
+				return setState(BODY_OPEN | CHUNKED_BODY);
 		}
 	}
 	if (!(value = headers.get("Content-Length")).empty()) {
@@ -83,11 +83,20 @@ void Body::chooseState(Header &headers) {
 	value = headers.get("Content-Type");
 	_boundary = Boundary(value);
 	if (_boundary.valid())
-		return setState(MULTIPARTED_BODY);
+		return setState(BODY_OPEN | MULTIPARTED_BODY);
 	else if (_contentLength > 0)
-		setState(LENGTHED_BODY);
+		setState(BODY_OPEN | LENGTHED_BODY);
 	else
-		setState(BODY_DONE);
+		setState(BODY_OPEN | BODY_DONE);
+}
+
+void Body::openFile() {
+	if (_bodyState & BODY_OPEN) {
+		cerr << "open body file !" << endl;
+		_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
+		_bodyFile = fopen(_filename.c_str(), "w+");  // TODO: check if the file is well opened !
+		_bodyState &= ~BODY_OPEN;
+	}
 }
 
 void Body::parseChunkedBody(stringstream &stream) {
@@ -167,14 +176,7 @@ void Body::parseLengthedBody(stringstream &stream) {
 		_bodyState |= BODY_DONE;
 }
 
-void Body::consumeBody(stringstream &stream, Request *req) {
-	if (_bodyState & BODY_INIT) {
-		chooseState(req->getHeaders());
-		_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
-		_bodyFile = fopen(_filename.c_str(), "w+");  // TODO: check if the file is well opened !
-		cerr << "Openning file!" << endl;
-	}
-
+void Body::consumeBody(stringstream &stream) {
 	if (_bodyState & BODY_READ) {
 		switch (_bodyState) {
 		case CHUNKED_BODY:
@@ -189,6 +191,7 @@ void Body::consumeBody(stringstream &stream, Request *req) {
 			parseChunkedBody(stream);
 			break;
 		case LENGTHED_BODY:
+			cerr << "Lengthed Body !" << endl;
 			parseLengthedBody(stream);
 			break;
 		case MULTIPARTED_BODY:
@@ -212,8 +215,7 @@ short Body::getState() const {
 }
 
 Body::~Body() {
-	if (_bodyFile)
-		fclose(_bodyFile);
+	closeFile();
 }
 
 void Body::parseHeaders(stringstream &ss) {
@@ -367,6 +369,13 @@ void Body::parseMultipartBody(stringstream &stream) {
 	}
 }
 
+void Body::closeFile() {
+	if (_bodyFile) {
+		fclose(_bodyFile);
+		_bodyFile = nullptr;
+	}
+}
+
 void Body::reset() {
 	_bodyState = BODY_INIT;
 	_readingState = START_BODY;
@@ -374,8 +383,7 @@ void Body::reset() {
 	_contentLength = 0;
 	_chunkedLength = 0;
 	_filename = "";
-	(_bodyFile) && (fclose(_bodyFile));
-	_bodyFile = NULL;
+	closeFile();
 
 	_multipartState = MULTIPART_INIT_BOUNDARY;
 	_line = "";

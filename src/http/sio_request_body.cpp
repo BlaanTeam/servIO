@@ -92,7 +92,6 @@ void Body::chooseState(Header &headers) {
 
 void Body::openFile() {
 	if (_bodyState & BODY_OPEN) {
-		cerr << "open body file !" << endl;
 		_filename = "/tmp/.servio_" + to_string(getmstime()) + "_body.io";
 		_bodyFile = fopen(_filename.c_str(), "w+");  // TODO: check if the file is well opened !
 		_bodyState &= ~BODY_OPEN;
@@ -191,7 +190,6 @@ void Body::consumeBody(stringstream &stream) {
 			parseChunkedBody(stream);
 			break;
 		case LENGTHED_BODY:
-			cerr << "Lengthed Body !" << endl;
 			parseLengthedBody(stream);
 			break;
 		case MULTIPARTED_BODY:
